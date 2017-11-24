@@ -1,5 +1,5 @@
+import configparser
 class datafile: # loads and parses files depending on file ending
-    import configparser
     def loadConfig(self, filename):
         '''() -> Config class
         load the config.txt file'''
@@ -20,6 +20,7 @@ class datafile: # loads and parses files depending on file ending
         else:
             file = open(self.name, "w")
         text = ""
+        #print(self.content, "is being saved")
         for i in self.content:
             text+=i+"\n"
         file.write(text)
@@ -28,7 +29,7 @@ class datafile: # loads and parses files depending on file ending
     def loadCSV(self, filename):
         '''() -> list of list of str
         splits the file by line and by comma'''
-        contents = loadRawText(filename)
+        contents = self.loadRawText(filename)
         contents = [i.split(",") for i in contents] # split at commas
         contents = [i.strip() for i in contents] # remove whitespaces (in case it was actuall seperated by ", ")
         return contents
@@ -48,22 +49,42 @@ class datafile: # loads and parses files depending on file ending
         if "." in filename:
             fileExt = filename[len(filename)-filename[::-1].index("."):].lower()
             if fileExt == "config":
-                self.content = loadConfig(filename)
+                self.content = self.loadConfig(filename)
             elif fileExt == "csv":
-                self.content = loadCSV(filename)
+                self.content = self.loadCSV(filename)
             else:
-                self.content = loadRawText(filename)
+                self.content = self.loadRawText(filename)
             self.type = fileExt
             self.name = filename[:len(filename)-filename[::-1].index(".")-1]
         else:
-            self.content = loadRawText(filename)
+            self.content = self.loadRawText(filename)
             self.type = None
             self.name = filename
-    def save():
+    def save(self):
         '''() -> None
         saves the file in the original format it was parsed from, including any chances'''
         if self.type == "csv":
-            saveCSV()
+            self.saveCSV()
         elif self.type != "config":
-            saveRawText()
+            self.saveRawText()
         # it's nasty saving Configs
+    def contains(self, string):
+        '''(str) -> bool
+        searches for string in the content list strings
+        Precondition: self.content must be a list of strings (no sublists or anything)
+        (THIS WILL CRASH IF IT'S A CONFIG FILE!!!)'''
+        for i in self.content:
+            if string in i:
+                return True
+        return False
+
+    def index(self, string):
+        '''(str) -> (int, int)
+        finds string in self.content, returns the location
+        Precondition: self.content must be a list of strings (no sublists or anything)
+        (THIS WILL CRASH IF IT'S A CONFIG FILE!!!)'''
+        for i in range(len(self.content)):
+            for j in range(len(self.content[i]-len(string))):
+                if self.content[i][j:j+len(string)] == string:
+                    return (i,j)
+        return (-1, -1)

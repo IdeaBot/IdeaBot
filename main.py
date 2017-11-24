@@ -64,7 +64,7 @@ class DiscordClient(discord.Client): # subClass : overwrites certain functions o
 # init stuff
 loop = asyncio.get_event_loop()
 bot = DiscordClient()
-credentials = loadConfig("./data/credentials.txt")
+credentials = loadConfig("./data/credentials.config")
 credentials = credentials["DEFAULT"]
 loop.run_until_complete(bot.login(credentials["username"], credentials["password"]))
 
