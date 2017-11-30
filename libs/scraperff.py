@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 import dataloader, time
 import sys
-sys.path.append('.\scraperlibs')
+sys.path.append('.\\libs\\scraperlibs')
 import pageRet
 
 config = dataloader.datafile('.\\data\\freeforums.config')
@@ -10,14 +10,14 @@ print(config.content["datafilepath"])
 data = dataloader.datafile(config.content["datafilepath"])
 def scrapeSection(url):
     '''(str) -> list of list of str
-    returns [url, [affected authors (str)]] for every page that has something new in it'''
+    returns [url, [affected author urls ends (str)]] for every page that has something new in it'''
     pass # for now it does nothing because this is hard
 def continuousScrape(q, stop):
     '''(Queue object, Queue object) -> None
     checks continuously for changes in the freeforums. A [url (str), affected users(str)] object is reported through q when anything changes
     This should be run in a different thread since it is blocking (it's a fucking while loop ffs)
     stop.put(anything) will stop the loop'''
-    while True: #stop.empty(): # run continuously unless there's something in stop
+    while stop.empty(): # run continuously unless there's something in stop
 
         rss = BeautifulSoup(pageRet.pageRet(config.content["url"]).decode(), "html.parser") # landing page
         links = rss.find_all("item")
@@ -37,6 +37,7 @@ def continuousScrape(q, stop):
                         break #gotta save those clock cycles
         if mostrecentexists == False:
             data.content.append("most recent post:"+threads[0][0])
+            data.save()
 
         if shouldScrape:
             #scrape stuff
@@ -44,9 +45,11 @@ def continuousScrape(q, stop):
             recentThread = BeautifulSoup(pageRet.pageRet(threads[0][0]).decode(),"html.parser")
             authors = [x.find("a").get("href") for x in recentThread.find_all("div", class_="mini-profile")]
             print(authors)
+            q.put([threads[0][0], authors])
+        time.sleep(60*5)
 
 
 # debug pls comment out everything under here if it isn't already
-continuousScrape(None,None)
+#continuousScrape(None,None)
 
 #data.save()
