@@ -1,13 +1,24 @@
 from bs4 import BeautifulSoup
-import dataloader, time
+import dataloader, time, logging
 import sys
-sys.path.append('.\\libs\\scraperlibs')
+sys.path.append('./libs/scraperlibs')
 import pageRet
 
-config = dataloader.datafile('.\\data\\twitter.config')
+config = dataloader.datafile('./data/twitter.config')
 config.content = config.content["DEFAULT"]
 print(config.content["datafilepath"])
 data = dataloader.datafile(config.content["datafilepath"])
+def tweetLogging():
+    '''() -> Logger class
+    set ups main log so that it outputs to ./scrapert.log and then returns the log'''
+    logger = logging.getLogger('twitter')
+    handler = logging.FileHandler(filename='scrapert.log', encoding='utf-8', mode='w')
+    handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s: %(message)s'))
+    logger.addHandler(handler)
+    return logger
+
+twitLog = tweetLogging()
+
 def get_tweet(bso):
     '''(BeautifulSoup object) -> str
     gets the text from title'''
@@ -28,28 +39,41 @@ def is_new_tweet(url):
                 else:
                     break
     return is_new
+def delete_entry(string):
+    '''(str [, bool])->bool
+    delete the first entry in data.content that contains string, if it exists'''
+    for i in range(len(data.content)):
+        if string.lower() in data.content[i].lower():
+            del(data.content[i])
+            return True
+    return False
+
 def continuousScrape(q, stop):
     '''(Queue object, Queue object) -> None
     checks continuously for new tweets from the official twitter. A [url (str), tweet (str)] object is reported through q when anything changes
     This should be run in a different thread since it is blocking (it's a fucking while loop ffs)
     stop.put(anything) will stop the loop'''
+    mostrecentrunstart = time.time()
     while stop.empty(): # run continuously unless there's something in stop
+        if time.time() - mostercentrunstart >= data.content["period"]:
+            mostrecentrunstart = time.time()
+            rss = BeautifulSoup(pageRet.pageRet(config.content["url"]).decode(), "html.parser") # rss page
+            items = rss.find_all("item")
+            tweets = [[get_url(x), get_tweet(x)] for x in items] # create list of [url to tweet, tweet content]
 
-        rss = BeautifulSoup(pageRet.pageRet(config.content["url"]).decode(), "html.parser") # rss feed page
-        items = rss.find_all("item")
-        threads = [[get_url(x), get_tweet(x)] for x in items] # create lsit of [url to tweet, tweet content]
-        print(threads[0][0])
+            if len(tweets)>0 and is_new_tweet(tweets[0][0]):
+                for i in tweets:
+                    if is_new_tweet(i[0]):
+                        twitLog.info("New tweet found: " + i[0])
+                        q.put(i)
+                    else:
+                        break
+                delete_entry("most recent tweet:")
+                data.content.append("most recent tweet:"+tweets[0][0])
+                data.save()
+                forumLog.info("Most recent tweet is now: " + tweets[0][0])
+    print("Stahped")
 
-        if mostrecentexists == False:
-            data.content.append("most recent tweet:"+threads[0][0])
-
-        if shouldScrape:
-            #scrape stuff
-            print("This means I should scrape things, yay!")
-            recentThread = BeautifulSoup(pageRet.pageRet(threads[0][0]).decode(),"html.parser")
-            authors = [x.find("a").get("href") for x in recentThread.find_all("div", class_="mini-profile")]
-            print(authors)
-            q.put([threads[0][0], authors])
 
 
 # debug pls comment out everything under here if it isn't already

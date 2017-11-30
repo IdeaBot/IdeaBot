@@ -1,5 +1,5 @@
 import discord
-import logging, time, asyncio, random, sys, configparser
+import logging, time, asyncio, random, sys, configparser, random
 from multiprocessing import Process, Queue
 
 sys.path.append('./libs')
@@ -38,7 +38,8 @@ def doChecks():
     '''() -> None
     checks to make sure no messages need to be sent about something special, like scraper updates'''
     while not qForum.empty():
-        yield from bot.send_message(bot.forumchannel, qForum.get()[0])
+        thread = qForum.get()
+        yield from bot.send_message(bot.forumchannel, str(thread))
     while not qTwitter.empty():
         tweet = qTwitter.get()
         yield from bot.send_message(bot.twitterchannel, "Idea Project tweeted this: "+ tweet[1] + " (from: <"+tweet[0]+">)")
@@ -75,18 +76,24 @@ class DiscordClient(discord.Client): # subClass : overwrites certain functions o
             if "hotdog" in message.content.lower() or "dick" in message.content.lower() or "hot-dog" in message.content.lower():
                 yield from self.send_message(message.channel, "Hotdog :)")
                 #yield from self.logout()
-            else:
+            elif "h" in message.content.lower() and "o" in message.content.lower() and "t" in message.content.lower() and "d" in message.content.lower() and "o" in message.content.lower() and "g" in message.content.lower():
                 yield from self.send_message(message.channel, "Not hotdog :(")
 
             if self.user.mention in message.content:
                 if "what" in message.content.lower():
                     if " id " in message.content.lower() or message.content[-len(" id"):].lower() == " id":
                         yield from self.send_message(message.channel, message.author.id)
+                if "snark" in message.content.lower():
+                    if "list" in message.content.lower():
+                        yield from self.send_message(message.channel, "``` " + str(snark.content) + " ```")
+                    else:
+                        yield from self.send_message(message.channel, random.choice(snark.content))
 
             if message.author.name[:len("ngnius")].lower() == "ngnius" and "shutdown protocol 0" in message.content.lower(): #if ngnius says shutdown
                 yield from self.send_message(message.channel, "Goodbye humans...")
                 yield from self.logout()
                 log.info("Shutdown started by: " + message.author.name)
+                stop.put("STAHHHPPP!!!!")
 
 bot = DiscordClient()
 
@@ -99,10 +106,11 @@ if __name__ == '__main__':
     credentials.content = credentials.content["DEFAULT"]
     channels = dataloader.datafile("./data/channels.config")
     channels.content = channels.content["DEFAULT"]
+    snark = dataloader.datafile("./data/snark.txt")
     qForum = Queue()
     qTwitter = Queue()
     stop = Queue()
-    qTwitter.put(["This is a url", "This is a tweet"])
+    #qTwitter.put(["This is a url", "This is a tweet"])
     forumScraper = Process(target = scraperff.continuousScrape, args = (qForum, stop, ))
     forumScraper.start()
     twitterScraper = Process(target = scrapert.continuousScrape, args = (qTwitter, stop, ))
