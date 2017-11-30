@@ -18,10 +18,27 @@ def mainLogging():
     '''() -> Logger class
     set ups main log so that it outputs to ./main.log and then returns the log'''
     logger = logging.getLogger('main')
+    logger.setLevel(logging.DEBUG)
     handler = logging.FileHandler(filename='main.log', encoding='utf-8', mode='w')
     handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
     logger.addHandler(handler)
     return logger
+
+def matchuser(userurl):
+    '''(str)-> discord.User object
+    matches the user on the forums with their Discord user'''
+    if userurl in forumdiscorduser.content:
+        for i in bot.get_all_members():
+            if i.id == forumdiscorduser.content[userurl]:
+                return i
+
+def mention_chain(users):
+    '''(list of discord.User object) -> str
+    returns a string of all the mentions'''
+    output = ""
+    for i in users:
+        output += i.mention + " "
+    return output
 
 def loadConfig(filename):
     '''() -> None
@@ -39,7 +56,16 @@ def doChecks():
     checks to make sure no messages need to be sent about something special, like scraper updates'''
     while not qForum.empty():
         thread = qForum.get()
-        yield from bot.send_message(bot.forumchannel, str(thread))
+        #yield from bot.send_message(bot.forumchannel, "BEEP BOOP. This is a debug msg:"+str(thread[1]))
+        users = []
+        for i in thread[1]:
+            user = matchuser(i)
+            if user != None and user not in users:
+                users.append(user)
+        if len(users)>0:
+            yield from bot.send_message(bot.forumchannel, "Hey " + mention_chain(users)+", "+thread[0]+" has something new in it")
+        else:
+            yield from bot.send_message(bot.forumchannel, "Hey, "+thread[0]+" has something new in it")
     while not qTwitter.empty():
         tweet = qTwitter.get()
         yield from bot.send_message(bot.twitterchannel, "Idea Project tweeted this: "+ tweet[1] + " (from: <"+tweet[0]+">)")
@@ -89,7 +115,7 @@ class DiscordClient(discord.Client): # subClass : overwrites certain functions o
                     else:
                         yield from self.send_message(message.channel, random.choice(snark.content))
 
-            if message.author.name[:len("ngnius")].lower() == "ngnius" and "shutdown protocol 0" in message.content.lower(): #if ngnius says shutdown
+            if message.author.id in perms.content["shutdownperm"] and "shutdown protocol 0" in message.content.lower(): #if ngnius says shutdown
                 yield from self.send_message(message.channel, "Goodbye humans...")
                 yield from self.logout()
                 log.info("Shutdown started by: " + message.author.name)
@@ -107,6 +133,10 @@ if __name__ == '__main__':
     channels = dataloader.datafile("./data/channels.config")
     channels.content = channels.content["DEFAULT"]
     snark = dataloader.datafile("./data/snark.txt")
+    perms = dataloader.datafile("./data/permissions.config")
+    perms.content = perms.content["DEFAULT"]
+    forumdiscorduser = dataloader.datafile("./data/freeforum-discorduser.config")
+    forumdiscorduser.content = forumdiscorduser.content["DEFAULT"]
     qForum = Queue()
     qTwitter = Queue()
     stop = Queue()

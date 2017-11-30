@@ -13,6 +13,7 @@ def forumLogging():
     '''() -> Logger class
     set ups main log so that it outputs to ./scraperf.log and then returns the log'''
     logger = logging.getLogger('forum')
+    logger.setLevel(logging.DEBUG)
     handler = logging.FileHandler(filename='scraperf.log', encoding='utf-8', mode='w')
     handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s: %(message)s'))
     logger.addHandler(handler)
@@ -47,9 +48,11 @@ def continuousScrape(q, stop):
     checks continuously for changes in the freeforums. A [url (str), affected users(str)] object is reported through q when anything changes
     This should be run in a different thread since it is blocking (it's a fucking while loop ffs)
     stop.put(anything) will stop the loop'''
-    mostrecentrunstart = time.time()
+    forumLog.info("Thread started")
+    mostrecentrunstart = -100000
     while stop.empty(): # run continuously unless there's something in stop
-        if time.time() - mostercentrunstart >= data.content["period"]:
+        if time.time() - mostrecentrunstart >= int(config.content["period"]):
+            forumLog.info("Starting scraping run")
             mostrecentrunstart = time.time()
             rss = BeautifulSoup(pageRet.pageRet(config.content["url"]).decode(), "html.parser") # landing page
             items = rss.find_all("item")
@@ -69,7 +72,7 @@ def continuousScrape(q, stop):
                 data.content.append("most recent thread:" + threads[0][0])
                 data.save()
                 forumLog.info("Most recent thread is now: " + threads[0][0])
-    print("Stopped")
+    forumLog.info("Stopped")
 
 
 # debug pls comment out everything under here if it isn't already
