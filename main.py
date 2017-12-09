@@ -63,9 +63,9 @@ def doChecks():
             if user != None and user not in users:
                 users.append(user)
         if len(users)>0:
-            yield from bot.send_message(bot.forumchannel, "Hey " + mention_chain(users)+", "+thread[0]+" has something new in it")
+            yield from bot.send_message(bot.forumchannel, "Hey " + mention_chain(users)+", <"+thread[0]+"> has something new in it")
         else:
-            yield from bot.send_message(bot.forumchannel, "Hey, "+thread[0]+" has something new in it")
+            yield from bot.send_message(bot.forumchannel, "Hey, <"+thread[0]+"> has something new in it")
     while not qTwitter.empty():
         tweet = qTwitter.get()
         yield from bot.send_message(bot.twitterchannel, "Idea Project tweeted this: "+ tweet[1] + " (from: <"+tweet[0]+">)")
