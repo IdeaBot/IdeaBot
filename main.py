@@ -32,7 +32,7 @@ def matchuser(userurl):
             if i.id == forumdiscorduser.content[userurl]:
                 return i
 
-def mention_chain(users):
+def mentionChain(users):
     '''(list of discord.User object) -> str
     returns a string of all the mentions'''
     output = ""
@@ -46,6 +46,11 @@ def loadConfig(filename):
     config = configparser.ConfigParser()
     config.read(filename)
     return config
+
+def convertTime(string):
+    '''(str)->str
+    converts string with random stuff in it and a time to another timezone mentioned also in string'''
+    return "Cheaky bastard"
 
 configureDiscordLogging()
 log = mainLogging()
@@ -109,6 +114,8 @@ class DiscordClient(discord.Client): # subClass : overwrites certain functions o
                 if "what" in messagecontentlower:
                     if (" id " in messagecontentlower or message.content[-len(" id"):].lower() == " id") and " my " in messagecontentlower:
                         yield from self.send_message(message.channel, message.author.id)
+                    if " in " in messagecontentlower and ":" in messagecontentlower:
+                        yield from self.send_message(message.channel, convertTime(message.content))
                 if "snark" in messagecontentlower:
                     if "list" in messagecontentlower:
                         yield from self.send_message(message.channel, "``` " + str(snark.content) + " ```")
