@@ -104,25 +104,25 @@ class DiscordClient(discord.Client): # subClass : overwrites certain functions o
         interprets and responds to the message'''
         yield from doChecks()
         if message.author != self.user: # everything past here will eventually become some super string parser
-            message.contentlower = message.content.lower()
-            if "hotdog" in message.contentlower or "dick" in message.contentlower or "hot-dog" in message.contentlower:
+            messagecontentlower = message.content.lower()
+            if "hotdog" in messagecontentlower or "dick" in messagecontentlower or "hot-dog" in messagecontentlower:
                 yield from self.send_message(message.channel, "Hotdog :)")
-            elif "h" in message.contentlower and "o" in message.contentlower and "t" in message.contentlower and "d" in message.contentlower and "o" in message.contentlower and "g" in message.contentlower:
+            elif "h" in messagecontentlower and "o" in messagecontentlower and "t" in messagecontentlower and "d" in messagecontentlower and "o" in messagecontentlower and "g" in messagecontentlower:
                 yield from self.send_message(message.channel, "Not hotdog :(")
 
             if self.user.mention in message.content:
-                if "what" in message.contentlower:
-                    if (" id " in message.contentlower or message.content[-len(" id"):].lower() == " id") and " my " in message.contentlower:
+                if "what" in messagecontentlower:
+                    if (" id " in messagecontentlower or message.content[-len(" id"):].lower() == " id") and " my " in messagecontentlower:
                         yield from self.send_message(message.channel, message.author.id)
-                    if " in " in message.contentlower and ":" in message.contentlower:
+                    if " in " in messagecontentlower and ":" in messagecontentlower:
                         yield from self.send_message(message.channel, convertTime(message.content))
-                if "snark" in message.contentlower:
-                    if "list" in message.contentlower:
+                if "snark" in messagecontentlower:
+                    if "list" in messagecontentlower:
                         yield from self.send_message(message.channel, "``` " + str(snark.content) + " ```")
                     else:
                         yield from self.send_message(message.channel, random.choice(snark.content))
 
-            if message.author.id in perms.content["shutdownperm"] and "shutdown protocol 0" in message.contentlower: #if ngnius says shutdown
+            if message.author.id in perms.content["shutdownperm"] and "shutdown protocol 0" in messagecontentlower: #if ngnius says shutdown
                 yield from self.send_message(message.channel, "Goodbye humans...")
                 yield from self.logout()
                 log.info("Shutdown started by: " + message.author.name)
