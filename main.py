@@ -32,7 +32,7 @@ def matchuser(userurl):
             if i.id == forumdiscorduser.content[userurl]:
                 return i
 
-def mention_chain(users):
+def mentionChain(users):
     '''(list of discord.User object) -> str
     returns a string of all the mentions'''
     output = ""
@@ -46,6 +46,11 @@ def loadConfig(filename):
     config = configparser.ConfigParser()
     config.read(filename)
     return config
+
+def convertTime(string):
+    '''(str)->str
+    converts string with random stuff in it and a time to another timezone mentioned also in string'''
+    return "Cheaky bastard"
 
 configureDiscordLogging()
 log = mainLogging()
@@ -63,7 +68,7 @@ def doChecks():
             if user != None and user not in users:
                 users.append(user)
         if len(users)>0:
-            yield from bot.send_message(bot.forumchannel, "Hey " + mention_chain(users)+", "+thread[0]+" has something new in it")
+            yield from bot.send_message(bot.forumchannel, "Hey " + mentionChain(users)+", "+thread[0]+" has something new in it")
         else:
             yield from bot.send_message(bot.forumchannel, "Hey, "+thread[0]+" has something new in it")
     while not qTwitter.empty():
@@ -109,6 +114,8 @@ class DiscordClient(discord.Client): # subClass : overwrites certain functions o
                 if "what" in message.contentlower:
                     if (" id " in message.contentlower or message.content[-len(" id"):].lower() == " id") and " my " in message.contentlower:
                         yield from self.send_message(message.channel, message.author.id)
+                    if " in " in message.contentlower and ":" in message.contentlower:
+                        yield from self.send_message(message.channel, convertTime(message.content))
                 if "snark" in message.contentlower:
                     if "list" in message.contentlower:
                         yield from self.send_message(message.channel, "``` " + str(snark.content) + " ```")
