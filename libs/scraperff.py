@@ -72,7 +72,7 @@ def continuousScrape(q, stop):
                 data.content.append("most recent thread:" + threads[0][0])
                 data.save()
                 forumLog.info("Most recent thread is now: " + threads[0][0])
-                forumLog.info("Finished scraping run in "+ str(time.time() - mostrecentrunstart))
+            forumLog.info("Finished scraping run in "+ str(time.time() - mostrecentrunstart))
     forumLog.info("Stopped")
 
 

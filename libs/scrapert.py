@@ -75,6 +75,7 @@ def continuousScrape(q, stop):
                 data.content.append("most recent tweet:"+tweets[0][0])
                 data.save()
                 twitLog.info("Most recent tweet is now: " + tweets[0][0])
+            forumLog.info("Finished scraping run in "+ str(time.time() - mostrecentrunstart))
     twitLog.info("Stahped")
 
 
