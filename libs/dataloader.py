@@ -31,7 +31,7 @@ class datafile: # loads and parses files depending on file ending
         splits the file by line and by comma'''
         contents = self.loadRawText(filename)
         contents = [i.split(",") for i in contents] # split at commas
-        contents = [i.strip() for i in contents] # remove whitespaces (in case it was actuall seperated by ", ")
+        contents = [[y.strip() for y in i] for i in contents] # remove whitespaces (in case it was actuall seperated by ", ")
         return contents
     def saveCSV(self):
         '''() -> None

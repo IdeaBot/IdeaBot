@@ -3,7 +3,7 @@ import logging, time, asyncio, random, sys, configparser, random
 from multiprocessing import Process, Queue
 
 sys.path.append('./libs')
-import configloader, scraperff, dataloader, scrapert
+import configloader, scraperff, dataloader, scrapert, timezones
 
 def configureDiscordLogging():
     '''() -> None
@@ -68,7 +68,7 @@ def doChecks():
             if user != None and user not in users:
                 users.append(user)
         if len(users)>0:
-            yield from bot.send_message(bot.forumchannel, "Hey " + mention_chain(users)+", <"+thread[0]+"> has something new in it")
+            yield from bot.send_message(bot.forumchannel, "Hey " + mentionChain(users)+", <"+thread[0]+"> has something new in it")
         else:
             yield from bot.send_message(bot.forumchannel, "Hey, <"+thread[0]+"> has something new in it")
     while not qTwitter.empty():
@@ -103,19 +103,24 @@ class DiscordClient(discord.Client): # subClass : overwrites certain functions o
         '''(Message class) -> None
         interprets and responds to the message'''
         yield from doChecks()
-        if message.author != self.user: # everything past here will eventually become some super string parser
+        if message.author != self.user and message.channel.permissions_for(message.channel.server.me).send_messages: # everything past here will eventually become some super string parser
             messagecontentlower = message.content.lower()
             if "hotdog" in messagecontentlower or "dick" in messagecontentlower or "hot-dog" in messagecontentlower:
                 yield from self.send_message(message.channel, "Hotdog :)")
             elif "h" in messagecontentlower and "o" in messagecontentlower and "t" in messagecontentlower and "d" in messagecontentlower and "o" in messagecontentlower and "g" in messagecontentlower:
                 yield from self.send_message(message.channel, "Not hotdog :(")
+            if "blame josh" in messagecontentlower:
+                yield from self.send_message(message.channel, "https://cdn.discordapp.com/attachments/382856950079291395/392398975686279168/unknown.png")
+            if "forum post" in messagecontentlower:
+                yield from self.add_reaction(message, config.content["forumpostemoji"])
 
             if self.user.mention in message.content:
                 if "what" in messagecontentlower:
                     if (" id " in messagecontentlower or message.content[-len(" id"):].lower() == " id") and " my " in messagecontentlower:
                         yield from self.send_message(message.channel, message.author.id)
                     if " in " in messagecontentlower and ":" in messagecontentlower:
-                        yield from self.send_message(message.channel, convertTime(message.content))
+                        convertParameters = timezones.getConversionParameters(message.content)
+                        yield from self.send_message(message.channel, timezones.convert(convertParameters[0], convertParameters[1]))
                 if "snark" in messagecontentlower:
                     if "list" in messagecontentlower:
                         yield from self.send_message(message.channel, "``` " + str(snark.content) + " ```")
@@ -134,20 +139,20 @@ if __name__ == '__main__':
     # main
     # init stuff
     loop = asyncio.get_event_loop()
-
-    credentials = dataloader.datafile("./data/credentials.config")
+    config = dataloader.datafile("./data/config.config")
+    config.content = config.content["DEFAULT"]
+    credentials = dataloader.datafile(config.content["credentialsloc"])
     credentials.content = credentials.content["DEFAULT"]
-    channels = dataloader.datafile("./data/channels.config")
+    channels = dataloader.datafile(config.content["channelsloc"])
     channels.content = channels.content["DEFAULT"]
-    snark = dataloader.datafile("./data/snark.txt")
-    perms = dataloader.datafile("./data/permissions.config")
+    snark = dataloader.datafile(config.content["snarkloc"])
+    perms = dataloader.datafile(config.content["permissionsloc"])
     perms.content = perms.content["DEFAULT"]
-    forumdiscorduser = dataloader.datafile("./data/freeforum-discorduser.config")
+    forumdiscorduser = dataloader.datafile(config.content["forumdiscorduserloc"])
     forumdiscorduser.content = forumdiscorduser.content["DEFAULT"]
     qForum = Queue()
     qTwitter = Queue()
     stop = Queue()
-    #qTwitter.put(["This is a url", "This is a tweet"])
     forumScraper = Process(target = scraperff.continuousScrape, args = (qForum, stop, ))
     forumScraper.start()
     twitterScraper = Process(target = scrapert.continuousScrape, args = (qTwitter, stop, ))
