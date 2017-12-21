@@ -1,3 +1,4 @@
+# this badly needs to be changed to OOP, because it's rly hurtful to understand right now
 import dataloader
 
 timezones = dataloader.datafile("./data/timezones.csv")
@@ -42,10 +43,22 @@ def findTimezone(string):
                 pass
     return -1
 
+def getTime(string):
+    '''(str) -> str
+    returns the first valid time in string
+    returns None if no valid time is found'''
+    for i in range(1, len(maybeTimes)):
+        try:
+            int(maybeTimes[i-1][-2:])
+            int(maybeTimes[i][:2])
+            return maybeTimes[i-1][-2:] + ":" + maybeTimes[i][:2]
+        except ValueError:
+            pass
+
 def findTime(string):
     '''(str) -> int
     returns the index of the first time in string
-    Precondition: string must contain a time in form HH:MM (to get an output)'''
+    returns None if no valid time is found'''
     maybeTimes = string.split(":")
     for i in range(1, len(maybeTimes)):
         try:
@@ -77,7 +90,7 @@ def getConversionParameters(msg):
                 print(fromtime[0]+" "+fromtime[1], targetTimezone)
                 return fromtime[0]+" "+fromtime[1], targetTimezone
     print("Nothing found!!!!!!! Using backup option")
-    return findTime(msg)+ " " + getTimezone(msg), "UTC+00"
+    return getTime(msg)+ " " + getTimezone(msg), "UTC+00"
 
 
 
