@@ -60,7 +60,7 @@ def stripTime(string):
     converts string to [time, timezone]
     Precondition: string must contain a time and timezone, together'''
     timezoneLoc = findTimezone(string)
-    splitstring = string[:timezoneLoc].split()
+    time = string[:timezoneLoc].split()[-1]
     timezone = getTimezone(string)
     return [time, timezone]
 
