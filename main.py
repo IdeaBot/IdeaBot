@@ -118,9 +118,9 @@ class DiscordClient(discord.Client): # subClass : overwrites certain functions o
                 if "what" in messagecontentlower:
                     if (" id " in messagecontentlower or message.content[-len(" id"):].lower() == " id") and " my " in messagecontentlower:
                         yield from self.send_message(message.channel, message.author.id)
-                    if " in " in messagecontentlower and ":" in messagecontentlower:
-                        convertParameters = timezones.getConversionParameters(message.content)
-                        yield from self.send_message(message.channel, timezones.convert(convertParameters[0], convertParameters[1]))
+                    if " in " in messagecontentlower:
+                        time, timezoneTarget = timezones.getConversionParameters(message.content)
+                        yield from self.send_message(message.channel, time.convertTo(timezoneTarget))
                 if "snark" in messagecontentlower:
                     if "list" in messagecontentlower:
                         yield from self.send_message(message.channel, "``` " + str(snark.content) + " ```")
@@ -158,7 +158,7 @@ if __name__ == '__main__':
     twitterScraper = Process(target = scrapert.continuousScrape, args = (qTwitter, stop, ))
     twitterScraper.start()
     loop.run_until_complete(bot.login(credentials.content["username"], credentials.content["password"]))
-
+    #print(timezones.FullTime(timezones.SimpleTime("12pm"), timezones.Timezone("EST")).convertTo("CHUT"))
     #run until logged out
     loop.run_until_complete(bot.connect())
     print("Ended")
