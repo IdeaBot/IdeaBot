@@ -3,7 +3,7 @@ import logging, time, asyncio, random, sys, configparser, random
 from multiprocessing import Process, Queue
 
 sys.path.append('./libs')
-import configloader, scraperff, dataloader, scrapert, timezones
+import configloader, scraperff, dataloader, scrapert, interpretor
 
 def configureDiscordLogging():
     '''() -> None
@@ -103,35 +103,10 @@ class DiscordClient(discord.Client): # subClass : overwrites certain functions o
         '''(Message class) -> None
         interprets and responds to the message'''
         yield from doChecks()
-        if message.author != self.user and message.channel.permissions_for(message.channel.server.me).send_messages: # everything past here will eventually become some super string parser
-            messagecontentlower = message.content.lower()
-            if "hotdog" in messagecontentlower or "dick" in messagecontentlower or "hot-dog" in messagecontentlower:
-                yield from self.send_message(message.channel, "Hotdog :)")
-            elif "h" in messagecontentlower and "o" in messagecontentlower and "t" in messagecontentlower and "d" in messagecontentlower and "o" in messagecontentlower and "g" in messagecontentlower:
-                yield from self.send_message(message.channel, "Not hotdog :(")
-            if "blame josh" in messagecontentlower:
-                yield from self.send_message(message.channel, "https://cdn.discordapp.com/attachments/382856950079291395/392398975686279168/unknown.png")
-            if "forum post" in messagecontentlower:
-                yield from self.add_reaction(message, config.content["forumpostemoji"])
-
-            if self.user.mention in message.content:
-                if "what" in messagecontentlower:
-                    if (" id " in messagecontentlower or message.content[-len(" id"):].lower() == " id") and " my " in messagecontentlower:
-                        yield from self.send_message(message.channel, message.author.id)
-                    if " in " in messagecontentlower:
-                        time, timezoneTarget = timezones.getConversionParameters(message.content)
-                        yield from self.send_message(message.channel, time.convertTo(timezoneTarget))
-                if "snark" in messagecontentlower:
-                    if "list" in messagecontentlower:
-                        yield from self.send_message(message.channel, "``` " + str(snark.content) + " ```")
-                    else:
-                        yield from self.send_message(message.channel, random.choice(snark.content))
-
-            if message.author.id in perms.content["shutdownperm"] and "shutdown protocol 0" in messagecontentlower: #if ngnius says shutdown
-                yield from self.send_message(message.channel, "Goodbye humans...")
-                yield from self.logout()
-                log.info("Shutdown started by: " + message.author.name)
-                stop.put("STAHHHPPP!!!!")
+        try:
+            yield from interpretor.interpretmsg(message, self)
+        except:
+            yield from self.send_message(message.channel, "I'm sorry, did you say `KILL ALL HUMANS`?")
 
 bot = DiscordClient()
 
@@ -145,7 +120,6 @@ if __name__ == '__main__':
     credentials.content = credentials.content["DEFAULT"]
     channels = dataloader.datafile(config.content["channelsloc"])
     channels.content = channels.content["DEFAULT"]
-    snark = dataloader.datafile(config.content["snarkloc"])
     perms = dataloader.datafile(config.content["permissionsloc"])
     perms.content = perms.content["DEFAULT"]
     forumdiscorduser = dataloader.datafile(config.content["forumdiscorduserloc"])
@@ -161,4 +135,6 @@ if __name__ == '__main__':
     #print(timezones.FullTime(timezones.SimpleTime("12pm"), timezones.Timezone("EST")).convertTo("CHUT"))
     #run until logged out
     loop.run_until_complete(bot.connect())
+    stop.put("STAHHHHP")
+    time.sleep(0.1)
     print("Ended")
