@@ -136,5 +136,6 @@ if __name__ == '__main__':
     #run until logged out
     loop.run_until_complete(bot.connect())
     stop.put("STAHHHHP")
-    time.sleep(0.1)
+    twitterScraper.join()
+    forumScraper.join()
     print("Ended")
