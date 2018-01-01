@@ -60,22 +60,25 @@ def continuousScrape(q, stop):
         if time.time() - mostrecentrunstart >= int(config.content["period"]):
             twitLog.info("Starting scraping run")
             mostrecentrunstart = time.time()
-            rss = BeautifulSoup(pageRet.pageRet(config.content["url"]).decode(), "html.parser") # rss page
-            items = rss.find_all("item")
-            tweets = [[get_url(x), get_tweet(x)] for x in items] # create list of [url to tweet, tweet content]
+            try:
+                rss = BeautifulSoup(pageRet.pageRet(config.content["url"]).decode(), "html.parser") # rss page
+                items = rss.find_all("item")
+                tweets = [[get_url(x), get_tweet(x)] for x in items] # create list of [url to tweet, tweet content]
 
-            if len(tweets)>0 and is_new_tweet(tweets[0][0]):
-                for i in tweets:
-                    if is_new_tweet(i[0]):
-                        twitLog.info("New tweet found: " + i[0])
-                        q.put(i)
-                    else:
-                        break
-                delete_entry("most recent tweet:")
-                data.content.append("most recent tweet:"+tweets[0][0])
-                data.save()
-                twitLog.info("Most recent tweet is now: " + tweets[0][0])
-            twitLog.info("Finished scraping run in "+ str(time.time() - mostrecentrunstart))
+                if len(tweets)>0 and is_new_tweet(tweets[0][0]):
+                    for i in tweets:
+                        if is_new_tweet(i[0]):
+                            twitLog.info("New tweet found: " + i[0])
+                            q.put(i)
+                        else:
+                            break
+                    delete_entry("most recent tweet:")
+                    data.content.append("most recent tweet:"+tweets[0][0])
+                    data.save()
+                    twitLog.info("Most recent tweet is now: " + tweets[0][0])
+                twitLog.info("Finished scraping run in "+ str(time.time() - mostrecentrunstart))
+            except:
+                twitLog.warning("Scraping run failed. Either the page has changed or the page is unavailable...")
     twitLog.info("Stahped")
 
 
