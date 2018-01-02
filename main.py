@@ -103,10 +103,7 @@ class DiscordClient(discord.Client): # subClass : overwrites certain functions o
         '''(Message class) -> None
         interprets and responds to the message'''
         yield from doChecks()
-        try:
-            yield from interpretor.interpretmsg(message, self)
-        except:
-            yield from self.send_message(message.channel, "I'm sorry, did you say `KILL ALL HUMANS`?")
+        yield from interpretor.interpretmsg(message, self)
 
 bot = DiscordClient()
 
