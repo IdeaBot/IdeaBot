@@ -85,8 +85,8 @@ class DiscordClient(discord.Client): # subClass : overwrites certain functions o
         logs info when API is ready'''
         #work or die
         log.info("API connection created successfully")
-        log.info("Username: " + self.user.name)
-        log.info("Email: " + self.email)
+        log.info("Username: " + str(self.user.name))
+        log.info("Email: " + str(self.email))
         log.info(str([i for i in self.servers]))
         for i in bot.get_all_channels(): # play the matchy-matchy game with server names
             if i.name == channels.content["twitter"]:
@@ -128,7 +128,10 @@ if __name__ == '__main__':
     forumScraper.start()
     twitterScraper = Process(target = scrapert.continuousScrape, args = (qTwitter, stop, ))
     twitterScraper.start()
-    loop.run_until_complete(bot.login(credentials.content["username"], credentials.content["password"]))
+    if "token" in credentials.content:
+        loop.run_until_complete(bot.login(credentials.content["token"]))
+    else:
+        loop.run_until_complete(bot.login(credentials.content["username"], credentials.content["password"]))
     #print(timezones.FullTime(timezones.SimpleTime("12pm"), timezones.Timezone("EST")).convertTo("CHUT"))
     #run until logged out
     loop.run_until_complete(bot.connect())

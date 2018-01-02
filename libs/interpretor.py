@@ -14,10 +14,10 @@ def interpretmsg(msg, client):
     msgcontentlower = msg.content.lower()
     try:
         if msg.author != client.user and msg.channel.permissions_for(msg.channel.server.me).send_messages: # everything past here will eventually become some super string parser
-            if "hotdog" in msgcontentlower or "dick" in msgcontentlower or "hot-dog" in msgcontentlower:
+            '''if "hotdog" in msgcontentlower or "dick" in msgcontentlower or "hot-dog" in msgcontentlower:
                 yield from client.send_message(msg.channel, "Hotdog :)")
             elif "h" in msgcontentlower and "o" in msgcontentlower and "t" in msgcontentlower and "d" in msgcontentlower and "o" in msgcontentlower and "g" in msgcontentlower:
-                yield from client.send_message(msg.channel, "Not hotdog :(")
+                yield from client.send_message(msg.channel, "Not hotdog :(")'''
             if "blame josh" in msgcontentlower:
                 yield from client.send_message(msg.channel, "https://cdn.discordapp.com/attachments/382856950079291395/392398975686279168/unknown.png")
             if "forum post" in msgcontentlower:
@@ -37,6 +37,8 @@ def interpretmsg(msg, client):
                         yield from client.send_message(msg.channel, "``` " + str(snark.content) + " ```")
                     else:
                         yield from client.send_message(msg.channel, random.choice(snark.content))
+                elif "ping" in msgcontentlower:
+                    pass
                 else: raise ValueError("That's a dumb message")
 
             if msg.author.id in perms.content["shutdownperm"] and "shutdown protocol 0" in msgcontentlower: #if ngnius says shutdown
