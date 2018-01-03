@@ -3,7 +3,7 @@ import logging, time, asyncio, random, sys, configparser, random
 from multiprocessing import Process, Queue
 
 sys.path.append('./libs')
-import configloader, scraperff, dataloader, scrapert, interpretor
+import configloader, scraperff, dataloader, scrapert, interpretor, scraperred
 
 def configureDiscordLogging():
     '''() -> None
@@ -73,7 +73,10 @@ def doChecks():
             yield from bot.send_message(bot.forumchannel, "Hey, <"+thread[0]+"> has something new in it")
     while not qTwitter.empty():
         tweet = qTwitter.get()
-        yield from bot.send_message(bot.twitterchannel, "Idea Project tweeted this: "+ tweet[1] + " (from: <"+tweet[0]+">)")
+        yield from bot.send_message(bot.twitterchannel, "Idea Project tweeted this: " + tweet[1] + " (from: <"+tweet[0]+">)")
+    while not qReddit.empty():
+        comment = qReddit.get()
+        yield from bot.send_message(bot.redditchannel, "A comment has been posted here: " + comment[0] + " (direct link: <"+comment[1]+">)")
 
 
 
@@ -95,6 +98,9 @@ class DiscordClient(discord.Client): # subClass : overwrites certain functions o
             if i.name == channels.content["forum"]:
                 self.forumchannel = i
                 log.info("forum channel found")
+            if i.name == channels.content["reddit"]:
+                self.redditchannel = i
+                log.info("reddit channel found")
         yield from self.send_message(self.twitterchannel, "Hello humans...")
         yield from doChecks()
 
@@ -123,11 +129,15 @@ if __name__ == '__main__':
     forumdiscorduser.content = forumdiscorduser.content["DEFAULT"]
     qForum = Queue()
     qTwitter = Queue()
+    qReddit = Queue()
+    qRedditURLAdder = Queue()
     stop = Queue()
     forumScraper = Process(target = scraperff.continuousScrape, args = (qForum, stop, ))
     forumScraper.start()
     twitterScraper = Process(target = scrapert.continuousScrape, args = (qTwitter, stop, ))
     twitterScraper.start()
+    redditScraper = Process(target = scraperred.continuousScrape, args = (qReddit, stop, qRedditURLAdder, ))
+    redditScraper.start()
     if "token" in credentials.content:
         loop.run_until_complete(bot.login(credentials.content["token"]))
     else:
@@ -138,4 +148,5 @@ if __name__ == '__main__':
     stop.put("STAHHHHP")
     twitterScraper.join()
     forumScraper.join()
+    redditScraper.join()
     print("Ended")
