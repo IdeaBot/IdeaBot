@@ -6,6 +6,7 @@ config.content = config.content["DEFAULT"]
 perms = dataloader.datafile(config.content["permissionsloc"])
 perms.content = perms.content["DEFAULT"]
 snark = dataloader.datafile(config.content["snarkloc"])
+evalDictOriginalNameThisIs = {}
 @asyncio.coroutine
 def interpretmsg(msg, client):
     '''(discord.msg object, DiscordClient object) -> None
@@ -14,18 +15,17 @@ def interpretmsg(msg, client):
     msgcontentlower = msg.content.lower()
     try:
         if msg.author != client.user and msg.channel.permissions_for(msg.channel.server.me).send_messages: # everything past here will eventually become some super string parser
-            '''if "hotdog" in msgcontentlower or "dick" in msgcontentlower or "hot-dog" in msgcontentlower:
-                yield from client.send_message(msg.channel, "Hotdog :)")
-            elif "h" in msgcontentlower and "o" in msgcontentlower and "t" in msgcontentlower and "d" in msgcontentlower and "o" in msgcontentlower and "g" in msgcontentlower:
-                yield from client.send_message(msg.channel, "Not hotdog :(")'''
-            if "blame josh" in msgcontentlower:
-                yield from client.send_message(msg.channel, "https://cdn.discordapp.com/attachments/382856950079291395/392398975686279168/unknown.png")
-            if "forum post" in msgcontentlower:
-                yield from client.add_reaction(msg, config.content["forumpostemoji"])
-
             if client.user.mention in msg.content:
+                msgcontentlower = msgcontentlower.replace(client.user.mention, "")
+                msgcontent = msg.content.replace(client.user.mention, "")
                 if ("execute" in msgcontentlower or "evaluate" in msgcontentlower) and msg.author.id in perms.content["executionperm"]:
-                    yield from client.send_message(msg.channel, eval(msgcontentlower[msgcontentlower.index("`")+1 : msgcontentlower.rindex("`")]))
+                    try:
+                        if "```" in msgcontentlower:
+                            yield from client.send_message(msg.channel, eval(msgcontent[msgcontent.index("```")+3 : msgcontent.rindex("```")]))
+                        else:
+                            yield from client.send_message(msg.channel, eval(msgcontent[msgcontent.index("`")+1 : msgcontent.rindex("`")]))
+                    except:
+                        yield from client.send_message(msg.channel, "I'm sure it's a feature that your code crashes, right?")
                 elif "what" in msgcontentlower:
                     if (" id " in msgcontentlower or msg.content[-len(" id"):].lower() == " id") and " my " in msgcontentlower:
                         yield from client.send_message(msg.channel, msg.author.id)
@@ -40,6 +40,15 @@ def interpretmsg(msg, client):
                 elif "ping" in msgcontentlower:
                     pass
                 else: raise ValueError("That's a dumb message")
+            else:
+                '''if "hotdog" in msgcontentlower or "dick" in msgcontentlower or "hot-dog" in msgcontentlower:
+                    yield from client.send_message(msg.channel, "Hotdog :)")
+                elif "h" in msgcontentlower and "o" in msgcontentlower and "t" in msgcontentlower and "d" in msgcontentlower and "o" in msgcontentlower and "g" in msgcontentlower:
+                    yield from client.send_message(msg.channel, "Not hotdog :(")'''
+                if "blame josh" in msgcontentlower:
+                    yield from client.send_message(msg.channel, "https://cdn.discordapp.com/attachments/382856950079291395/392398975686279168/unknown.png")
+                if "forum post" in msgcontentlower:
+                    yield from client.add_reaction(msg, config.content["forumpostemoji"])
 
             if msg.author.id in perms.content["shutdownperm"] and "shutdown protocol 0" in msgcontentlower: #if ngnius says shutdown
                 yield from client.send_message(msg.channel, "Goodbye humans...")
@@ -48,3 +57,20 @@ def interpretmsg(msg, client):
         yield from client.send_message(msg.channel, config.content["invalidmessagemessage"])
     if "benchmark" in msgcontentlower and client.user.mention in msg.content:
         yield from client.send_message(msg.channel, "Executed in " + str(timelib.time()-startTime)+"s")
+
+def test(a,b):
+    '''(int,int) -> (int)'''
+    c = a+b
+    return c
+
+def assign(a,b):
+    '''(str, object) -> bool
+    assigns b value in a global dict to a
+    returns True if it creates a new key'''
+    global evalDictOriginalNameThisIs
+    if a in evalDictOriginalNameThisIs:
+        output = False
+    else:
+        output = True
+    evalDictOriginalNameThisIs[a] = b
+    return output
