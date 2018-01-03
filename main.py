@@ -109,7 +109,7 @@ class DiscordClient(discord.Client): # subClass : overwrites certain functions o
         '''(Message class) -> None
         interprets and responds to the message'''
         yield from doChecks()
-        yield from interpretor.interpretmsg(message, self)
+        yield from interpretor.interpretmsg(message, self, qRedditURLAdder)
 
 bot = DiscordClient()
 
@@ -130,6 +130,7 @@ if __name__ == '__main__':
     qForum = Queue()
     qTwitter = Queue()
     qReddit = Queue()
+    global qRedditURLAdder
     qRedditURLAdder = Queue()
     stop = Queue()
     forumScraper = Process(target = scraperff.continuousScrape, args = (qForum, stop, ))

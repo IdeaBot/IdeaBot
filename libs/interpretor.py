@@ -8,7 +8,7 @@ perms.content = perms.content["DEFAULT"]
 snark = dataloader.datafile(config.content["snarkloc"])
 evalDictOriginalNameThisIs = {}
 @asyncio.coroutine
-def interpretmsg(msg, client):
+def interpretmsg(msg, client, qRedditURLAdder):
     '''(discord.msg object, DiscordClient object) -> None
     raises an exception if the msg cannot be interpreted, otherwise does the appropriate stuff'''
     startTime = timelib.time()
@@ -39,6 +39,9 @@ def interpretmsg(msg, client):
                         yield from client.send_message(msg.channel, random.choice(snark.content))
                 elif "ping" in msgcontentlower:
                     pass
+                elif "add" in msgcontentlower and "`" in msgcontentlower: # add a url to the reddit watchlist
+                    qRedditURLAdder.put({"action" : "add", "url" : msgcontent[msgcontent.index("`")+1 : msgcontent.rindex("`")]})
+                    yield from client.send_message(msg.channel,"Ok, I'll try!")
                 else: raise ValueError("That's a dumb message")
             else:
                 '''if "hotdog" in msgcontentlower or "dick" in msgcontentlower or "hot-dog" in msgcontentlower:
