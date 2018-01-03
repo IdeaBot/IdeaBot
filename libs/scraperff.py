@@ -54,28 +54,38 @@ def continuousScrape(q, stop):
         if time.time() - mostrecentrunstart >= int(config.content["period"]):
             forumLog.info("Starting scraping run")
             mostrecentrunstart = time.time()
-            try:
-                rss = BeautifulSoup(pageRet.pageRet(config.content["url"]).decode(), "html.parser") # landing page
-                items = rss.find_all("item")
-                threads = [[x.find("guid").get_text(), x.find("title").get_text()] for x in items] # list of [url, thread title]
+            #try:
+            rss = BeautifulSoup(pageRet.pageRet(config.content["url"]).decode(), "html.parser") # landing page
+            items = rss.find_all("item")
+            threads = [[x.find("guid").get_text(), x.find("title").get_text()] for x in items] # list of [url, thread title]
 
-                if is_new_thread(threads[0][0]):
-                    for i in threads:
-                        if is_new_thread(i[0]):
-                            forumLog.info("New thread found: " + i[0])
-                            #scrape stuff
-                            recentThread = BeautifulSoup(pageRet.pageRet(i[0]).decode(),"html.parser")
-                            authors = [x.find("a").get("href") for x in recentThread.find_all("div", class_="mini-profile")]
-                            q.put([i[0], authors])
-                        else:
-                            break
-                    delete_entry("most recent thread:")
-                    data.content.append("most recent thread:" + threads[0][0])
-                    data.save()
-                    forumLog.info("Most recent thread is now: " + threads[0][0])
-                forumLog.info("Finished scraping run in "+ str(time.time() - mostrecentrunstart))
-            except:
-                forumLog.warning("Scraping run failed. Either the page has changed or the page is unavailable...")
+            if is_new_thread(threads[0][0]):
+                for i in threads:
+                    if is_new_thread(i[0]):
+                        forumLog.info("New thread found: " + i[0])
+                        #scrape stuff
+                        recentThread = BeautifulSoup(pageRet.pageRet(i[0]).decode(),"html.parser")
+                        forumLog.info("Haven't crashed yet... yay 1 ")
+                        print(recentThread.find_all("div", class_="mini-profile"))
+                        authors = []
+                        for x in recentThread.find_all("div", class_="mini-profile"):
+                            try:
+                                authors.append(x.find("a").get("href"))
+                            except AttributeError: # if author is a guest, x.find("a") will return a NoneType, and None.get("href") will raise an AttributeError
+                                pass
+                        #authors = [x.find("a").get("href") for x in recentThread.find_all("div", class_="mini-profile")]
+                        forumLog.info("Haven't crashed yet... yay 2 ")
+                        q.put([i[0], authors])
+                        forumLog.info("Haven't crashed yet... yay 3 ")
+                    else:
+                        break
+                delete_entry("most recent thread:")
+                data.content.append("most recent thread:" + threads[0][0])
+                data.save()
+                forumLog.info("Most recent thread is now: " + threads[0][0])
+            forumLog.info("Finished scraping run in "+ str(time.time() - mostrecentrunstart))
+            #except:
+            forumLog.warning("Scraping run failed. Either the page has changed or the page is unavailable...")
     forumLog.info("Stopped")
 
 
