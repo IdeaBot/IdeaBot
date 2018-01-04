@@ -68,7 +68,7 @@ def continuousScrape(q, stop):
                             authors = []
                             for x in recentThread.find_all("div", class_="mini-profile"):
                                 try:
-                                    authors.append(x.find("a").get("href"))
+                                    authors.append({"name" : x.find("a").get_text(),"url" : x.find("a").get("href"), "img" : x.find("div", class_="avatar").find("img").get("src")})
                                 except AttributeError: # if author is a guest, x.find("a") will return a NoneType, and None.get("href") will raise an AttributeError
                                     pass
                             #authors = [x.find("a").get("href") for x in recentThread.find_all("div", class_="mini-profile")]

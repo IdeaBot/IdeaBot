@@ -24,9 +24,10 @@ def mainLogging():
     logger.addHandler(handler)
     return logger
 
-def matchuser(userurl):
+def matchuser(user):
     '''(str)-> discord.User object
-    matches the user on the forums with their Discord user'''
+    matches the user, by forum url, with their Discord user'''
+    userurl = user["url"]
     if userurl in forumdiscorduser.content:
         for i in bot.get_all_members():
             if i.id == forumdiscorduser.content[userurl]:
@@ -49,7 +50,7 @@ def loadConfig(filename):
 
 def convertTime(string):
     '''(str)->str
-    converts string with random stuff in it and a time to another timezone mentioned also in string'''
+    does nothing'''
     return "Cheaky bastard"
 
 configureDiscordLogging()
