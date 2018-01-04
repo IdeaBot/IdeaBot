@@ -1,5 +1,5 @@
 
-import timezones, asyncio, dataloader, random, discord
+import timezones, asyncio, dataloader, random, discord, sys
 import time as timelib
 config = dataloader.datafile("./data/config.config")
 config.content = config.content["DEFAULT"]
@@ -21,11 +21,18 @@ def interpretmsg(msg, client, qRedditURLAdder):
                 if ("execute" in msgcontentlower or "evaluate" in msgcontentlower) and msg.author.id in perms.content["executionperm"]:
                     try:
                         if "```" in msgcontentlower:
-                            yield from client.send_message(msg.channel, eval(msgcontent[msgcontent.index("```")+3 : msgcontent.rindex("```")]))
+                            result = eval(msgcontent[msgcontent.index("```")+3 : msgcontent.rindex("```")])
                         else:
-                            yield from client.send_message(msg.channel, eval(msgcontent[msgcontent.index("`")+1 : msgcontent.rindex("`")]))
+                            result = eval(msgcontent[msgcontent.index("`")+1 : msgcontent.rindex("`")])
+                        if result != None:
+                            yield from client.send_message(msg.channel, result)
+                        else:
+                            yield from client.send_message(msg.channel, "Execution completed successfully")
+                    except KeyboardInterrupt:
+                        raise
                     except:
-                        yield from client.send_message(msg.channel, "I'm sure it's a feature that your code crashes, right?")
+                        exception = sys.exc_info()
+                        yield from client.send_message(msg.channel, "I'm sure it's a feature that your code crashes, right? " + "Your code raised this: " + str(exception[0]).replace("'>", "").replace("<class '", "") + ":" + str(exception[1]))
                 elif "what" in msgcontentlower:
                     if (" id " in msgcontentlower or msg.content[-len(" id"):].lower() == " id") and " my " in msgcontentlower:
                         yield from client.send_message(msg.channel, msg.author.id)
@@ -67,7 +74,7 @@ def test(a,b):
     return c
 
 def assign(a,b):
-    '''(str, object) -> bool
+    '''(object, object) -> bool
     assigns b value in a global dict to a
     returns True if it creates a new key'''
     global evalDictOriginalNameThisIs
@@ -77,3 +84,9 @@ def assign(a,b):
         output = True
     evalDictOriginalNameThisIs[a] = b
     return output
+
+def retrieve(a):
+    '''(object) -> object
+    retrieves a in evalDictOriginalNameThisIs
+    Precondition: a must be in evalDictOriginalNameThisIs'''
+    return evalDictOriginalNameThisIs[a]

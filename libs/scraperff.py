@@ -65,8 +65,6 @@ def continuousScrape(q, stop):
                             forumLog.info("New thread found: " + i[0])
                             #scrape stuff
                             recentThread = BeautifulSoup(pageRet.pageRet(i[0]).decode(),"html.parser")
-                            forumLog.info("Haven't crashed yet... yay 1 ")
-                            print(recentThread.find_all("div", class_="mini-profile"))
                             authors = []
                             for x in recentThread.find_all("div", class_="mini-profile"):
                                 try:
@@ -74,9 +72,7 @@ def continuousScrape(q, stop):
                                 except AttributeError: # if author is a guest, x.find("a") will return a NoneType, and None.get("href") will raise an AttributeError
                                     pass
                             #authors = [x.find("a").get("href") for x in recentThread.find_all("div", class_="mini-profile")]
-                            forumLog.info("Haven't crashed yet... yay 2 ")
                             q.put([i[0], authors])
-                            forumLog.info("Haven't crashed yet... yay 3 ")
                         else:
                             break
                     delete_entry("most recent thread:")
