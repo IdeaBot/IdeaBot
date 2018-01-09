@@ -28,11 +28,35 @@ def is_new_thread(url):
     if len(data.content) > 0:
         for i in range(len(data.content)):
             if data.content[i][:len("Most Recent Thread:")].lower() == "most recent thread:" : # if it's the file line about most recent thread
+                if url[:-3] == data.content[i][len("Most Recent Thread:"):len("Most Recent Thread:")+len(url)][:-3]:
+                    is_new = False
+                else:
+                    break
+    return is_new
+
+def has_new_stuff(url):
+    if len(data.content) > 0:
+        for i in range(len(data.content)):
+            if data.content[i][:len("Most Recent Thread:")].lower() == "most recent thread:" : # if it's the file line about most recent thread
                 if url == data.content[i][len("Most Recent Thread:"):len("Most Recent Thread:")+len(url)]:
                     is_new = False
                 else:
                     break
     return is_new
+
+def get_most_recent():
+    '''(None) -> str
+    returns the url of the most recent thread in data.content'''
+    for i in range(len(data.content)):
+        if data.content[i][:len("Most Recent Thread:")].lower() == "most recent thread:" : # if it's the file line about most recent thread
+            return data.content[i][len("Most Recent Thread:")+1:]
+
+def get_trailing_int(url):
+    '''(str) -> int
+    finds the integer at the end of RSS Proboard URLs
+    ie http://ideahavers.freeforums.net/thread/42/answer-life-universe-everything-666 returns 666'''
+    return int(url.split("-")[-1])
+
 
 def delete_entry(string):
     '''(str [, bool])->bool
@@ -60,8 +84,9 @@ def continuousScrape(q, stop):
                 threads = [[x.find("guid").get_text(), x.find("title").get_text()] for x in items] # list of [url, thread title]
 
                 if is_new_thread(threads[0][0]):
+                    newestint = get_trailing_int(get_most_recent())
                     for i in threads:
-                        if is_new_thread(i[0]):
+                        if get_trailing_int(i[0]) > newestint:
                             forumLog.info("New thread found: " + i[0])
                             #scrape stuff
                             recentThread = BeautifulSoup(pageRet.pageRet(i[0]).decode(),"html.parser")
