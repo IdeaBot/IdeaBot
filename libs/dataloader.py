@@ -60,6 +60,7 @@ class datafile: # loads and parses files depending on file ending
             self.content = self.loadRawText(filename)
             self.type = None
             self.name = filename
+
     def save(self):
         '''() -> None
         saves the file in the original format it was parsed from, including any chances'''
@@ -88,3 +89,13 @@ class datafile: # loads and parses files depending on file ending
                 if self.content[i][j:j+len(string)] == string:
                     return (i,j)
         return (-1, -1)
+
+class newdatafile:
+    def __init__(self, filename):
+        self.content = []
+        if "." in filename:
+            self.type = filename.strip(".")[0]
+            self.name = filename[:filename.rindex(".")]
+        else:
+            self.type = None
+            self.name = filename
