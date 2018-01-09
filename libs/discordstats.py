@@ -28,5 +28,5 @@ def dumpMessagesTime(discordClient, filename = "./data/msgdump.csv"):
     messages = discordClient.messages
     msgFile = dataloader.newdatafile(filename)
     for i in messages:
-        msgFile.content.append([i.timestamp.isoformat(timespec="seconds")])
+        msgFile.content.append([i.timestamp.isoformat(timespec="seconds"), i.content]) # yes I'm logging messages' contents right now, don't worry, nobody will see it
     msgFile.save()

@@ -90,11 +90,11 @@ class datafile: # loads and parses files depending on file ending
                     return (i,j)
         return (-1, -1)
 
-class newdatafile:
+class newdatafile (datafile):
     def __init__(self, filename):
         self.content = []
         if "." in filename:
-            self.type = filename.strip(".")[0]
+            self.type = filename[filename.rindex(".")+1:]
             self.name = filename[:filename.rindex(".")]
         else:
             self.type = None

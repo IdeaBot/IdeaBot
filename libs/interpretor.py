@@ -1,5 +1,5 @@
 
-import timezones, asyncio, dataloader, random, discord, sys
+import timezones, asyncio, dataloader, random, discord, sys, discordstats
 import time as timelib
 config = dataloader.datafile("./data/config.config")
 config.content = config.content["DEFAULT"]

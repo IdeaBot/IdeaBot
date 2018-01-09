@@ -102,3 +102,6 @@ ENV/
 
 #logs (redundant)
 *.log
+
+#data
+**.csv
