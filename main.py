@@ -2,7 +2,7 @@ import discord
 import logging, time, asyncio, random, sys, configparser
 from multiprocessing import Process, Queue
 import bot
-from commands import ping
+from commands import *
 
 sys.path.append('./libs')
 from libs import configloader, scraperff, dataloader, scrapert, interpretor, scraperred
@@ -136,8 +136,8 @@ if __name__ == '__main__':
     # updates it's available to DirectOnlyCommand's without giving extra info.
     user_func = lambda: bot.user
 
-    ping_cmd = ping.PingCommand(user=user_func)
-    bot.register_command(ping_cmd)
+    bot.register_command(ping.PingCommand(user=user_func))
+    bot.refister_command(id.IdCommand(user=user_func))
     
     qForum = Queue()
     qTwitter = Queue()
