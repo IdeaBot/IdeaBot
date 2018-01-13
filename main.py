@@ -137,7 +137,8 @@ if __name__ == '__main__':
     user_func = lambda: bot.user
 
     bot.register_command(ping.PingCommand(user=user_func))
-    bot.refister_command(id.IdCommand(user=user_func))
+    bot.register_command(id.IdCommand(user=user_func))
+    bot.register_command(blamejosh.BlameJoshCommand())
     
     qForum = Queue()
     qTwitter = Queue()
