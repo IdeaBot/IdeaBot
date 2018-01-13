@@ -9,15 +9,18 @@ Created on Wed Jan 10 20:05:03 2018
 """
 
 import discord
-import dataloader
 import asyncio
+from commands import command
 
-DEFAULT = "DEFAULT"
+from libs import dataloader
+
+DEFAULT = 'DEFAULT'
 
 class Bot(discord.Client):
     """TODO: Add description"""
     
     def __init__(self, config):
+        super().__init__()
         if not config:
             # TODO: raise some kind of exception
             pass
@@ -30,17 +33,20 @@ class Bot(discord.Client):
         data_file = dataloader.datafile(self.data_config[name])
         self.data[name] = data_file.content[content_from]
         
-    def register_command(self, command):
-        pass
+    def register_command(self, cmd):
+        if not isinstance(cmd, command.Command):
+            raise ValueError('Only commands may be registered in Bot::register_command')
+        self.commands.append(cmd)
     
     def register_plugin(self, plugin):
         pass
     
     @asyncio.coroutine
     def on_message(self, message):
-        for command in self.commands:
-            if command._matches(message):
-                command._action(message, self.send_message)
+        for cmd in self.commands:
+            if cmd._matches(message):
+                yield from cmd._action(message, self.send_message)
+                # TOOD(14flash): is break necessary? Can this be done per command?
                 break
     
     @asyncio.coroutine

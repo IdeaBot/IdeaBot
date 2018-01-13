@@ -1,9 +1,11 @@
 import discord
-import logging, time, asyncio, random, sys, configparser, random
+import logging, time, asyncio, random, sys, configparser
 from multiprocessing import Process, Queue
+import bot
+from commands import ping
 
 sys.path.append('./libs')
-import configloader, scraperff, dataloader, scrapert, interpretor, scraperred
+from libs import configloader, scraperff, dataloader, scrapert, interpretor, scraperred
 
 def configureDiscordLogging():
     '''() -> None
@@ -112,7 +114,7 @@ class DiscordClient(discord.Client): # subClass : overwrites certain functions o
         yield from doChecks()
         yield from interpretor.interpretmsg(message, self, qRedditURLAdder)
 
-bot = DiscordClient()
+# bot = DiscordClient()
 
 if __name__ == '__main__':
     # main
@@ -128,6 +130,15 @@ if __name__ == '__main__':
     perms.content = perms.content["DEFAULT"]
     forumdiscorduser = dataloader.datafile(config.content["forumdiscorduserloc"])
     forumdiscorduser.content = forumdiscorduser.content["DEFAULT"]
+
+    bot = bot.Bot("./data/config.config")
+    # user_func uses lambda to create a closure on bot. This way when bot.user
+    # updates it's available to DirectOnlyCommand's without giving extra info.
+    user_func = lambda: bot.user
+
+    ping_cmd = ping.PingCommand(user=user_func)
+    bot.register_command(ping_cmd)
+    
     qForum = Queue()
     qTwitter = Queue()
     qReddit = Queue()
@@ -146,7 +157,8 @@ if __name__ == '__main__':
         loop.run_until_complete(bot.login(credentials.content["username"], credentials.content["password"]))
     #print(timezones.FullTime(timezones.SimpleTime("12pm"), timezones.Timezone("EST")).convertTo("CHUT"))
     #run until logged out
-    loop.run_until_complete(bot.connect())
+    loop.run_until_complete(bot.connect())    
+    
     stop.put("STAHHHHP")
     twitterScraper.join()
     forumScraper.join()
