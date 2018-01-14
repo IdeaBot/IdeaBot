@@ -10,6 +10,8 @@ from commands import command
 import re
 
 class UrlAdderCommand(command.DirectOnlyCommand):
+    '''UrlAdderCommand adds a url to the reddit watch list. URLs in the watch
+    list will have updates posted in the discord.'''
     
     def __init__(self, url_adder, **kwargs):
         super().__init__(**kwargs)

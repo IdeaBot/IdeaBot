@@ -9,8 +9,8 @@ from commands import command
 import re
 
 class ForumPostCommand(command.Command):
-    """ForumPostCommand adds a :forum_post: reaction to any message that has
-    the words "forum post"."""
+    '''ForumPostCommand adds an emoji reaction to any message that has
+    the words "forum post".'''
 
     def __init__(self, add_reaction_func, emoji, **kwargs):
         super().__init__(**kwargs)

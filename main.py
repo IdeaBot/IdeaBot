@@ -14,7 +14,7 @@ from commands import forumpost
 from commands import invalid
 
 sys.path.append('./libs')
-from libs import configloader, scraperff, dataloader, scrapert, interpretor, scraperred
+from libs import configloader, scraperff, dataloader, scrapert, scraperred
 
 PERMISSIONS_LOCATION = 'permissionsloc'
 EXECUTION_PERM = 'executionperm'
@@ -69,11 +69,10 @@ def convertTime(string):
     return "Cheaky bastard"
 
 configureDiscordLogging()
-log = mainLogging()
 
 @asyncio.coroutine
-def doChecks():
-    '''() -> None
+def doChecks(bot):
+    '''(discord.Client) -> None
     checks to make sure no messages need to be sent about something special, like scraper updates'''
     while not qForum.empty():
         thread = qForum.get()
@@ -95,40 +94,6 @@ def doChecks():
         yield from bot.send_message(bot.redditchannel, "A comment has been posted here: " + comment[0] + " (direct link: <"+comment[1]+">)")
 
 
-
-class DiscordClient(discord.Client): # subClass : overwrites certain functions of discord.Client class
-    '''To overwrite functions without modifying the Discord API Python code'''
-    @asyncio.coroutine
-    def on_ready(self):
-        '''() -> None
-        logs info when API is ready'''
-        #work or die
-        log.info("API connection created successfully")
-        log.info("Username: " + str(self.user.name))
-        log.info("Email: " + str(self.email))
-        log.info(str([i for i in self.servers]))
-        for i in bot.get_all_channels(): # play the matchy-matchy game with server names
-            if i.name == channels.content["twitter"]:
-                self.twitterchannel = i
-                log.info("twitter channel found")
-            if i.name == channels.content["forum"]:
-                self.forumchannel = i
-                log.info("forum channel found")
-            if i.name == channels.content["reddit"]:
-                self.redditchannel = i
-                log.info("reddit channel found")
-        yield from self.send_message(self.twitterchannel, "Hello humans...")
-        yield from doChecks()
-
-    @asyncio.coroutine
-    def on_message(self, message):
-        '''(Message class) -> None
-        interprets and responds to the message'''
-        yield from doChecks()
-        yield from interpretor.interpretmsg(message, self, qRedditURLAdder)
-
-# bot = DiscordClient()
-
 if __name__ == '__main__':
     # main
     # init stuff
@@ -143,6 +108,8 @@ if __name__ == '__main__':
     perms.content = perms.content["DEFAULT"]
     forumdiscorduser = dataloader.datafile(config.content["forumdiscorduserloc"])
     forumdiscorduser.content = forumdiscorduser.content["DEFAULT"]
+
+    log = mainLogging()
 
     bot = botlib.Bot("./data/config.config", log, doChecks)
     bot.add_data(PERMISSIONS_LOCATION)
@@ -178,8 +145,7 @@ if __name__ == '__main__':
     redditScraper = Process(target = scraperred.continuousScrape, args = (qReddit, stop, qRedditURLAdder, ))
     redditScraper.start()
 
-    bot.register_command(invalid.InvalidCommand(user=user_func, invalid_message=config.content["invalidmessagemessage"]))    
-
+    bot.register_command(invalid.InvalidCommand(user=user_func, invalid_message=config.content["invalidmessagemessage"]))
     if "token" in credentials.content:
         loop.run_until_complete(bot.login(credentials.content["token"]))
     else:
