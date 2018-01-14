@@ -15,16 +15,20 @@ from commands import command
 from libs import dataloader
 
 DEFAULT = 'DEFAULT'
+CHANNEL_LOC = 'channelsloc'
 
 class Bot(discord.Client):
     """TODO: Add description"""
     
-    def __init__(self, config):
+    def __init__(self, config, log, checks):
         super().__init__()
         if not config:
             # TODO: raise some kind of exception
             pass
         self.data_config = dataloader.datafile(config).content[DEFAULT]
+        self.log = log
+        # TODO(14flash): Plugin refactor, where we won't need a doCheck() func anymore
+        self.checks = checks
         self.data = dict()
         self.commands = list()
         self.plugins = list()
@@ -44,10 +48,12 @@ class Bot(discord.Client):
         self.commands.append(cmd)
     
     def register_plugin(self, plugin):
+        # TODO(14flash): Plugin refactor.
         pass
     
     @asyncio.coroutine
     def on_message(self, message):
+        self.checks()
         for cmd in self.commands:
             if cmd._matches(message):
                 yield from cmd._action(message, self.send_message)
@@ -56,5 +62,22 @@ class Bot(discord.Client):
     
     @asyncio.coroutine
     def on_ready(self):
-        # TODO: transfer from main.pu
-        pass
+        self.log.info('API connection created successfully')
+        self.log.info('Username: ' + str(self.user.name))
+        self.log.info('Email: ' + str(self.email))
+        self.log.info(str([i for i in self.servers]))
+        self.setup_channels()
+        yield from self.send_message(self.twitterchannel, "Hello humans...")
+        self.checks()
+    
+    def setup_channels(self):
+        for i in self.get_all_channels(): # play the matchy-matchy game with server names
+            if i.name == self.get_data(CHANNEL_LOC, 'twitter'):
+                self.twitterchannel = i
+                self.log.info("twitter channel found")
+            if i.name == self.get_data(CHANNEL_LOC, 'forum'):
+                self.forumchannel = i
+                self.log.info("forum channel found")
+            if i.name == self.get_data(CHANNEL_LOC, 'reddit'):
+                self.redditchannel = i
+                self.log.info("reddit channel found")

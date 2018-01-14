@@ -1,7 +1,7 @@
 import discord
 import logging, time, asyncio, random, sys, configparser
 from multiprocessing import Process, Queue
-import bot
+import bot as botlib
 from commands import ping
 from commands import id
 from commands import blamejosh
@@ -11,6 +11,7 @@ from commands import execute
 from commands import shutdown
 from commands import urladder
 from commands import forumpost
+from commands import invalid
 
 sys.path.append('./libs')
 from libs import configloader, scraperff, dataloader, scrapert, interpretor, scraperred
@@ -143,8 +144,9 @@ if __name__ == '__main__':
     forumdiscorduser = dataloader.datafile(config.content["forumdiscorduserloc"])
     forumdiscorduser.content = forumdiscorduser.content["DEFAULT"]
 
-    bot = bot.Bot("./data/config.config")
+    bot = botlib.Bot("./data/config.config", log, doChecks)
     bot.add_data(PERMISSIONS_LOCATION)
+    bot.add_data(botlib.CHANNEL_LOC)
     # user_func uses lambda to create a closure on bot. This way when bot.user
     # updates it's available to DirectOnlyCommand's without giving extra info.
     user_func = lambda: bot.user
@@ -159,7 +161,7 @@ if __name__ == '__main__':
     bot.register_command(blamejosh.BlameJoshCommand())
     emoji = config.content["forumpostemoji"]
     bot.register_command(forumpost.ForumPostCommand(add_reaction_func=bot.add_reaction, emoji=emoji))
-    
+
     qForum = Queue()
     qTwitter = Queue()
     qReddit = Queue()
@@ -167,7 +169,7 @@ if __name__ == '__main__':
     qRedditURLAdder = Queue()
 
     bot.register_command(urladder.UrlAdderCommand(user=user_func, url_adder=qRedditURLAdder))    
-    
+
     stop = Queue()
     forumScraper = Process(target = scraperff.continuousScrape, args = (qForum, stop, ))
     forumScraper.start()
@@ -175,6 +177,9 @@ if __name__ == '__main__':
     twitterScraper.start()
     redditScraper = Process(target = scraperred.continuousScrape, args = (qReddit, stop, qRedditURLAdder, ))
     redditScraper.start()
+
+    bot.register_command(invalid.InvalidCommand(user=user_func, invalid_message=config.content["invalidmessagemessage"]))    
+
     if "token" in credentials.content:
         loop.run_until_complete(bot.login(credentials.content["token"]))
     else:
@@ -182,7 +187,7 @@ if __name__ == '__main__':
     #print(timezones.FullTime(timezones.SimpleTime("12pm"), timezones.Timezone("EST")).convertTo("CHUT"))
     #run until logged out
     loop.run_until_complete(bot.connect())    
-    
+
     stop.put("STAHHHHP")
     twitterScraper.join()
     forumScraper.join()
