@@ -7,9 +7,15 @@ from commands import id
 from commands import blamejosh
 from commands import timezone
 from commands import snark
+from commands import execute
+from commands import shutdown
 
 sys.path.append('./libs')
 from libs import configloader, scraperff, dataloader, scrapert, interpretor, scraperred
+
+PERMISSIONS_LOCATION = 'permissionsloc'
+EXECUTION_PERM = 'executionperm'
+SHUTDOWN_PERM = 'shutdownperm'
 
 def configureDiscordLogging():
     '''() -> None
@@ -136,11 +142,14 @@ if __name__ == '__main__':
     forumdiscorduser.content = forumdiscorduser.content["DEFAULT"]
 
     bot = bot.Bot("./data/config.config")
+    bot.add_data(PERMISSIONS_LOCATION)
     # user_func uses lambda to create a closure on bot. This way when bot.user
     # updates it's available to DirectOnlyCommand's without giving extra info.
     user_func = lambda: bot.user
 
     bot.register_command(ping.PingCommand(user=user_func))
+    bot.register_command(execute.ExecuteCommand(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, EXECUTION_PERM)))
+    bot.register_command(shutdown.ShutdownCommand(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, SHUTDOWN_PERM), logout_func=bot.logout))
     bot.register_command(id.IdCommand(user=user_func))
     bot.register_command(timezone.TimeZoneCommand(user=user_func))
     snark_data = dataloader.datafile(config.content["snarkloc"])

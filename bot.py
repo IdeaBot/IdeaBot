@@ -33,7 +33,9 @@ class Bot(discord.Client):
         data_file = dataloader.datafile(self.data_config[name])
         self.data[name] = data_file.content[content_from]
     
-    def get_data(self, name):
+    def get_data(self, name, key=None):
+        if key:
+            return self.data[name][key]
         return self.data[name]
         
     def register_command(self, cmd):
