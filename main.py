@@ -10,6 +10,7 @@ from commands import snark
 from commands import execute
 from commands import shutdown
 from commands import urladder
+from commands import forumpost
 
 sys.path.append('./libs')
 from libs import configloader, scraperff, dataloader, scrapert, interpretor, scraperred
@@ -156,6 +157,8 @@ if __name__ == '__main__':
     snark_data = dataloader.datafile(config.content["snarkloc"])
     bot.register_command(snark.SnarkCommand(user=user_func, snark_data=snark_data))
     bot.register_command(blamejosh.BlameJoshCommand())
+    emoji = config.content["forumpostemoji"]
+    bot.register_command(forumpost.ForumPostCommand(add_reaction_func=bot.add_reaction, emoji=emoji))
     
     qForum = Queue()
     qTwitter = Queue()
