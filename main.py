@@ -9,6 +9,7 @@ from commands import timezone
 from commands import snark
 from commands import execute
 from commands import shutdown
+from commands import urladder
 
 sys.path.append('./libs')
 from libs import configloader, scraperff, dataloader, scrapert, interpretor, scraperred
@@ -161,6 +162,9 @@ if __name__ == '__main__':
     qReddit = Queue()
     global qRedditURLAdder
     qRedditURLAdder = Queue()
+
+    bot.register_command(urladder.UrlAdderCommand(user=user_func, url_adder=qRedditURLAdder))    
+    
     stop = Queue()
     forumScraper = Process(target = scraperff.continuousScrape, args = (qForum, stop, ))
     forumScraper.start()

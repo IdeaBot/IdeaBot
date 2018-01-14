@@ -14,9 +14,6 @@ class ExecuteCommand(command.DirectOnlyCommand, command.BenchmarkableCommand):
     with the result of the execution."""
     
     def matches(self, message):
-        print("execute's permissions are: ", self.perms)
-        print(message.content)
-        print(self.collect_args(message))
         return self.collect_args(message)
         
     def action(self, message, send_func):
