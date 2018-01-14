@@ -1,5 +1,5 @@
 # this badly needs to be changed to OOP, because it's rly hurtful to understand right now
-import dataloader
+from libs import dataloader
 
 timezones = dataloader.datafile("./data/timezones.csv")
 
