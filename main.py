@@ -138,6 +138,7 @@ if __name__ == '__main__':
 
     bot.register_command(ping.PingCommand(user=user_func))
     bot.register_command(id.IdCommand(user=user_func))
+    bot.register_command(timezone.TimeZoneCommand(user=user_func))
     bot.register_command(blamejosh.BlameJoshCommand())
     
     qForum = Queue()
