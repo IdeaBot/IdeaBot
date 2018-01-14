@@ -2,7 +2,11 @@ import discord
 import logging, time, asyncio, random, sys, configparser
 from multiprocessing import Process, Queue
 import bot
-from commands import *
+from commands import ping
+from commands import id
+from commands import blamejosh
+from commands import timezone
+from commands import snark
 
 sys.path.append('./libs')
 from libs import configloader, scraperff, dataloader, scrapert, interpretor, scraperred
@@ -139,6 +143,8 @@ if __name__ == '__main__':
     bot.register_command(ping.PingCommand(user=user_func))
     bot.register_command(id.IdCommand(user=user_func))
     bot.register_command(timezone.TimeZoneCommand(user=user_func))
+    snark_data = dataloader.datafile(config.content["snarkloc"])
+    bot.register_command(snark.SnarkCommand(user=user_func, snark_data=snark_data))
     bot.register_command(blamejosh.BlameJoshCommand())
     
     qForum = Queue()

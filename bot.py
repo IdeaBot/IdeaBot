@@ -32,6 +32,9 @@ class Bot(discord.Client):
     def add_data(self, name, content_from=DEFAULT):
         data_file = dataloader.datafile(self.data_config[name])
         self.data[name] = data_file.content[content_from]
+    
+    def get_data(self, name):
+        return self.data[name]
         
     def register_command(self, cmd):
         if not isinstance(cmd, command.Command):
