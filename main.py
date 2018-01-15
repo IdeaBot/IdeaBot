@@ -12,6 +12,7 @@ from commands import shutdown
 from commands import urladder
 from commands import forumpost
 from commands import invalid
+from commands import karma
 
 sys.path.append('./libs')
 from libs import configloader, scraperff, dataloader, scrapert, scraperred
@@ -128,6 +129,8 @@ if __name__ == '__main__':
     bot.register_command(blamejosh.BlameJoshCommand())
     emoji = config.content["forumpostemoji"]
     bot.register_command(forumpost.ForumPostCommand(add_reaction_func=bot.add_reaction, emoji=emoji))
+    bot.register_command(karma.KarmaAdderCommand())
+    bot.register_command(karma.KarmaCountCommand(user=user_func))
 
     qForum = Queue()
     qTwitter = Queue()
