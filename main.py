@@ -130,7 +130,7 @@ if __name__ == '__main__':
     emoji = config.content["forumpostemoji"]
     bot.register_command(forumpost.ForumPostCommand(add_reaction_func=bot.add_reaction, emoji=emoji))
     bot.register_command(karma.KarmaAdderCommand())
-    bot.register_command(karma.KarmaCountCommand(user=user_func))
+    bot.register_command(karma.KarmaValueCommand(user=user_func))
 
     qForum = Queue()
     qTwitter = Queue()
