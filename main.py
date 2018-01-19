@@ -159,6 +159,11 @@ if __name__ == '__main__':
     #run until logged out
     loop.run_until_complete(bot.connect())    
 
+    karma_entity_sum = 0
+    for key in karma.Karma.karma:
+        karma_entity_sum += len(key)
+    log.info("karma would take about %d bytes to save" % karma_entity_sum)
+
     stop.put("STAHHHHP")
     twitterScraper.join()
     forumScraper.join()
