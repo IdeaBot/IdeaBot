@@ -1,0 +1,4 @@
+%s sucks!
+%s whited out!
+%s got pwned!
+%s lost a life!

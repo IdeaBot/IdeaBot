@@ -129,7 +129,9 @@ if __name__ == '__main__':
     bot.register_command(blamejosh.BlameJoshCommand())
     emoji = config.content["forumpostemoji"]
     bot.register_command(forumpost.ForumPostCommand(add_reaction_func=bot.add_reaction, emoji=emoji))
-    bot.register_command(karma.KarmaAdderCommand())
+    karma_up_data = dataloader.datafile(config.content["karmauploc"])
+    karma_down_data = dataloader.datafile(config.content["karmadownloc"])
+    bot.register_command(karma.KarmaAdderCommand(karma_up_data=karma_up_data, karma_down_data=karma_down_data))
     bot.register_command(karma.KarmaValueCommand(user=user_func))
 
     qForum = Queue()
