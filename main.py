@@ -13,6 +13,7 @@ from commands import urladder
 from commands import forumpost
 from commands import invalid
 from commands import karma
+from commands import featurelist
 
 sys.path.append('./libs')
 from libs import configloader, scraperff, dataloader, scrapert, scraperred
@@ -126,6 +127,7 @@ if __name__ == '__main__':
     bot.register_command(timezone.TimeZoneCommand(user=user_func))
     snark_data = dataloader.datafile(config.content["snarkloc"])
     bot.register_command(snark.SnarkCommand(user=user_func, snark_data=snark_data))
+    bot.register_command(featurelist.FeatureListCommand(user=user_func))
     bot.register_command(blamejosh.BlameJoshCommand())
     emoji = config.content["forumpostemoji"]
     bot.register_command(forumpost.ForumPostCommand(add_reaction_func=bot.add_reaction, emoji=emoji))
