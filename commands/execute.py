@@ -12,7 +12,7 @@ import sys
 
 evalDictOriginalNameThisIs = {}
 
-class ExecuteCommand(command.DirectOnlyCommand, command.AdminCommand):
+class ExecuteCommand(command.DirectOnlyCommand, command.AdminCommand, command.BenchmarkableCommand):
     '''ExecuteCommand tries to execute a passed in piece of code and responds
     with the result of the execution.'''
 

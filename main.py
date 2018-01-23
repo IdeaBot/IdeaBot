@@ -119,7 +119,7 @@ if __name__ == '__main__':
     user_func = lambda: bot.user
 
     bot.register_command(ping.PingCommand(user=user_func))
-    bot.register_admin_command(execute.ExecuteCommand(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, EXECUTION_PERM)))
+    bot.register_command(execute.ExecuteCommand(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, EXECUTION_PERM)))
     bot.register_command(shutdown.ShutdownCommand(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, SHUTDOWN_PERM), logout_func=bot.logout))
     bot.register_command(id.IdCommand(user=user_func))
     bot.register_command(timezone.TimeZoneCommand(user=user_func))
@@ -136,7 +136,7 @@ if __name__ == '__main__':
     qRedditURLAdder = Queue()
 
     bot.register_command(urladder.UrlAdderCommand(user=user_func, url_adder=qRedditURLAdder))
-    '''
+
     stop = Queue()
     forumScraper = Process(target = scraperff.continuousScrape, args = (qForum, stop, ))
     forumScraper.start()
@@ -144,7 +144,7 @@ if __name__ == '__main__':
     twitterScraper.start()
     redditScraper = Process(target = scraperred.continuousScrape, args = (qReddit, stop, qRedditURLAdder, ))
     redditScraper.start()
-    '''
+
     bot.register_command(invalid.InvalidCommand(user=user_func, invalid_message=config.content["invalidmessagemessage"]))
     if "token" in credentials.content:
         loop.run_until_complete(bot.login(credentials.content["token"]))
@@ -153,9 +153,10 @@ if __name__ == '__main__':
     #print(timezones.FullTime(timezones.SimpleTime("12pm"), timezones.Timezone("EST")).convertTo("CHUT"))
     #run until logged out
     loop.run_until_complete(bot.connect())
-    '''
+
     stop.put("STAHHHHP")
     twitterScraper.join()
     forumScraper.join()
-    redditScraper.join()'''
+    redditScraper.join()
+    
     print("Ended")
