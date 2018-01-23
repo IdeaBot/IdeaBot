@@ -12,6 +12,8 @@ from commands import shutdown
 from commands import urladder
 from commands import forumpost
 from commands import invalid
+from commands import karma
+from commands import featurelist
 
 sys.path.append('./libs')
 from libs import configloader, scraperff, dataloader, scrapert, scraperred
@@ -125,9 +127,14 @@ if __name__ == '__main__':
     bot.register_command(timezone.TimeZoneCommand(user=user_func))
     snark_data = dataloader.datafile(config.content["snarkloc"])
     bot.register_command(snark.SnarkCommand(user=user_func, snark_data=snark_data))
+    bot.register_command(featurelist.FeatureListCommand(user=user_func))
     bot.register_command(blamejosh.BlameJoshCommand())
     emoji = config.content["forumpostemoji"]
     bot.register_command(forumpost.ForumPostCommand(add_reaction_func=bot.add_reaction, emoji=emoji))
+    karma_up_data = dataloader.datafile(config.content["karmauploc"])
+    karma_down_data = dataloader.datafile(config.content["karmadownloc"])
+    bot.register_command(karma.KarmaAdderCommand(karma_up_data=karma_up_data, karma_down_data=karma_down_data))
+    bot.register_command(karma.KarmaValueCommand(user=user_func))
 
     qForum = Queue()
     qTwitter = Queue()
@@ -154,7 +161,12 @@ if __name__ == '__main__':
     #run until logged out
     loop.run_until_complete(bot.connect())
 
-    stop.put("STAHHHHP") # any message put() into stop will make all the scraper threads shut down
+    karma_entity_sum = 0
+    for key in karma.Karma.karma:
+        karma_entity_sum += len(key)
+    log.info("karma would take about %d bytes to save" % karma_entity_sum)
+
+    stop.put("STAHHHHP")
     twitterScraper.join()
     forumScraper.join()
     redditScraper.join()
