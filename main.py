@@ -154,9 +154,9 @@ if __name__ == '__main__':
     #run until logged out
     loop.run_until_complete(bot.connect())
 
-    stop.put("STAHHHHP")
+    stop.put("STAHHHHP") # any message put() into stop will make all the scraper threads shut down
     twitterScraper.join()
     forumScraper.join()
     redditScraper.join()
-    
+
     print("Ended")
