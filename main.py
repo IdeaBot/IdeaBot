@@ -135,8 +135,8 @@ if __name__ == '__main__':
     global qRedditURLAdder
     qRedditURLAdder = Queue()
 
-    bot.register_command(urladder.UrlAdderCommand(user=user_func, url_adder=qRedditURLAdder))    
-
+    bot.register_command(urladder.UrlAdderCommand(user=user_func, url_adder=qRedditURLAdder))
+    '''
     stop = Queue()
     forumScraper = Process(target = scraperff.continuousScrape, args = (qForum, stop, ))
     forumScraper.start()
@@ -144,7 +144,7 @@ if __name__ == '__main__':
     twitterScraper.start()
     redditScraper = Process(target = scraperred.continuousScrape, args = (qReddit, stop, qRedditURLAdder, ))
     redditScraper.start()
-
+    '''
     bot.register_command(invalid.InvalidCommand(user=user_func, invalid_message=config.content["invalidmessagemessage"]))
     if "token" in credentials.content:
         loop.run_until_complete(bot.login(credentials.content["token"]))
@@ -152,10 +152,10 @@ if __name__ == '__main__':
         loop.run_until_complete(bot.login(credentials.content["username"], credentials.content["password"]))
     #print(timezones.FullTime(timezones.SimpleTime("12pm"), timezones.Timezone("EST")).convertTo("CHUT"))
     #run until logged out
-    loop.run_until_complete(bot.connect())    
-
+    loop.run_until_complete(bot.connect())
+    '''
     stop.put("STAHHHHP")
     twitterScraper.join()
     forumScraper.join()
-    redditScraper.join()
+    redditScraper.join()'''
     print("Ended")
