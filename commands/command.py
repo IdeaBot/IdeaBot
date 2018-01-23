@@ -75,7 +75,7 @@ class DirectOnlyCommand(Command):
     # be passed in.
     def __init__(self, user=None, **kwargs):
         super().__init__(**kwargs)
-        # hypothectically, you could also make this so that it responds if a 
+        # hypothectically, you could also make this so that it responds if a
         # particular user is @ed, not just the bot
         if user is None or type(user) is not types.FunctionType:
             raise ValueError('DirectOnlyCommand requires a user func to be passed in')
@@ -84,3 +84,16 @@ class DirectOnlyCommand(Command):
     def _matches(self, message):
         mentioned = self.user().mention in message.content
         return mentioned and super()._matches(message)
+
+class AdminCommand(Command):
+    '''Extending AdminCommand will make the command have access to the bot object (discord.Client object)'''
+
+    def _action(self, message, send_func, client):
+        '''(AdminCommand, discord.Message, func, discord.Client) -> None
+        Allows for action() to receive the client object for advanced use '''
+        yield from self.action(message, send_func, client)
+
+    def action(self, message, send_func, client):
+        '''(AdminCommand, discord.Message, func, discord.Client) -> None
+        Responds to the message with access to discord.Client '''
+        pass

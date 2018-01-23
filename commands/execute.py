@@ -12,14 +12,14 @@ import sys
 
 evalDictOriginalNameThisIs = {}
 
-class ExecuteCommand(command.DirectOnlyCommand, command.BenchmarkableCommand):
+class ExecuteCommand(command.DirectOnlyCommand, command.AdminCommand):
     '''ExecuteCommand tries to execute a passed in piece of code and responds
     with the result of the execution.'''
 
     def matches(self, message):
         return self.collect_args(message)
 
-    def action(self, message, send_func):
+    def action(self, message, send_func, client):
         args_match = self.collect_args(message)
         # TODO(14flash): Avoid magic number.
         code = args_match.group(3)

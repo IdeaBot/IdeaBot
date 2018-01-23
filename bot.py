@@ -36,6 +36,7 @@ class Bot(discord.Client):
         self.checks = checks
         self.data = dict()
         self.commands = list()
+        self.admin_commands = list()
         self.plugins = list()
 
     def add_data(self, name, content_from=DEFAULT):
@@ -61,6 +62,13 @@ class Bot(discord.Client):
             raise ValueError('Only commands may be registered in Bot::register_command')
         self.commands.append(cmd)
 
+    def register_admin_command(self, cmd):
+        '''(AdminCommand) -> None
+        Registers a Command for execution when a PM is received from an admin'''
+        if not isinstance(cmd, command.AdminCommand):
+            raise ValueError('Only AdminCommands may be registered in Bot::register_admin_command')
+        self.admin_commands.append(cmd)
+
     def register_plugin(self, plugin):
         '''(Plugin) -> None
         Registers a Plugin which executes in a separate process'''
@@ -75,6 +83,9 @@ class Bot(discord.Client):
                 yield from cmd._action(message, self.send_message)
                 # TOOD(14flash): is break necessary? Can this be done per command?
                 break
+        for cmd in self.admin_commands:
+            if cmd._matches(message):
+                yield from cmd._action(message, self.send_message, self)
 
     @asyncio.coroutine
     def on_ready(self):

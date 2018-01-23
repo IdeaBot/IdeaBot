@@ -35,9 +35,10 @@ def dumpMessagesTime(discordClient, filename = "./data/msgdump.csv"):
 def dumpMessages(discordClient, filename = "./data/msgdump.csv", info = "timestamp.isoformat(timespec='seconds'),channel.name,server.name"):
     '''(discord.Client object, str, str) -> None
     dumps messages' info in discordClient.messages to filename'''
-    messages = discordClient.messages
+    global i, messages # horrible idea but it works
+    messages = list(discordClient.messages)
     msgFile = dataloader.newdatafile(filename)
-    infostrip = info.strip(",")
+    infostrip = info.split(",")
     msgFile.content = [None]*len(messages)
     for i in range(len(messages)):
         msgFile.content[i] = [eval("messages[i]."+x) for x in infostrip]

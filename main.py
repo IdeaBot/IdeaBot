@@ -119,7 +119,7 @@ if __name__ == '__main__':
     user_func = lambda: bot.user
 
     bot.register_command(ping.PingCommand(user=user_func))
-    bot.register_command(execute.ExecuteCommand(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, EXECUTION_PERM)))
+    bot.register_admin_command(execute.ExecuteCommand(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, EXECUTION_PERM)))
     bot.register_command(shutdown.ShutdownCommand(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, SHUTDOWN_PERM), logout_func=bot.logout))
     bot.register_command(id.IdCommand(user=user_func))
     bot.register_command(timezone.TimeZoneCommand(user=user_func))
