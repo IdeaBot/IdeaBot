@@ -12,6 +12,7 @@ from commands import shutdown
 from commands import urladder
 from commands import forumpost
 from commands import invalid
+from commands import karma
 from commands import featurelist
 
 sys.path.append('./libs')
@@ -130,6 +131,10 @@ if __name__ == '__main__':
     bot.register_command(blamejosh.BlameJoshCommand())
     emoji = config.content["forumpostemoji"]
     bot.register_command(forumpost.ForumPostCommand(add_reaction_func=bot.add_reaction, emoji=emoji))
+    karma_up_data = dataloader.datafile(config.content["karmauploc"])
+    karma_down_data = dataloader.datafile(config.content["karmadownloc"])
+    bot.register_command(karma.KarmaAdderCommand(karma_up_data=karma_up_data, karma_down_data=karma_down_data))
+    bot.register_command(karma.KarmaValueCommand(user=user_func))
 
     qForum = Queue()
     qTwitter = Queue()
@@ -155,6 +160,11 @@ if __name__ == '__main__':
     #print(timezones.FullTime(timezones.SimpleTime("12pm"), timezones.Timezone("EST")).convertTo("CHUT"))
     #run until logged out
     loop.run_until_complete(bot.connect())    
+
+    karma_entity_sum = 0
+    for key in karma.Karma.karma:
+        karma_entity_sum += len(key)
+    log.info("karma would take about %d bytes to save" % karma_entity_sum)
 
     stop.put("STAHHHHP")
     twitterScraper.join()

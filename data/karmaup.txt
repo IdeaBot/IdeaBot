@@ -1,0 +1,7 @@
+%s rocks!
+%s leveled up!
+%s deserves a high five!
+%s is a beast!
+All hail %s!
+%s got a 1-up!
+It's a bird! It's a plane! No, it's %s!
