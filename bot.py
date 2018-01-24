@@ -11,6 +11,7 @@ Created on Wed Jan 10 20:05:03 2018
 import discord
 import asyncio
 from commands import command
+from reactions import reactioncommand
 
 from libs import dataloader
 
@@ -36,7 +37,8 @@ class Bot(discord.Client):
         self.checks = checks
         self.data = dict()
         self.commands = list()
-        self.admin_commands = list()
+        self.reaction_add_commands = list()
+        self.reaction_remove_commands = list()
         self.plugins = list()
 
     def add_data(self, name, content_from=DEFAULT):
@@ -68,6 +70,16 @@ class Bot(discord.Client):
         # TODO(14flash): Plugin refactor.
         pass
 
+    def register_reaction_command(self, cmd):
+        '''(discord.Client, reactions.Command) -> None
+        Registers a reaction command for execution when a message is reacted to'''
+        if not (isinstance(cmd, reactioncommand.ReactionAddCommand) or isinstance(cmd, reactioncommand.ReactionRemoveCommand)):
+            raise ValueError("Only reaction add/remove commands may be registered in Bot::register_reaction_command")
+        if isinstance(cmd, reactioncommand.ReactionAddCommand):
+            self.reaction_add_commands.append(cmd)
+        if isinstance(cmd, reactioncommand.ReactionRemoveCommand):
+            self.reaction_remove_commands.append(cmd)
+
     @asyncio.coroutine
     def on_message(self, message):
         yield from self.checks(self)
@@ -78,6 +90,26 @@ class Bot(discord.Client):
                 else:
                     yield from cmd._action(message, self.send_message)
                 # TOOD(14flash): is break necessary? Can this be done per command?
+                break
+
+    @asyncio.coroutine
+    def on_reaction_add(self, reaction, user):
+        for cmd in self.reaction_add_commands:
+            if cmd._matches(reaction, user):
+                if isinstance(cmd, reactioncommand.AdminReactionAddCommand):
+                    yield from cmd._action(reaction, user, self)
+                else:
+                    yield from cmd._action(reaction, user)
+                break
+
+    @asyncio.coroutine
+    def on_reaction_remove(self, reaction, user):
+        for cmd in self.reaction_remove_commands:
+            if cmd._matches(reaction, user):
+                if isinstance(cmd, reactioncommand.AdminReactionRemoveCommand):
+                    yield from cmd._action(reaction, user, self)
+                else:
+                    yield from cmd._action(reaction, user)
                 break
 
     @asyncio.coroutine

@@ -14,6 +14,7 @@ from commands import forumpost
 from commands import invalid
 from commands import karma
 from commands import featurelist
+from reactions import invalid as invalidreaction
 
 sys.path.append('./libs')
 from libs import configloader, scraperff, dataloader, scrapert, scraperred
@@ -136,12 +137,15 @@ if __name__ == '__main__':
     bot.register_command(karma.KarmaAdderCommand(karma_up_data=karma_up_data, karma_down_data=karma_down_data))
     bot.register_command(karma.KarmaValueCommand(user=user_func))
 
+    #bot.register_reaction_command(<command>) can go here
+
     qForum = Queue()
     qTwitter = Queue()
     qReddit = Queue()
     global qRedditURLAdder
     qRedditURLAdder = Queue()
 
+    bot.register_reaction_command(invalidreaction.InvalidCommand())
     bot.register_command(urladder.UrlAdderCommand(user=user_func, url_adder=qRedditURLAdder))
 
     stop = Queue()
