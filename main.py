@@ -14,7 +14,9 @@ from commands import forumpost
 from commands import invalid
 from commands import karma
 from commands import featurelist
+from reactions import retry
 from reactions import invalid as invalidreaction
+from reactions import id as emojid #I'm sorry, I'm not even sure what I did there
 
 sys.path.append('./libs')
 from libs import configloader, scraperff, dataloader, scrapert, scraperred
@@ -22,6 +24,7 @@ from libs import configloader, scraperff, dataloader, scrapert, scraperred
 PERMISSIONS_LOCATION = 'permissionsloc'
 EXECUTION_PERM = 'executionperm'
 SHUTDOWN_PERM = 'shutdownperm'
+EMOJIS_LOCATION = "emojiloc"
 
 def configureDiscordLogging():
     '''() -> None
@@ -117,6 +120,7 @@ if __name__ == '__main__':
     bot = botlib.Bot("./data/config.config", log, doChecks)
     bot.add_data(PERMISSIONS_LOCATION)
     bot.add_data(botlib.CHANNEL_LOC)
+    bot.add_data(EMOJIS_LOCATION)
     # user_func uses lambda to create a closure on bot. This way when bot.user
     # updates it's available to DirectOnlyCommand's without giving extra info.
     user_func = lambda: bot.user
@@ -138,6 +142,8 @@ if __name__ == '__main__':
     bot.register_command(karma.KarmaValueCommand(user=user_func))
 
     #bot.register_reaction_command(<command>) can go here
+    bot.register_reaction_command(retry.RetryCommand(bot.get_data(EMOJIS_LOCATION, "retry"), bot.get_all_emojis))
+    bot.register_reaction_command(emojid.IdCommand())
 
     qForum = Queue()
     qTwitter = Queue()

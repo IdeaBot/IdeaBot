@@ -11,10 +11,11 @@ class ReactionCommand():
     '''ReactionAddCommand represents a command that the bot can use to take action
     based on reactions added to any discord messeage it listens to.'''
 
-    def __init__(self, perms=None, **kwargs):
-        '''(Command, str, dict) -> Command
+    def __init__(self, all_emojis_func=None, perms=None, **kwargs):
+        '''(ReactionCommand, func, str, dict) -> Command
         perms: str of users who have permission to use this command
         kwargs: included for sub-classing'''
+        self.all_emojis_func = all_emojis_func
         self.perms = perms
         self.emoji_action = set()
 
@@ -44,15 +45,30 @@ class ReactionCommand():
         Reacts to a Reaction '''
         pass
 
+    #useful methods just in case
+    def matchemoji(self, emoji_id):
+        '''(ReactionCommand, str) -> discord.Emoji object
+        matches the emoji's id with the Discord emoji '''
+        if self.all_emojis_func == None:
+            return
+        emojis = self.all_emojis_func()
+        for e in emojis:
+            try:
+                if e.id == emoji_id:
+                    return e
+            except:
+                if e == emoji_id:
+                    return e
+
 
 class ReactionAddCommand(ReactionCommand):
-    def __init__(self, perms=None, **kwargs):
-        super().__init__(perms, **kwargs)
+    def __init__(self, all_emojis_func=None, perms=None, **kwargs):
+        super().__init__(all_emojis_func, perms, **kwargs)
         self.emoji_action.add("add") # this is the only difference
 
 class ReactionRemoveCommand(ReactionCommand):
-    def __init__(self, perms=None, **kwargs):
-        super().__init__(perms, **kwargs)
+    def __init__(self, all_emojis_func=None, perms=None, **kwargs):
+        super().__init__(all_emojis_func, perms, **kwargs)
         self.emoji_action.add("remove") # this is the only difference
 
 class AdminReactionAddCommand(ReactionAddCommand):
