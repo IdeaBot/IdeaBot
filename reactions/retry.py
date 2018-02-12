@@ -1,7 +1,7 @@
 from reactions import reactioncommand
 
 class RetryCommand(reactioncommand.AdminReactionAddCommand):
-    def __init__(self, emoji, all_emojis_func, perms=None, **kwargs):
+    def __init__(self, all_emojis_func, emoji, perms=None, **kwargs):
         '''(RetryCommand, str, discord.Emoji, dict) -> None '''
         super().__init__(all_emojis_func, perms, **kwargs)
         self.emoji = emoji

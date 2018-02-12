@@ -11,13 +11,14 @@ class ReactionCommand():
     '''ReactionAddCommand represents a command that the bot can use to take action
     based on reactions added to any discord messeage it listens to.'''
 
-    def __init__(self, all_emojis_func=None, perms=None, **kwargs):
+    def __init__(self, all_emojis_func=None, emoji=None, perms=None, **kwargs):
         '''(ReactionCommand, func, str, dict) -> Command
         perms: str of users who have permission to use this command
         kwargs: included for sub-classing'''
         self.all_emojis_func = all_emojis_func
         self.perms = perms
         self.emoji_action = set()
+        self.emoji = None
 
     def _matches(self, reaction, user):
         '''(Command, discord.Reaction, discord.Member or discord.User) -> bool
@@ -25,7 +26,7 @@ class ReactionCommand():
         functionality. This calls matches()
 
         Returns True if the reaction should be interpreted by the command'''
-        return (self.perms is None or message.author.id in self.perms) and self.matches(reaction, user)
+        return (self.perms is None or user.id in self.perms) and self.matches(reaction, user)
 
     def matches(self, reaction, user):
         '''(Command, discord.Reaction, discord.Member or discord.User) -> bool
