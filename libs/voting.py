@@ -70,6 +70,8 @@ class STV(Poll):
                     raise ValueError("Option "+i+" used more than once")
             self.votes[voter]=vote
             self.voted.add(voter)
+        else:
+            raise ValueError("Invalid vote or voter")
 
     def tallyVotes(self):
         '''kill me now...'''

@@ -24,11 +24,11 @@ from reactions import vote as reactionvote
 sys.path.append('./libs')
 from libs import configloader, scraperff, dataloader, scrapert, scraperred
 
+EMOJIS_LOCATION = 'emojiloc'
 PERMISSIONS_LOCATION = 'permissionsloc'
 EXECUTION_PERM = 'executionperm'
 SHUTDOWN_PERM = 'shutdownperm'
-EMOJIS_LOCATION = 'emojiloc'
-TALLY_PERM = 'tallyperm'
+MANAGE_VOTE_PERM = 'managevoteperm'
 DEV_PERM = 'devperm'
 
 def configureDiscordLogging():
@@ -146,15 +146,15 @@ if __name__ == '__main__':
     bot.register_command(karma.KarmaAdderCommand(karma_up_data=karma_up_data, karma_down_data=karma_down_data))
     bot.register_command(karma.KarmaValueCommand(user=user_func))
     bot.register_command(privatevote.VoteCommand())
-    bot.register_command(privatevote.StartVoteCommand(user=user_func))
-    bot.register_command(privatevote.EndVoteCommand(user=user_func))
+    bot.register_command(privatevote.StartVoteCommand(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_VOTE_PERM)))
+    bot.register_command(privatevote.EndVoteCommand(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_VOTE_PERM)))
 
     #bot.register_reaction_command(<command>) can go here
     bot.register_reaction_command(retry.RetryCommand(bot.get_all_emojis, bot.get_data(EMOJIS_LOCATION, "retry")))
     bot.register_reaction_command(reactionvote.VoteAddReaction(bot.get_all_emojis, bot.get_data(EMOJIS_LOCATION, "yes_vote"), bot.get_data(EMOJIS_LOCATION, "no_vote")))
     bot.register_reaction_command(reactionvote.VoteRemoveReaction(bot.get_all_emojis, bot.get_data(EMOJIS_LOCATION, "yes_vote"), bot.get_data(EMOJIS_LOCATION, "no_vote")))
     bot.register_reaction_command(emojid.IdCommand(perms=bot.get_data(PERMISSIONS_LOCATION, DEV_PERM)))
-    bot.register_reaction_command(reactionvote.VoteTallyReaction(bot.get_all_emojis, bot.get_data(EMOJIS_LOCATION, "tally_vote"), perms=bot.get_data(PERMISSIONS_LOCATION, TALLY_PERM)))
+    bot.register_reaction_command(reactionvote.VoteTallyReaction(bot.get_all_emojis, bot.get_data(EMOJIS_LOCATION, "tally_vote"), perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_VOTE_PERM)))
 
 
     qForum = Queue()
