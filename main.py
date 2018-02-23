@@ -14,6 +14,8 @@ from commands import forumpost
 from commands import invalid
 from commands import karma
 from commands import featurelist
+from commands import vote as privatevote
+
 from reactions import invalid as invalidreaction
 from reactions import retry
 from reactions import id as emojid #I'm sorry, I'm not even sure what I did there
@@ -143,6 +145,9 @@ if __name__ == '__main__':
     karma_down_data = dataloader.datafile(config.content["karmadownloc"])
     bot.register_command(karma.KarmaAdderCommand(karma_up_data=karma_up_data, karma_down_data=karma_down_data))
     bot.register_command(karma.KarmaValueCommand(user=user_func))
+    bot.register_command(privatevote.VoteCommand())
+    bot.register_command(privatevote.StartVoteCommand(user=user_func))
+    bot.register_command(privatevote.EndVoteCommand(user=user_func))
 
     #bot.register_reaction_command(<command>) can go here
     bot.register_reaction_command(retry.RetryCommand(bot.get_all_emojis, bot.get_data(EMOJIS_LOCATION, "retry")))
