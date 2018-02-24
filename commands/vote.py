@@ -1,5 +1,5 @@
 from commands import command
-from libs import voting
+from libs import voting, embed
 
 import re
 
@@ -57,8 +57,8 @@ class StartVoteCommand(command.DirectOnlyCommand):
                 vote_dict[args.group(4)] = dict()
                 vote_dict[args.group(4)][VOTES] = voting.STV(options=args.group(6).split(","))
                 vote_dict[args.group(4)][MODE] = args.group(2).lower()
-            yield from send_func(message.channel, "Started `"+args.group(4)+"` vote. Get voting y'all!")
-            print("mode:", vote_dict[args.group(4)][MODE], "name:", args.group(4), "options:", vote_dict[args.group(4)][VOTES].options)
+            yield from send_func(message.channel, embed=embed.create_embed(title=args.group(4), description="Options: "+str(vote_dict[args.group(4)][VOTES].options)+"\nMode: "+vote_dict[args.group(4)][MODE], footer={"text":"Voting started", "icon_url":None}, colour=0x00ff00))
+            #print("mode:", vote_dict[args.group(4)][MODE], "name:", args.group(4), "options:", vote_dict[args.group(4)][VOTES].options)
         else:
             yield from send_func(message.channel, "Name conflict - please choose a different name")
 
@@ -72,12 +72,15 @@ class EndVoteCommand(command.DirectOnlyCommand):
         #group(1) is end, group(2) is vote name, group(3) is vote
         if args.group(2) in vote_dict:
             #vote counting
-            yield from send_func(message.channel, self.format_results(vote_dict[args.group(2)][VOTES].tallyVotes()))
+            yield from send_func(message.channel, embed=embed.create_embed(title=args.group(2), description=self.format_results(vote_dict[args.group(2)][VOTES].tallyVotes()), footer={"text":"Voting ended", "icon_url":None}, colour=0xff0000))
             del(vote_dict[args.group(2)])
 
-    def format_results(self, results):
+    def format_results(self, results, start="Vote Results: \n"):
         print(results)
-        output = "Results of vote: \n"
-        for i in results:
-            output += str(i[0])+": "+str(i[1])+"\n"
+        output = start[:]
+        if len(results) != 0:
+            for i in results:
+                output += str(i[0])+": "+str(i[1])+"\n"
+        else:
+            output += "No Votes Recorded"
         return output
