@@ -17,7 +17,7 @@ def create_embed(footer=None, image=None, thumbnail=None, author=None, **kwargs)
         embed.set_thumbnail(**thumbnail)
     if author:
         author = none2Empty(author)
-        embed.set_author(author["name"], url=author["url"], icon_url=author["icon_url"])
+        embed.set_author(name=author["name"], url=author["url"], icon_url=author["icon_url"])
     return embed
 
 def none2Empty(dictionary):

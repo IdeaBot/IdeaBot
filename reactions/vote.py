@@ -4,9 +4,9 @@ import asyncio
 vote_dict = dict() # global variables ftw. this is a dict of dicts; dict-ception
 
 class VoteAddReaction(reactioncommand.ReactionAddCommand):
-    def __init__(self, all_emojis_func, yes_emoji, no_emoji, perms=None):
+    def __init__(self, yes_emoji, no_emoji, **kwargs):
         '''(RetryCommand, func, str, str, str, dict) -> None '''
-        super().__init__(all_emojis_func, perms=perms)
+        super().__init__(**kwargs)
         self.yes_emoji = yes_emoji
         self.no_emoji = no_emoji
 
@@ -25,9 +25,9 @@ class VoteAddReaction(reactioncommand.ReactionAddCommand):
 
 
 class VoteRemoveReaction(reactioncommand.ReactionRemoveCommand):
-    def __init__(self, all_emojis_func, yes_emoji, no_emoji, perms=None):
+    def __init__(self, yes_emoji, no_emoji, **kwargs):
         '''(RetryCommand, func, str, str, str, dict) -> None '''
-        super().__init__(all_emojis_func, perms=perms)
+        super().__init__(**kwargs)
         self.yes_emoji = yes_emoji
         self.no_emoji = no_emoji
 
@@ -50,12 +50,6 @@ def tally(message_id):
     return total
 
 class VoteTallyReaction(reactioncommand.AdminReactionAddCommand):
-    def __init__(self, all_emojis_func, emoji, perms=None):
-        super().__init__(all_emojis_func, perms=perms)
-        self.emoji = emoji
-
-    def matches(self, reaction, user):
-        return reaction.emoji == self.matchemoji(self.emoji)
 
     def action (self, reaction, user, client):
         yield from client.send_message(reaction.message.channel, "The tally is "+str(tally(reaction.message.id)))

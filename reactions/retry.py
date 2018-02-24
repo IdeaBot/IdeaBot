@@ -1,10 +1,6 @@
 from reactions import reactioncommand
 
 class RetryCommand(reactioncommand.AdminReactionAddCommand):
-    def __init__(self, all_emojis_func, emoji, perms=None, **kwargs):
-        '''(RetryCommand, str, discord.Emoji, dict) -> None '''
-        super().__init__(all_emojis_func, perms, **kwargs)
-        self.emoji = emoji
 
     def matches(self, reaction, user):
         return reaction.emoji == (self.matchemoji(self.emoji) or False) and user == reaction.message.author

@@ -15,11 +15,13 @@ from commands import invalid
 from commands import karma
 from commands import featurelist
 from commands import vote as privatevote
+from commands import quote
 
 from reactions import invalid as invalidreaction
 from reactions import retry
 from reactions import id as emojid #I'm sorry, I'm not even sure what I did there
 from reactions import vote as reactionvote
+from reactions import quote as savequote
 
 sys.path.append('./libs')
 from libs import configloader, scraperff, dataloader, scrapert, scraperred
@@ -148,13 +150,16 @@ if __name__ == '__main__':
     bot.register_command(privatevote.VoteCommand())
     bot.register_command(privatevote.StartVoteCommand(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_VOTE_PERM)))
     bot.register_command(privatevote.EndVoteCommand(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_VOTE_PERM)))
+    bot.register_command(quote.DisplayQuote(saveloc=bot.data_config["quotesavedir"]))
 
     #bot.register_reaction_command(<command>) can go here
-    bot.register_reaction_command(retry.RetryCommand(bot.get_all_emojis, bot.get_data(EMOJIS_LOCATION, "retry")))
-    bot.register_reaction_command(reactionvote.VoteAddReaction(bot.get_all_emojis, bot.get_data(EMOJIS_LOCATION, "yes_vote"), bot.get_data(EMOJIS_LOCATION, "no_vote")))
-    bot.register_reaction_command(reactionvote.VoteRemoveReaction(bot.get_all_emojis, bot.get_data(EMOJIS_LOCATION, "yes_vote"), bot.get_data(EMOJIS_LOCATION, "no_vote")))
+    bot.register_reaction_command(retry.RetryCommand(all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "retry")))
+    bot.register_reaction_command(reactionvote.VoteAddReaction(bot.get_data(EMOJIS_LOCATION, "yes_vote"), bot.get_data(EMOJIS_LOCATION, "no_vote"), all_emojis_func=bot.get_all_emojis))
+    bot.register_reaction_command(reactionvote.VoteRemoveReaction(bot.get_data(EMOJIS_LOCATION, "yes_vote"), bot.get_data(EMOJIS_LOCATION, "no_vote"), all_emojis_func=bot.get_all_emojis))
     bot.register_reaction_command(emojid.IdCommand(perms=bot.get_data(PERMISSIONS_LOCATION, DEV_PERM)))
-    bot.register_reaction_command(reactionvote.VoteTallyReaction(bot.get_all_emojis, bot.get_data(EMOJIS_LOCATION, "tally_vote"), perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_VOTE_PERM)))
+    bot.register_reaction_command(reactionvote.VoteTallyReaction(all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "tally_vote"), perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_VOTE_PERM)))
+    bot.register_reaction_command(savequote.SaveQuote(saveloc=bot.data_config["quotesavedir"],all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "save")))
+    bot.register_reaction_command(savequote.DisplayQuote(all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "quote")))
 
 
     qForum = Queue()
