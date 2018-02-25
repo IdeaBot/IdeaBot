@@ -86,9 +86,8 @@ class STV(Poll):
 
     def tallyVotes(self):
         '''kill me now...'''
-        print(self.votes)
         return self.dumpVotes()
-        #recursiveTallySort(self.votes, self.options):
+        #TODO: recursiveTallySort(self.votes, self.options):
 
     def dumpVotes(self, anonymised=True):
         '''(STV) -> list
