@@ -1,1 +1,0 @@
-{'author': 'IdeaTest', 'channel': 'general', 'server': 'IdeaBot Test Server', 'content': 'Hello humans...', 'id': {'author': '402970974125031435', 'channel': '381172950448996365', 'server': '381172950448996363', 'message': '417099167479889934'}}

@@ -1,1 +1,0 @@
-{'author': 'NGnius', 'channel': 'general', 'server': 'IdeaBot Test Server', 'content': '417100976407838721', 'id': {'author': '106537989684887552', 'channel': '381172950448996365', 'server': '381172950448996363', 'message': '417101021136027649'}}
