@@ -1,0 +1,1 @@
+{'author': 'NGnius', 'channel': 'idiocy', 'server': 'life', 'content': 'Great real awesomeness hardly arrives magically', 'id': {'author': '004957575748505500', 'channel': '000000000000000001', 'server': '000000000000000001', 'message': '079116116971199700'}}
