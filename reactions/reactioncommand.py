@@ -26,12 +26,12 @@ class ReactionCommand():
         functionality. This calls matches()
 
         Returns True if the reaction should be interpreted by the command'''
-        return (self.perms is None or user.id in self.perms) and self.matches(reaction, user)
+        return (self.perms == None or user.id in self.perms) and (reaction.emoji == self.matchemoji(self.emoji) or self.emoji==None) and self.matches(reaction, user)
 
     def matches(self, reaction, user):
         '''(Command, discord.Reaction, discord.Member or discord.User) -> bool
         Returns True if the reaction should be interpreted by the command'''
-        return reaction.emoji == (self.matchemoji(self.emoji) or False) or reaction.emoji==None
+        return True
 
     def _action(self, reaction, user):
         '''(Command, discord.Reaction, discord.Member or discord.User) -> None

@@ -7,7 +7,7 @@ class Poll():
         self.voted = set()
 
     def addVote(self, voter, vote):
-        '''(Poll, anything, anything)
+        '''(Poll, anything, str)
         If vote is an option, the vote will be added to the sef.votes.
         Otherwise, this will raise a ValueError'''
         if vote in self.options and (self.allowed_voters == None or voter in self.allowed_voters) and voter not in self.voted:
@@ -15,6 +15,8 @@ class Poll():
             self.voted.add(voter)
         else:
             raise ValueError("Invalid voter or vote option")
+
+    addChoice = addVote
 
     def tallyVotes(self):
         '''(Poll) -> list
@@ -72,6 +74,15 @@ class STV(Poll):
             self.voted.add(voter)
         else:
             raise ValueError("Invalid vote or voter")
+
+    def addChoice(self, voter, vote):
+        '''(STV, anything, str)-> None
+        adds votes chronologically (1st addChoice is 1st choice, 2nd addChoice is 2nd choice, etc.)'''
+        if voter not in self.votes and (self.allowed_voters == None or voter in self.allowed_voters):
+            self.votes[voter]=[None]*self.transferables
+            self.voted.add(voter)
+        if voter in self.votes and None in self.votes[voter] and vote in self.options and vote not in self.votes[voter]:
+            self.votes[voter][self.votes[voter].index(None)] = vote
 
     def tallyVotes(self):
         '''kill me now...'''
