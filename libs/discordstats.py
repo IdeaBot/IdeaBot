@@ -32,7 +32,7 @@ def dumpMessagesTime(discordClient, filename = "./data/msgdump.csv"):
         msgFile.content.append([i.timestamp.isoformat(timespec="seconds"), i.channel.name]) # yes I'm logging messages' contents right now, don't worry, nobody will see it
     msgFile.save()
 
-def dumpMessages(discordClient, filename = "./data/msgdump.csv", info = "timestamp.isoformat(timespec='seconds'),channel.name,server.name"):
+def dumpMessages(discordClient, filename = "./data/msgdump.csv", info = "timestamp.isoformat(timespec='seconds'),id,channel.name,server.name"):
     '''(discord.Client object, str, str) -> None
     dumps messages' info in discordClient.messages to filename'''
     global i, messages # horrible idea but it works

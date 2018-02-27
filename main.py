@@ -25,7 +25,7 @@ from reactions import quote
 from reactions import advancedvote as advancedvoteR
 
 sys.path.append('./libs')
-from libs import configloader, scraperff, dataloader, scrapert, scraperred
+from libs import configloader, scraperff, dataloader, scrapert, scraperred, embed
 
 EMOJIS_LOCATION = 'emojiloc'
 PERMISSIONS_LOCATION = 'permissionsloc'
@@ -125,7 +125,8 @@ if __name__ == '__main__':
 
     log = mainLogging()
 
-    bot = botlib.Bot("./data/config.config", log, doChecks)
+    stop = Queue()
+    bot = botlib.Bot("./data/config.config", log, doChecks, stop)
     bot.add_data(PERMISSIONS_LOCATION)
     bot.add_data(botlib.CHANNEL_LOC)
     bot.add_data(EMOJIS_LOCATION)
@@ -175,7 +176,6 @@ if __name__ == '__main__':
     bot.register_reaction_command(emojid.IdCommand(perms=bot.get_data(PERMISSIONS_LOCATION, DEV_PERM)))
     bot.register_command(urladder.UrlAdderCommand(user=user_func, url_adder=qRedditURLAdder))
 
-    stop = Queue()
     forumScraper = Process(target = scraperff.continuousScrape, args = (qForum, stop, ))
     forumScraper.start()
     twitterScraper = Process(target = scrapert.continuousScrape, args = (qTwitter, stop, ))
@@ -190,14 +190,15 @@ if __name__ == '__main__':
         loop.run_until_complete(bot.login(credentials.content["username"], credentials.content["password"]))
     #print(timezones.FullTime(timezones.SimpleTime("12pm"), timezones.Timezone("EST")).convertTo("CHUT"))
     #run until logged out
-    loop.run_until_complete(bot.connect())
+    while stop.empty():
+        loop.run_until_complete(bot.connect())
+        print("Something tripped up - reconnecting Discord API")
 
     karma_entity_sum = 0
     for key in karma.Karma.karma:
         karma_entity_sum += len(key)
     log.info("karma would take about %d bytes to save" % karma_entity_sum)
 
-    stop.put("STAHHHHP")
     twitterScraper.join()
     forumScraper.join()
     redditScraper.join()
