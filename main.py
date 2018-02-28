@@ -16,6 +16,7 @@ from commands import karma
 from commands import featurelist
 from commands import advancedvote as advancedvoteC
 from commands import retrievequote
+from commands import pi as picommand
 
 from reactions import invalid as invalidreaction
 from reactions import retry
@@ -155,6 +156,7 @@ if __name__ == '__main__':
     bot.register_command(advancedvoteC.StartVoteCommand(vote_dict=vote_dict, user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_VOTE_PERM)))
     bot.register_command(advancedvoteC.EndVoteCommand(vote_dict=vote_dict, user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_VOTE_PERM)))
     bot.register_command(retrievequote.DisplayQuote(saveloc=bot.data_config["quotesavedir"]))
+    bot.register_command(picommand.PiCommand(bot.data_config["pifile"], user=user_func))
 
     #bot.register_reaction_command(<command>) can go here
     bot.register_reaction_command(retry.RetryCommand(all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "retry")))
