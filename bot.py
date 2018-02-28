@@ -120,7 +120,7 @@ class Bot(discord.Client):
         self.log.info('Email: ' + str(self.email))
         self.log.info(str([i for i in self.servers]))
         self.setup_channels()
-        yield from self.send_message(self.twitterchannel, 'Hello humans...')
+        #yield from self.send_message(self.twitterchannel, 'Hello humans...')
         yield from self.checks(self)
 
     def setup_channels(self):

@@ -2,7 +2,7 @@ from reactions import reactioncommand
 
 class IdCommand(reactioncommand.AdminReactionAddCommand):
     def matches(self, reaction, user):
-        return "id" in reaction.message.content.lower()
+        return " id " in reaction.message.content.lower() or " id" == reaction.message.content.lower()[-3:] or "id " == reaction.message.content.lower()[:3] or "id"==reaction.message.content.lower()
 
     def action(self, reaction, user, client):
         try:

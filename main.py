@@ -193,7 +193,13 @@ if __name__ == '__main__':
     #print(timezones.FullTime(timezones.SimpleTime("12pm"), timezones.Timezone("EST")).convertTo("CHUT"))
     #run until logged out
     while stop.empty():
-        loop.run_until_complete(bot.connect())
+        try:
+            loop.run_until_complete(bot.connect())
+        except KeyboardInterrupt:
+            break
+        except:
+            exception = sys.exc_info()
+            print("Something went wrong", str(exception[0]).replace("'>", "").replace("<class '", "") + ":" + str(exception[1]))
         print("Something tripped up - reconnecting Discord API")
 
     karma_entity_sum = 0

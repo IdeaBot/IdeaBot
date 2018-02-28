@@ -22,7 +22,7 @@ class ShutdownCommand(command.DirectOnlyCommand, command.AdminCommand):
     def action(self, message, send_func, client):
         client.stop_queue.put("Stopping time!")
         if re.search(r'shutdown protocol 1', message.content, re.IGNORECASE): # basic shutdown with stats
-            discordstats.dumpMessages(client, filename="./data/msgdump"+time.time()+".csv")
+            discordstats.dumpMessages(client, filename="./data/msgdump"+str(time.time())+".csv")
         elif re.search(r'shutdown protocol 0', message.content, re.IGNORECASE): # basic shutdown
             pass
         yield from self.logout()
