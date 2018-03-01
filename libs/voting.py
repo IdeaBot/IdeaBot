@@ -38,8 +38,10 @@ class FPTP(Poll):
     def tallyVotes(self):
         '''(FPTP) -> list
         returns a list of [option, total votes], sorted by total votes'''
+        print(dumpVotes())
         results = [[self.votes[x],x] for x in self.votes] #turn into list of [votes, option]
         results.sort()
+        results = results[::-1] #reverse order so highest number is first; not last
         return [[x[1],x[0]] for x in results] #swap option with votes
 
     def dumpVotes(self):
@@ -59,7 +61,7 @@ class STV(Poll):
         self.votes = dict()
 
     def addVote(self, voter, vote):
-        '''(STV, anything, list)-> None
+        '''(STV, str, list)-> None
         vote should be list of options from highest priority choice (1st choice) to lowest choice
         If the length of the vote list isn't the same length as transferables or the voter isn't allowed to vote,
         this won't do anything
@@ -70,24 +72,24 @@ class STV(Poll):
                     raise ValueError("Invalid option: "+i)
                 if self.options.count(i)>1:
                     raise ValueError("Option "+i+" used more than once")
-            self.votes[voter]=vote
-            self.voted.add(voter)
+            self.votes[str(voter)]=list(vote)
+            self.voted.add(str(voter))
         else:
             raise ValueError("Invalid vote or voter")
 
     def addChoice(self, voter, vote):
-        '''(STV, anything, str)-> None
+        '''(STV, str, str)-> None
         adds votes chronologically (1st addChoice is 1st choice, 2nd addChoice is 2nd choice, etc.)'''
         if voter not in self.votes and (self.allowed_voters == None or voter in self.allowed_voters):
-            self.votes[voter]=[None]*self.transferables
-            self.voted.add(voter)
+            self.votes[str(voter)]=[None]*self.transferables
+            self.voted.add(str(voter))
         if voter in self.votes and None in self.votes[voter] and vote in self.options and vote not in self.votes[voter]:
-            self.votes[voter][self.votes[voter].index(None)] = vote
+            self.votes[str(voter)][self.votes[str(voter)].index(None)] = str(vote)
 
     def tallyVotes(self):
-        '''kill me now...'''
-        return self.dumpVotes()
-        #TODO: recursiveTallySort(self.votes, self.options):
+        '''Recursion: kill me now...'''
+        print(dumpVotes())
+        return self.recursiveTallySort(self.votes, self.options)
 
     def dumpVotes(self, anonymised=True):
         '''(STV) -> list
@@ -98,7 +100,7 @@ class STV(Poll):
             result = list()
             count = 0
             for x in self.votes:
-                result.append([count, self.votes[x]])
+                result.append([int(count), list(self.votes[x])])
                 count += 1
             return result
 
@@ -111,18 +113,37 @@ class STV(Poll):
         output.sort()
         return output
 
-    def recursiveTallySort(self, votes, options):
+    def countVotes(self, votes, options):
+        counts = list() # [[0]*self.transferables]*len(options) but copies, not pointers
+        # Damn it Python why you make me do dis!? ^^^ is so much nicer and easier...
+        for i in range(len(options)):
+            counts.append(list())
+            for j in range(self.transferables):
+                counts[i].append(0)
+        optionsCount = dict(zip(options, counts))
+        for voter in votes:
+            for i in range(len(votes[voter])):
+                optionsCount[votes[voter][i]][i]+=1
+        output = [[optionsCount[x], x] for x in optionsCount]
+        output.sort()
+        return output
+
+    def recursiveTallySort(self, votestemp, optionstemp):
         '''(dict, list) -> list
         If this works, returns a list of options sorted by highest (winner) to lowest (least voted for)'''
-        votes = dict(votes)
-        options = list(options)
+        votes = dict()
+        for voter in votestemp: # I give up with hoping Python mem shit will work
+            votes[str(voter)]=list(votestemp[voter])
+        options = list(optionstemp)
+        voteCount = self.countVotes(votes, options)
         if len(options)>1:
-            first_choices = self.countFirsts(votes, options)
-            lowest_voted = firstChoices[-1] # lowerest_voted is list in form [option, votes]
+            lowest_voted = voteCount[0] # lowest_voted is list in form [votes, option]
             for voter in votes:
-                if lowest_voted[0] in votes[voter]:
-                    del(votes[voter][votes[voter].index(lowest_voted[0])])
-            del(options[options.index(lowest_voted[0])])
-            return self.recursiveTallySort(votes, options) + lowest_voted
-        else:
-            return first_choices[0][0]
+                if lowest_voted[1] in votes[voter]:
+                    del(votes[voter][votes[voter].index(lowest_voted[1])])
+            del(options[options.index(lowest_voted[1])])
+            return self.recursiveTallySort(votes, options) + [[lowest_voted[1],lowest_voted[0][0]]]
+        elif len(options)==1:
+            return [[voteCount[0][1], voteCount[0][0][0]]]
+        else: # len(options) == 0
+            return ["No votes recorded"]

@@ -22,7 +22,7 @@ class Bot(discord.Client):
     '''A Discord client which has config data and a list of commands to try when
     a message is received.'''
 
-    def __init__(self, config, log, checks):
+    def __init__(self, config, log, checks, stop_queue):
         '''(str, Logger, fun) -> Bot
         config: a string which is the loaction of the base config file
         log: a Logger for dumping info
@@ -40,6 +40,7 @@ class Bot(discord.Client):
         self.reaction_add_commands = list()
         self.reaction_remove_commands = list()
         self.plugins = list()
+        self.stop_queue=stop_queue
 
     def add_data(self, name, content_from=DEFAULT):
         '''(str, str) -> None
@@ -119,7 +120,7 @@ class Bot(discord.Client):
         self.log.info('Email: ' + str(self.email))
         self.log.info(str([i for i in self.servers]))
         self.setup_channels()
-        yield from self.send_message(self.twitterchannel, 'Hello humans...')
+        #yield from self.send_message(self.twitterchannel, 'Hello humans...')
         yield from self.checks(self)
 
     def setup_channels(self):

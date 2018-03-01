@@ -52,4 +52,30 @@ def runTimeReport(discordClient, interval=3600, filename="./data/msgtimedump.csv
     msgInfoFile = dataloader.newdatafile(filename)
     msgInfoFile.content = results
     msgInfoFile.save()
-    return result
+    return results
+
+def dumpMessagesTime(discordClient, filename = "./data/msgdump.csv"):
+    messages = discordClient.messages
+    msgFile = dataloader.newdatafile(filename)
+    for i in messages:
+        msgFile.content.append([i.timestamp.isoformat(timespec="seconds"), i.channel.name]) # yes I'm logging messages' contents right now, don't worry, nobody will see it
+    msgFile.save()
+
+def dumpMessages(discordClient, filename = "./data/msgdump.csv", info = "timestamp.isoformat(timespec='seconds'),id,channel.name,server.name"):
+    '''(discord.Client object, str, str) -> None
+    dumps messages' info in discordClient.messages to filename'''
+    global i, messages # horrible idea but it works
+    messages = list(discordClient.messages)
+    msgFile = dataloader.newdatafile(filename)
+    infostrip = info.split(",")
+    msgFile.content = [None]*len(messages)
+    for i in range(len(messages)):
+        msgFile.content[i] = [eval("messages[i]."+x) for x in infostrip]
+        '''
+        for j in info:
+            try:
+                msgFile.content[i].append(eval("messages[i]."+j))
+            except:
+                msgFile.content[i].append(" ")
+        '''
+    msgFile.save()

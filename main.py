@@ -16,6 +16,7 @@ from commands import karma
 from commands import featurelist
 from commands import advancedvote as advancedvoteC
 from commands import retrievequote
+from commands import pi as picommand
 
 from reactions import invalid as invalidreaction
 from reactions import retry
@@ -25,7 +26,7 @@ from reactions import quote
 from reactions import advancedvote as advancedvoteR
 
 sys.path.append('./libs')
-from libs import configloader, scraperff, dataloader, scrapert, scraperred
+from libs import configloader, scraperff, dataloader, scrapert, scraperred, embed
 
 EMOJIS_LOCATION = 'emojiloc'
 PERMISSIONS_LOCATION = 'permissionsloc'
@@ -125,7 +126,8 @@ if __name__ == '__main__':
 
     log = mainLogging()
 
-    bot = botlib.Bot("./data/config.config", log, doChecks)
+    stop = Queue()
+    bot = botlib.Bot("./data/config.config", log, doChecks, stop)
     bot.add_data(PERMISSIONS_LOCATION)
     bot.add_data(botlib.CHANNEL_LOC)
     bot.add_data(EMOJIS_LOCATION)
@@ -154,6 +156,7 @@ if __name__ == '__main__':
     bot.register_command(advancedvoteC.StartVoteCommand(vote_dict=vote_dict, user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_VOTE_PERM)))
     bot.register_command(advancedvoteC.EndVoteCommand(vote_dict=vote_dict, user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_VOTE_PERM)))
     bot.register_command(retrievequote.DisplayQuote(saveloc=bot.data_config["quotesavedir"]))
+    bot.register_command(picommand.PiCommand(bot.data_config["pifile"], user=user_func))
 
     #bot.register_reaction_command(<command>) can go here
     bot.register_reaction_command(retry.RetryCommand(all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "retry")))
@@ -175,7 +178,6 @@ if __name__ == '__main__':
     bot.register_reaction_command(emojid.IdCommand(perms=bot.get_data(PERMISSIONS_LOCATION, DEV_PERM)))
     bot.register_command(urladder.UrlAdderCommand(user=user_func, url_adder=qRedditURLAdder))
 
-    stop = Queue()
     forumScraper = Process(target = scraperff.continuousScrape, args = (qForum, stop, ))
     forumScraper.start()
     twitterScraper = Process(target = scrapert.continuousScrape, args = (qTwitter, stop, ))
@@ -190,14 +192,22 @@ if __name__ == '__main__':
         loop.run_until_complete(bot.login(credentials.content["username"], credentials.content["password"]))
     #print(timezones.FullTime(timezones.SimpleTime("12pm"), timezones.Timezone("EST")).convertTo("CHUT"))
     #run until logged out
-    loop.run_until_complete(bot.connect())
+    while stop.empty():
+        try:
+            loop.run_until_complete(bot.connect())
+        except KeyboardInterrupt:
+            stop.put("KeyboardInterrupt")
+        except:
+            exception = sys.exc_info()
+            print("Something went wrong", str(exception[0]).replace("'>", "").replace("<class '", "") + ":" + str(exception[1]))
+        if stop.empty():
+            print("Something tripped up - reconnecting Discord API")
 
     karma_entity_sum = 0
     for key in karma.Karma.karma:
         karma_entity_sum += len(key)
     log.info("karma would take about %d bytes to save" % karma_entity_sum)
 
-    stop.put("STAHHHHP")
     twitterScraper.join()
     forumScraper.join()
     redditScraper.join()
