@@ -38,7 +38,7 @@ class FPTP(Poll):
     def tallyVotes(self):
         '''(FPTP) -> list
         returns a list of [option, total votes], sorted by total votes'''
-        print(dumpVotes())
+        print(self.dumpVotes())
         results = [[self.votes[x],x] for x in self.votes] #turn into list of [votes, option]
         results.sort()
         results = results[::-1] #reverse order so highest number is first; not last
@@ -85,10 +85,12 @@ class STV(Poll):
             self.voted.add(str(voter))
         if voter in self.votes and None in self.votes[voter] and vote in self.options and vote not in self.votes[voter]:
             self.votes[str(voter)][self.votes[str(voter)].index(None)] = str(vote)
+            return True
+        return False
 
     def tallyVotes(self):
         '''Recursion: kill me now...'''
-        print(dumpVotes())
+        print(self.dumpVotes())
         return self.recursiveTallySort(self.votes, self.options)
 
     def dumpVotes(self, anonymised=True):

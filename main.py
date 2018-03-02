@@ -136,6 +136,7 @@ if __name__ == '__main__':
     user_func = lambda: bot.user
 
     vote_dict=dict()
+    ballot=dict()
 
     bot.register_command(ping.PingCommand(user=user_func))
     bot.register_command(execute.ExecuteCommand(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, EXECUTION_PERM)))
@@ -155,6 +156,7 @@ if __name__ == '__main__':
     #bot.register_command(privatevote.VoteCommand())
     bot.register_command(advancedvoteC.StartVoteCommand(vote_dict=vote_dict, user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_VOTE_PERM)))
     bot.register_command(advancedvoteC.EndVoteCommand(vote_dict=vote_dict, user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_VOTE_PERM)))
+    bot.register_command(advancedvoteC.StartBallot(vote_dict=vote_dict, user=user_func, ballots=ballot))
     bot.register_command(retrievequote.DisplayQuote(saveloc=bot.data_config["quotesavedir"]))
     bot.register_command(picommand.PiCommand(bot.data_config["pifile"], user=user_func))
 
@@ -165,8 +167,8 @@ if __name__ == '__main__':
     bot.register_reaction_command(simplevote.VoteTallyReaction(all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "tally_vote"), perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_VOTE_PERM)))
     bot.register_reaction_command(quote.SaveQuote(saveloc=bot.data_config["quotesavedir"],all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "save")))
     bot.register_reaction_command(quote.DisplayQuote(all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "quote")))
-    bot.register_reaction_command(advancedvoteR.StartBallot(vote_dict=vote_dict, all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "vote")))
-    bot.register_reaction_command(advancedvoteR.RegisterVote(vote_dict=vote_dict))
+    bot.register_reaction_command(advancedvoteR.StartBallot(vote_dict=vote_dict, ballots=ballot, all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "vote")))
+    bot.register_reaction_command(advancedvoteR.RegisterVote(vote_dict=vote_dict, ballots=ballot))
 
     qForum = Queue()
     qTwitter = Queue()

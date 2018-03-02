@@ -6,6 +6,7 @@ import re, time
 MODE = "mode"
 VOTES = "votes"
 NAME = "name"
+REACTIONS = [chr(x) for x in list(range(127462, 127462+26))] #all the regional indicators from 🇦 to 🇿
 VALID_MODES=["fptp", "stv", ""] #iterable
 DEFAULT_MODE="fptp" #string
 DEFAULT_NAME_GEN=time.time #function
@@ -23,12 +24,6 @@ class StartVoteCommand(command.DirectOnlyCommand):
         return re.search(r'start\s+vote\s*', message.content, re.I) != None
 
     def action(self, message, send_func):
-        #this should add the name of the vote to vote_dict and initialise vote_dict[vote name]
-        # old thing: args = re.search(r'\b(mode:?)?\s+\b([^\s]+)\s+\b(name:?)?\s+\b([^\s]+)\s+\b(options:?)?\s+\b([^\s]+)', message.content, re.I)
-        #mode:?\s*["'\s]([^"'\s]+)["'\s]
-        #group(1) is mode, group(2) is mode value, group(3) is name, group(4) is name value
-        #group(5) is options, group(6) is options value (which will be split at commas)
-        #TODO: clean this up and make it work better
         reply = ""
         temp_dict = dict()
         mode = re.compile(r'\bmode[:=]?\s*([^\s]+)\s*', re.I).search(message.content)
@@ -37,13 +32,21 @@ class StartVoteCommand(command.DirectOnlyCommand):
             temp_dict[MODE]=DEFAULT_MODE
         else:
             temp_dict[MODE]=mode.group(1).strip("\'\"").lower()
+            reply+='Mode set to '+temp_dict[MODE]+"\n"
 
         name = re.compile(r'\bname[:=]?\s*["]([^"]+)["]', re.I).search(message.content)
-        if name==None or name.group(1)=="":
-            reply+='Choosing default name. Set a mode by putting `name` in front of a name, surrounded by quotes, like `name \"My Cool Poll\"` or `name:\"Awesome Poll Name\"` \n'
+        name_is_used = False
+        if name!=None and name.group(1)!="":
+            for poll in self.vote_dict:
+                if self.vote_dict[poll][NAME]==name.group(1):
+                    name_is_used=True
+                    break
+        if name==None or name.group(1)=="" or name_is_used:
+            reply+='Name conflict or no name declared. Choosing default name. Set a unique name by putting `name` in front of a name, surrounded by quotes, like `name \"My Cool Poll\"` or `name:\"Awesome Poll Name\"` \n'
             temp_dict[NAME]=str(DEFAULT_NAME_GEN())
         else:
             temp_dict[NAME]=name.group(1)
+            reply+='Name set to '+temp_dict[NAME]+"\n"
 
         options = re.compile(r'\boptions?[:=]?\s*((["][^"]+["][\s,]*)+)', re.I).search(message.content)
         if options==None:
@@ -52,6 +55,7 @@ class StartVoteCommand(command.DirectOnlyCommand):
         else:
             options = options.group(1).split('\"')
             options = [options[i] for i in range(len(options)) if i%2==1]
+            reply+= 'Options set to '+str(options)+"\n"
 
         if temp_dict[MODE] == "fptp" or temp_dict[MODE]=="":
             temp_dict[VOTES] = voting.FPTP(options=list(options))
@@ -117,3 +121,29 @@ class EndVoteCommand(command.DirectOnlyCommand):
         else:
             output += "No Votes Recorded"
         return output
+
+class StartBallot(command.DirectOnlyCommand):
+    def __init__(self, vote_dict=dict(), ballots=dict(), **kwargs):
+        super().__init__(**kwargs)
+        self.vote_dict=vote_dict
+        self.ballots = ballots
+
+    def matches(self, message):
+        args = re.search(r'\bvote\s+in\s+["]([^"]+)["]', message.content, re.I)
+        if args == None:
+            return False
+        for i in self.vote_dict:
+            if self.vote_dict[i][NAME] == args.group(1) or i == args.group(1):
+                self.ballots[message.author.id]=i
+                return True
+        return False
+
+    def action(self, message, send_func):
+        reply = "Poll: **"+self.vote_dict[self.ballots[message.author.id]][NAME]+"**\n"
+        for i in range(len(self.vote_dict[self.ballots[message.author.id]][VOTES].options)):
+            reply += REACTIONS[i]+" : "+self.vote_dict[self.ballots[message.author.id]][VOTES].options[i]+"\n"
+        reply +="""
+Please place your vote by reacting with your choice(s).
+In the event that multiple choices are accepted, choices will be considered in chronological order (ie first reaction is first choice, second reaction is second choice, etc).
+**No take-backsies.**"""
+        yield from send_func(message.author, reply)

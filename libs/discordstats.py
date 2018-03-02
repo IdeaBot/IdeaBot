@@ -70,7 +70,13 @@ def dumpMessages(discordClient, filename = "./data/msgdump.csv", info = "timesta
     infostrip = info.split(",")
     msgFile.content = [None]*len(messages)
     for i in range(len(messages)):
-        msgFile.content[i] = [eval("messages[i]."+x) for x in infostrip]
+        msgFile.content[i] = list()
+        for j in infostrip:
+            try:
+                result = eval("messages[i]."+x)
+            except:
+                result = "None"
+            msgFile.content[i].append(str(result))
         '''
         for j in info:
             try:
