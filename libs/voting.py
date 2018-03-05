@@ -54,13 +54,16 @@ class FPTP(Poll):
 
 class STV(Poll):
     '''Implementation of Single Transferable Vote voting system'''
-    def __init__(self, options = ["A", "B", "C"], allowed_voters = None, transferables=3, **kwargs):
+    def __init__(self, options = ["A", "B", "C"], allowed_voters = None, transferables=None, **kwargs):
         '''(STV [, list, list, , int, dict]) -> None
         transferables is how many ranked votes one person can make
         ie transferables=2 means a voter can have a first choice and a second choice
         transferables=5 means a voter can have a first choice up to a fifth choice'''
         super().__init__(options=options, allowed_voters=allowed_voters)
-        self.transferables = transferables
+        if transferables!=None:
+            self.transferables = transferables
+        else:
+            self.transferables = len(self.options)
         self.votes = dict()
 
     def addVote(self, voter, vote):
