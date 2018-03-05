@@ -7,14 +7,14 @@ class Poll():
         self.voted = set()
 
     def addVote(self, voter, vote):
-        '''(Poll, anything, str)
+        '''(Poll, anything, str) -> bool
         If vote is an option, the vote will be added to the sef.votes.
-        Otherwise, this will raise a ValueError'''
+        Otherwise, this will return False'''
         if vote in self.options and (self.allowed_voters == None or voter in self.allowed_voters) and voter not in self.voted:
             self.votes[vote] += 1
             self.voted.add(voter)
-        else:
-            raise ValueError("Invalid voter or vote option")
+            return True
+        return False
 
     addChoice = addVote
 
@@ -78,7 +78,7 @@ class STV(Poll):
             raise ValueError("Invalid vote or voter")
 
     def addChoice(self, voter, vote):
-        '''(STV, str, str)-> None
+        '''(STV, str, str)-> bool
         adds votes chronologically (1st addChoice is 1st choice, 2nd addChoice is 2nd choice, etc.)'''
         if voter not in self.votes and (self.allowed_voters == None or voter in self.allowed_voters):
             self.votes[str(voter)]=[None]*self.transferables
@@ -130,6 +130,11 @@ class STV(Poll):
         output.sort()
         return output
 
+    def deleteNones(self, votes):
+        for voter in votes:
+            while None in votes[voter]:
+                del(votes[voter][votes[voter].index(None)])
+
     def recursiveTallySort(self, votestemp, optionstemp):
         '''(dict, list) -> list
         If this works, returns a list of options sorted by highest (winner) to lowest (least voted for)'''
@@ -137,6 +142,7 @@ class STV(Poll):
         for voter in votestemp: # I give up with hoping Python mem shit will work
             votes[str(voter)]=list(votestemp[voter])
         options = list(optionstemp)
+        self.deleteNones(votes)
         voteCount = self.countVotes(votes, options)
         if len(options)>1:
             lowest_voted = voteCount[0] # lowest_voted is list in form [votes, option]
