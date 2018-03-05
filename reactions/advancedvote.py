@@ -38,7 +38,7 @@ class RegisterVote(reactioncommand.AdminReactionAddCommand):
         registered = self.vote_dict[self.ballots[user.id]][VOTES].addChoice(user.id, self.vote_dict[self.ballots[user.id]][VOTES].options[ord(reaction.emoji)-FIRST_REACTION_ORD])
         if registered:
             yield from client.send_message(reaction.message.channel, "Your choice "+str(reaction.emoji)+" for "+self.vote_dict[self.ballots[user.id]][NAME]+" has been recorded")
-            try:
+            if self.vote_dict[self.ballots[user.id]][MODE]=="stv" and str(self.vote_dict[self.ballots[user.id]][VOTES].votes[user.id].count(None))>0:
                 yield from client.send_message(reaction.message.channel, "You have "+str(self.vote_dict[self.ballots[user.id]][VOTES].votes[user.id].count(None))+" votes remaining")
-            except TypeError:
-                pass
+            else:
+                yield from client.send_message(reaction.message.channel, "Thanks for voting!")

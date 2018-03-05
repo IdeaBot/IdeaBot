@@ -5,13 +5,14 @@ class Poll():
         self.options = options
         self.allowed_voters = allowed_voters
         self.voted = set()
+        self.votes= dict()
 
     def addVote(self, voter, vote):
         '''(Poll, anything, str) -> bool
         If vote is an option, the vote will be added to the sef.votes.
         Otherwise, this will return False'''
         if vote in self.options and (self.allowed_voters == None or voter in self.allowed_voters) and voter not in self.voted:
-            self.votes[vote] += 1
+            self.votes[voter] = vote
             self.voted.add(voter)
             return True
         return False
@@ -33,13 +34,15 @@ class FPTP(Poll):
     def __init__(self, options = ["Y", "N"], allowed_voters = None, **kwargs):
         '''(FPTP [, list, list, dict]) -> None '''
         super().__init__(options=options, allowed_voters=allowed_voters)
-        self.votes = dict(zip(self.options, [0]*len(self.options)))
 
     def tallyVotes(self):
         '''(FPTP) -> list
         returns a list of [option, total votes], sorted by total votes'''
         print(self.dumpVotes())
-        results = [[self.votes[x],x] for x in self.votes] #turn into list of [votes, option]
+        votes_by_option = dict(zip(self.options, [0]*len(self.options)))
+        for voter in self.votes:
+            votes_by_option[self.votes[voter]]+=1
+        results = [[self.votes_by_option[x],x] for x in self.votes_by_option] #turn into list of [votes, option]
         results.sort()
         results = results[::-1] #reverse order so highest number is first; not last
         return [[x[1],x[0]] for x in results] #swap option with votes
