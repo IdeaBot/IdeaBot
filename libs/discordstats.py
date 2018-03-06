@@ -73,7 +73,7 @@ def dumpMessages(discordClient, filename = "./data/msgdump.csv", info = "timesta
         msgFile.content[i] = list()
         for j in infostrip:
             try:
-                result = eval("messages[i]."+x)
+                result = eval("messages[i]."+j)
             except:
                 result = "None"
             msgFile.content[i].append(str(result))
