@@ -83,7 +83,7 @@ class KarmaAdderCommand(command.Command):
     def collect_args(self, message):
         # An enitity must be more than 1 character so I can tlak about how
         # great C++ is without the bot going crazy.
-        return re.findall(r'(\w{2,})(\+\+|--)', message.content, re.I)
+        return re.findall(r'(\w{2,})\skarma(\+\+|--)', message.content, re.I)
 
 class KarmaValueCommand(command.DirectOnlyCommand):
     '''KarmaCountCommand responds to direct queries about an entity's karma.'''
