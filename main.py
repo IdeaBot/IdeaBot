@@ -17,6 +17,7 @@ from commands import featurelist
 from commands import advancedvote as advancedvoteC
 from commands import retrievequote
 from commands import pi as picommand
+from commands import statistics
 
 from reactions import invalid as invalidreaction
 from reactions import retry
@@ -35,6 +36,7 @@ EXECUTION_PERM = 'executionperm'
 SHUTDOWN_PERM = 'shutdownperm'
 MANAGE_VOTE_PERM = 'managevoteperm'
 DEV_PERM = 'devperm'
+STATISTICS_PERM = "statsperm"
 
 FORUM_URL = r"http://ideahavers.freeforums.net/"
 TWITTER_URL = r"https://twitter.com/openideaproject"
@@ -166,6 +168,7 @@ if __name__ == '__main__':
     bot.register_command(advancedvoteC.StartBallot(vote_dict=vote_dict, user=user_func, ballots=ballot))
     bot.register_command(retrievequote.DisplayQuote(saveloc=bot.data_config["quotesavedir"]))
     bot.register_command(picommand.PiCommand(bot.data_config["pifile"], user=user_func))
+    bot.register_command(statistics.GetStats(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, STATISTICS_PERM)))
 
     #bot.register_reaction_command(<command>) can go here
     bot.register_reaction_command(retry.RetryCommand(all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "retry")))
@@ -186,7 +189,7 @@ if __name__ == '__main__':
     qRedditURLAdder = Queue()
 
     bot.register_reaction_command(emojid.IdCommand(perms=bot.get_data(PERMISSIONS_LOCATION, DEV_PERM)))
-    bot.register_reaction_command(invalidreaction.InvalidCommand())    
+    bot.register_reaction_command(invalidreaction.InvalidCommand())
     bot.register_command(urladder.UrlAdderCommand(user=user_func, url_adder=qRedditURLAdder))
 
     forumScraper = Process(target = scraperff.continuousScrape, args = (qForum, stop, ))
