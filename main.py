@@ -24,6 +24,7 @@ from reactions import id as emojid #I'm sorry, I'm not even sure what I did ther
 from reactions import simplevote
 from reactions import quote
 from reactions import advancedvote as advancedvoteR
+from reactions import pin
 
 sys.path.append('./libs')
 from libs import configloader, scraperff, dataloader, scrapert, scraperred, embed
@@ -104,7 +105,7 @@ def doChecks(bot):
             if user != None and user not in users:
                 users.append(user)
         if len(users)>0:
-            yield from bot.send_message(bot.forumchannel, mentionChain(users), embed=embed.create_embed(description="In: "+thread[0], author={"name" : thread[1][-1]["name"], "url" : FORUM_URL+thread[1][-1]["url"], "icon_url" : None}, footer={"text":"forum", "icon_url":None}))
+            yield from bot.send_message(bot.forumchannel, mentionChain(users), embed=embed.create_embed(description="In: "+thread[0], author={"name" : thread[1][-1]["name"], "url" : FORUM_URL+thread[1][-1]["url"], "icon_url" : None}, footer={"text":"Forum", "icon_url":None}))
         else:
             yield from bot.send_message(bot.forumchannel, embed=embed.create_embed(description="In: "+thread[0], author={"name" : thread[1][-1]["name"], "url" : FORUM_URL+thread[1][-1]["url"], "icon_url" : None}, footer={"text":"forum", "icon_url":None}))
     while not qTwitter.empty():
@@ -173,8 +174,10 @@ if __name__ == '__main__':
     bot.register_reaction_command(simplevote.VoteTallyReaction(all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "tally_vote"), perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_VOTE_PERM)))
     bot.register_reaction_command(quote.SaveQuote(saveloc=bot.data_config["quotesavedir"],all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "save")))
     bot.register_reaction_command(quote.DisplayQuote(all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "quote")))
+    bot.register_reaction_command(pin.PinReaction(all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "pin")))
     bot.register_reaction_command(advancedvoteR.StartBallot(vote_dict=vote_dict, ballots=ballot, all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "vote")))
     bot.register_reaction_command(advancedvoteR.RegisterVote(vote_dict=vote_dict, ballots=ballot))
+
 
     qForum = Queue()
     qTwitter = Queue()
@@ -182,8 +185,8 @@ if __name__ == '__main__':
     global qRedditURLAdder
     qRedditURLAdder = Queue()
 
-    bot.register_reaction_command(invalidreaction.InvalidCommand())
     bot.register_reaction_command(emojid.IdCommand(perms=bot.get_data(PERMISSIONS_LOCATION, DEV_PERM)))
+    bot.register_reaction_command(invalidreaction.InvalidCommand())    
     bot.register_command(urladder.UrlAdderCommand(user=user_func, url_adder=qRedditURLAdder))
 
     forumScraper = Process(target = scraperff.continuousScrape, args = (qForum, stop, ))

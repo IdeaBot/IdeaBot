@@ -26,7 +26,7 @@ class ReactionCommand():
         functionality. This calls matches()
 
         Returns True if the reaction should be interpreted by the command'''
-        return (self.perms == None or user.id in self.perms) and (reaction.emoji == self.matchemoji(self.emoji) or self.emoji==None) and self.matches(reaction, user)
+        return (self.perms == None or user.id in self.perms) and self.are_same_emoji(self.emoji, reaction.emoji) and self.matches(reaction, user)
 
     def matches(self, reaction, user):
         '''(Command, discord.Reaction, discord.Member or discord.User) -> bool
@@ -48,18 +48,32 @@ class ReactionCommand():
 
     #useful methods just in case
     def matchemoji(self, emoji_id):
-        '''(ReactionCommand, str) -> discord.Emoji object
+        '''(ReactionCommand, str) -> discord.Emoji or chr
         matches the emoji's id with the Discord emoji '''
+        #return self.emoji==None or self.emoji==reaction.emoji or self.emoji==reaction.emoji.id
         if self.all_emojis_func == None:
             return
-        emojis = self.all_emojis_func()
-        for e in emojis:
+        for e in self.all_emojis_func():
             try:
                 if e.id == emoji_id:
                     return e
             except:
-                if e == emoji_id:
+                if str(e) == emoji_id:
                     return e
+
+    def are_same_emoji(self, e_id, emoji):
+        '''(ReactionCommand, string, discord.Emoji or chr) -> bool
+        compares id with emoji, returns True if they are the same emoji '''
+        if e_id == None or len(e_id)==0:
+            return True
+        elif len(e_id)>1:
+            try:
+                return e_id == emoji.id
+            except:
+                pass
+        else:
+            return e_id == emoji
+        return False
 
 
 class ReactionAddCommand(ReactionCommand):
