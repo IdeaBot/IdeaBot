@@ -35,6 +35,12 @@ SHUTDOWN_PERM = 'shutdownperm'
 MANAGE_VOTE_PERM = 'managevoteperm'
 DEV_PERM = 'devperm'
 
+FORUM_URL = r"http://ideahavers.freeforums.net/"
+TWITTER_URL = r"https://twitter.com/openideaproject"
+TWITTER_PROFILE_ICON = r"https://pbs.twimg.com/profile_images/913153081566691328/wDhS7B1w_400x400.jpg"
+TWITTER_LOGO = r"https://pbs.twimg.com/profile_images/875087697177567232/Qfy0kRIP_400x400.jpg"
+REDDIT_LOGO = r"https://pbs.twimg.com/profile_images/868147475852312577/fjCSPU-a_400x400.jpg" #ignore that this is a Twitter link *whistles innocently*
+
 def configureDiscordLogging():
     '''() -> None
     set ups discord log so that it outputs to ./discord.log'''
@@ -98,15 +104,15 @@ def doChecks(bot):
             if user != None and user not in users:
                 users.append(user)
         if len(users)>0:
-            yield from bot.send_message(bot.forumchannel, "Hey " + mentionChain(users)+", <"+thread[0]+"> has something new in it")
+            yield from bot.send_message(bot.forumchannel, mentionChain(users), embed=embed.create_embed(description="In: "+thread[0], author={"name" : thread[1][-1]["name"], "url" : FORUM_URL+thread[1][-1]["url"], "icon_url" : None}, footer={"text":"forum", "icon_url":None}))
         else:
-            yield from bot.send_message(bot.forumchannel, "Hey, <"+thread[0]+"> has something new in it")
+            yield from bot.send_message(bot.forumchannel, embed=embed.create_embed(description="In: "+thread[0], author={"name" : thread[1][-1]["name"], "url" : FORUM_URL+thread[1][-1]["url"], "icon_url" : None}, footer={"text":"forum", "icon_url":None}))
     while not qTwitter.empty():
         tweet = qTwitter.get()
-        yield from bot.send_message(bot.twitterchannel, "Idea Project tweeted this: " + tweet[1] + " (from: <"+tweet[0]+">)")
+        yield from bot.send_message(bot.twitterchannel, embed=embed.create_embed(author={"name":"Idea Project", "url":TWITTER_URL, "icon_url":TWITTER_PROFILE_ICON}, description=tweet[1], footer={"text":"Twitter", "icon_url":TWITTER_LOGO}))
     while not qReddit.empty():
         comment = qReddit.get()
-        yield from bot.send_message(bot.redditchannel, "A comment has been posted here: " + comment[0] + " (direct link: <"+comment[1]+">)")
+        yield from bot.send_message(bot.redditchannel, embed=embed.create_embed(description="A comment has been posted here: " + comment[0] + " (direct link: "+comment[1]+" )", footer={"text":"Reddit", "icon_url":REDDIT_LOGO}))
 
 
 if __name__ == '__main__':

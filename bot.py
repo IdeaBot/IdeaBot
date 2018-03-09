@@ -13,7 +13,7 @@ import asyncio
 from commands import command
 from reactions import reactioncommand
 
-from libs import dataloader
+from libs import dataloader, embed
 
 DEFAULT = 'DEFAULT'
 CHANNEL_LOC = 'channelsloc'
@@ -120,7 +120,7 @@ class Bot(discord.Client):
         self.log.info('Email: ' + str(self.email))
         self.log.info(str([i for i in self.servers]))
         self.setup_channels()
-        #yield from self.send_message(self.twitterchannel, 'Hello humans...')
+        #yield from self.send_message(self.twitterchannel, 'Hello humans...', embed=embed.create_embed(title="Test", description="Potato"))
         yield from self.checks(self)
 
     def setup_channels(self):
