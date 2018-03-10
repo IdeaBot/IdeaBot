@@ -17,5 +17,9 @@ class TimeZoneCommand(command.DirectOnlyCommand):
         return re.search(r'\bwhat\'?s?\s+(.*)\s+in\s+([A-Z]{3})', message.content, re.IGNORECASE)
 
     def action(self, message, send_func):
-        time, timezoneTarget = timezones.getConversionParameters(message.content)
-        yield from send_func(message.channel, time.convertTo(timezoneTarget))
+        try:
+            time, timezoneTarget = timezones.getConversionParameters(message.content)
+            yield from send_func(message.channel, time.convertTo(timezoneTarget))
+        except TypeError:
+            if "-v" in message.content.lower():
+                yield from send_func(message.channel, "You're missing something; `Missing argument error`")
