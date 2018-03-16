@@ -1,0 +1,43 @@
+from reactions import reactioncommand
+from libs import dataloader
+
+import asyncio, re, discord
+
+role_messages = dict()
+
+class RoleGiveReaction(reactioncommand.AdminReactionAddCommand):
+    def matches(self, reaction, user):
+        return reaction.message.id in role_messages and reaction.emoji in role_messages[reaction.message.id]
+    def action(self, reaction, user, bot):
+        yield from bot.add_roles(user, role_messages[reaction.message.id][reaction.emoji])
+
+class RoleRemoveReaction(reactioncommand.AdminReactionRemoveCommand):
+    def matches(self, reaction, user):
+        return reaction.message.id in role_messages and reaction.emoji in role_messages[reaction.message.id]
+    def action(self, reaction, user, bot):
+        yield from bot.remove_roles(user, role_messages[reaction.message.id][reaction.emoji])
+
+class RoleMessageCreate(reactioncommand.ReactionAddCommand):
+    @asyncio.coroutine
+    def action(self, reaction, user):
+        emojiToRoleDict = self.associateEmojiToRoles(reaction.message.content)
+        if emojiToRoleDict!=None:
+            role_messages[reaction.message.id]=emojiToRoleDict
+
+    def associateEmojiToRoles(self, content):
+        result = dict()
+        info = re.search(r'\`\`\`((\s|.)+)\`\`\`', content, re.I|re.M)
+        info = info.group(1).splitlines()
+        for line in info:
+            lineInfo = re.match(r'(\d{18}|.)\s*:?\s*(\d{18})', line, re.I)
+            if lineInfo!=None:
+                if len(lineInfo.group(1))==1: #unicode emoji
+                    result[self.matchemoji(lineInfo.group(1))] = discord.Object(lineInfo.group(2)) #this may or may not work
+                else:
+                    result[self.matchemoji(lineInfo.group(1))] = discord.Object(lineInfo.group(2))
+        return result
+
+    def matchRole(self, roleID, roles): #unnecessary method 
+        for role in roles:
+            if role.id == roleID:
+                return role
