@@ -5,7 +5,7 @@ class RolesCommand(command.Command):
         return "roles id" in message.content.lower() and message.server != None
 
     def action(self, message, send_func):
-        result = "```\n"
+        result = "```\n name, id, colour\n"
         for role in message.server.roles:
-            result += "name: "+role.name+", id: "+role.id+", colour: "+str(role.colour.value)+"\n"
+            result += role.name+", "+role.id+", "+str(role.colour.value)+"\n"
         yield from send_func(message.channel, result+"```")

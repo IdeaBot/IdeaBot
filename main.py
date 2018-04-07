@@ -20,6 +20,7 @@ from commands import pi as picommand
 from commands import statistics
 from commands import todo
 from commands import roles
+from commands import colourroles
 
 from reactions import invalid as invalidreaction
 from reactions import retry
@@ -150,6 +151,7 @@ if __name__ == '__main__':
 
     vote_dict=dict()
     ballot=dict()
+    role_messages = dict()
 
     bot.register_command(ping.PingCommand(user=user_func))
     bot.register_command(execute.ExecuteCommand(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, EXECUTION_PERM)))
@@ -174,7 +176,9 @@ if __name__ == '__main__':
     bot.register_command(picommand.PiCommand(bot.data_config["pifile"], user=user_func))
     bot.register_command(statistics.GetStats(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, STATISTICS_PERM)))
     bot.register_command(todo.ToDoCommand(user=user_func, saveloc=bot.data_config["todosavedir"]))
-    bot.register_command(roles.RolesCommand())
+    bot.register_command(roles.RolesCommand(role_messages=role_messages))
+    bot.register_command(colourroles.CreateColourRoleMessage(role_messages=role_messages, user=user_func))
+    bot.register_command(colourroles.DeleteColourRoles(user=user_func))
 
     #bot.register_reaction_command(<command>) can go here
     bot.register_reaction_command(retry.RetryCommand(all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "retry")))
@@ -186,9 +190,9 @@ if __name__ == '__main__':
     bot.register_reaction_command(pin.PinReaction(all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "pin")))
     bot.register_reaction_command(advancedvoteR.StartBallot(vote_dict=vote_dict, ballots=ballot, all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "vote")))
     bot.register_reaction_command(advancedvoteR.RegisterVote(vote_dict=vote_dict, ballots=ballot))
-    bot.register_reaction_command(rolegiver.RoleGiveReaction(all_emojis_func=bot.get_all_emojis))
-    bot.register_reaction_command(rolegiver.RoleRemoveReaction(all_emojis_func=bot.get_all_emojis))
-    bot.register_reaction_command(rolegiver.RoleMessageCreate(all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "rolemessagecreate"), perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_ROLES_PERM)))
+    bot.register_reaction_command(rolegiver.RoleGiveReaction(all_emojis_func=bot.get_all_emojis, role_messages=role_messages))
+    bot.register_reaction_command(rolegiver.RoleRemoveReaction(all_emojis_func=bot.get_all_emojis, role_messages=role_messages))
+    bot.register_reaction_command(rolegiver.RoleMessageCreate(role_messages=role_messages, all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "rolemessagecreate"), perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_ROLES_PERM)))
 
 
     qForum = Queue()
