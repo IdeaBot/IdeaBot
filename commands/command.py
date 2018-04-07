@@ -85,6 +85,12 @@ class DirectOnlyCommand(Command):
         mentioned = self.user().mention in message.content
         return mentioned and super()._matches(message)
 
+class PrivateCommand(Command):
+    '''Extending PrivateCommand will make the bot only respond to this
+    command if it is sent in a private message to the bot.'''
+    def _matches(self, message):
+        return message.server == None and super()._matches(message)
+
 class AdminCommand(Command):
     '''Extending AdminCommand will make the command have access to the bot object (discord.Client object)'''
 
