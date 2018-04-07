@@ -2,8 +2,12 @@ from commands import command
 import discord, asyncio, time
 
 dc = discord.Colour
-RAINBOW = {dc.teal():"teal", dc.dark_teal():"dark_teal", dc.green():"green", dc.dark_green():"dark_green", dc.blue():"blue", dc.dark_blue():"dark_blue", dc.purple():"purple", dc.dark_purple():"dark_purple", dc(0xFF00FF):"magenta", dc(0xAF00AF):"dark_magenta", dc.gold():"gold", dc.dark_gold():"dark_gold", dc.orange():"orange", dc.dark_orange():"dark_orange", dc.red():"red", dc.dark_red():"dark_red", dc.lighter_grey():"lighter_grey", dc.dark_grey():"dark_grey", dc.darker_grey():"darker_grey", dc(0x000000):"black", dc(0xffffff):"white", dc(0x990d29):"TNT", dc(0xFFC0CB):"pink", dc(0xF5F5DC):"beige", dc(0x964B00):"brown"}
-EMOJIS = ['🌎', '🌍', '☘️', '🎬', '🔵', '🐬', '🦄', '🐋', '🔮', '⚜', '💛', '⚠', '🔶', '🔅', '🔴', '🐞', '🌖', '🌗', '🌘', '🌑','🌕','💣', '🐖', '🏷', '🍪']
+RAINBOW = {dc.teal():"teal", dc.green():"green", dc.dark_green():"dark_green",
+dc.blue():"blue", dc.dark_blue():"dark_blue", dc.purple():"purple", 
+dc(0xFF00FF):"magenta", dc.gold():"gold", dc.orange():"orange",
+dc.red():"red", dc.dark_red():"dark_red", dc.lighter_grey():"lighter_grey",
+dc.darker_grey():"darker_grey", dc(0x010101):"black", dc(0xffffff):"white", dc(0xFFC0CB):"pink", dc(0x964B00):"brown"}
+EMOJIS = ['🌎', '☘', '🎬', '🔵', '🐬', '🦄', '🔮', '💛', '🔶', '🔴', '🐞', '🌖', '🌘', '🌑','🌕', '🐖', '🍪']
 SPEED = 0
 RAINBOW_MESSAGE = "React with these emojis to get the corresponding colour: \n"
 n=0
@@ -30,6 +34,9 @@ class CreateColourRoleMessage(command.AdminCommand, command.DirectOnlyCommand):
             n+=1
             time.sleep(speed)
         roleMessage = yield from send_func(message.channel, RAINBOW_MESSAGE)
+        for emoji in EMOJIS:
+            yield from bot.add_reaction(roleMessage, emoji)
+            time.sleep(speed)
         self.role_messages[roleMessage.id]=colourRoleDict
 
 class DeleteColourRoles(command.AdminCommand, command.DirectOnlyCommand):
@@ -43,6 +50,7 @@ class DeleteColourRoles(command.AdminCommand, command.DirectOnlyCommand):
 
 def deleteColourRoles(server, bot, speed=SPEED):
     count = 0
+    time.sleep(speed)
     for role in server.roles:
         for colour in RAINBOW:
             if RAINBOW[colour].lower().strip() == role.name.lower().strip():

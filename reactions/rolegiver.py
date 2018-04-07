@@ -1,7 +1,7 @@
 from reactions import reactioncommand
 from libs import dataloader
 
-import asyncio, re, discord
+import asyncio, re, discord, time
 
 role_messages = dict()
 
@@ -22,18 +22,21 @@ class RoleRemoveReaction(reactioncommand.AdminReactionRemoveCommand, RoleReactio
     def action(self, reaction, user, bot):
         yield from bot.remove_roles(user, self.role_messages[reaction.message.id][reaction.emoji])
 
-class RoleMessageCreate(reactioncommand.ReactionAddCommand, RoleReaction):
+class RoleMessageCreate(reactioncommand.AdminReactionAddCommand, RoleReaction):
     @asyncio.coroutine
-    def action(self, reaction, user):
+    def action(self, reaction, user, bot):
         emojiToRoleDict = self.associateEmojiToRoles(reaction.message.content)
         if emojiToRoleDict!=None:
-            self.role_messages[reaction.message.id]=emojiToRoleDict
+            for emoji in emojiToRoleDict: #add all the emojis so people don't have to search through the list
+                yield from bot.add_reaction(reaction.message, emoji)
+            self.role_messages[reaction.message.id]=dict(emojiToRoleDict)
+            for emoji in emojiToRoleDict: #make sure the bot doesn't get the roles as it reacts with the emojis
+                yield from bot.remove_roles(reaction.message.server.me, self.role_messages[reaction.message.id][emoji])
 
     def associateEmojiToRoles(self, content):
         result = dict() # {discord.Emoji:discord.Object(id=role id),...}
         info = re.search(r'\`{3}((\s|.)+)\`{3}', content, re.I|re.M)
         info = info.group(1).splitlines()
-        print(info)
         for line in info:
             lineInfo = re.match(r'(\d{18}|.)\s*:?\s*(\d{18})', line, re.I)
             if lineInfo!=None:
