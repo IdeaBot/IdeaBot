@@ -63,7 +63,7 @@ def continuousScrape(q, stop):
             try:
                 rss = BeautifulSoup(pageRet.pageRet(config.content["url"]).decode(), "html.parser") # rss page
                 items = rss.find_all("item")
-                tweets = [[get_url(x), get_tweet(x)] for x in items] # create list of [url to tweet, tweet content]
+                tweets = [[get_url(x), get_tweet(x)] for x in items][1:] # create list of [url to tweet, tweet content], discard first tweet because it's pinned
 
                 if len(tweets)>0 and is_new_tweet(tweets[0][0]):
                     for i in tweets:

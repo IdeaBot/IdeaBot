@@ -32,7 +32,7 @@ class RegisterVote(reactioncommand.AdminReactionAddCommand):
         self.vote_dict=vote_dict
         self.ballots=ballots
     def matches(self, reaction, user):
-        return reaction.emoji in REACTIONS and self.ballots[user.id] in self.vote_dict and ord(reaction.emoji)-FIRST_REACTION_ORD < len(self.vote_dict[self.ballots[user.id]][VOTES].options) and ord(reaction.emoji)>=FIRST_REACTION_ORD and reaction.message.server == None
+        return (reaction.emoji in REACTIONS) and (self.ballots[user.id] in self.vote_dict) and (ord(reaction.emoji)-FIRST_REACTION_ORD < len(self.vote_dict[self.ballots[user.id]][VOTES].options)) and (ord(reaction.emoji)>=FIRST_REACTION_ORD) and (reaction.message.server == None)
 
     def action(self, reaction, user, client):
         registered = self.vote_dict[self.ballots[user.id]][VOTES].addChoice(user.id, self.vote_dict[self.ballots[user.id]][VOTES].options[ord(reaction.emoji)-FIRST_REACTION_ORD])

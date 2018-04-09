@@ -26,7 +26,7 @@ class ReactionCommand():
         functionality. This calls matches()
 
         Returns True if the reaction should be interpreted by the command'''
-        return (self.perms == None or user.id in self.perms) and (reaction.emoji == self.matchemoji(self.emoji) or self.emoji==None) and self.matches(reaction, user)
+        return (self.perms == None or user.id in self.perms) and self.are_same_emoji(self.emoji, reaction.emoji) and self.matches(reaction, user)
 
     def matches(self, reaction, user):
         '''(Command, discord.Reaction, discord.Member or discord.User) -> bool
@@ -48,56 +48,74 @@ class ReactionCommand():
 
     #useful methods just in case
     def matchemoji(self, emoji_id):
-        '''(ReactionCommand, str) -> discord.Emoji object
+        '''(ReactionCommand, str) -> discord.Emoji or chr
         matches the emoji's id with the Discord emoji '''
+        #return self.emoji==None or self.emoji==reaction.emoji or self.emoji==reaction.emoji.id
         if self.all_emojis_func == None:
             return
-        emojis = self.all_emojis_func()
-        for e in emojis:
+        for e in self.all_emojis_func():
             try:
                 if e.id == emoji_id:
                     return e
             except:
-                if e == emoji_id:
+                if str(e) == emoji_id:
                     return e
+
+    def are_same_emoji(self, e_id, emoji):
+        '''(ReactionCommand, string, discord.Emoji or chr) -> bool
+        compares id with emoji, returns True if they are the same emoji '''
+        if e_id == None or len(e_id)==0:
+            return True
+        elif len(e_id)>1:
+            try:
+                return e_id == emoji.id
+            except:
+                pass
+        else:
+            return e_id == emoji
+        return False
 
 
 class ReactionAddCommand(ReactionCommand):
+    '''Extending ReactionAddCommand will make the command's matches() run whenever a Reaction is added'''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.emoji_action.add("add") # this is the only difference
+        self.emoji_action.add("add")
 
 class ReactionRemoveCommand(ReactionCommand):
+    '''Extending ReactionAddCommand will make the command's matches() run whenever a Reaction is removed'''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.emoji_action.add("remove") # this is the only difference
+        self.emoji_action.add("remove")
 
-class AdminReactionAddCommand(ReactionAddCommand):
-    '''Extending AdminReactionAddCommand will make the command have access to the bot object (discord.Client object)'''
+class AdminReactionCommand(ReactionCommand):
+    '''Extending AdminReactionCommand will make the command have access to the bot object (discord.Client object)'''
 
     def _action(self, reaction, user, client):
-        '''(AdminReactionAddCommand, discord.Reaction, discord.Member or discord.User, discord.Client) -> None
-        This calls action()
-
-        Reacts to a Reaction '''
+        '''(AdminReactionCommand, discord.Reaction, discord.Member or discord.User, discord.Client) -> None
+        This calls action()'''
         yield from self.action(reaction, user, client)
 
     def action(self, reaction, user, client):
-        '''(AdminReactionAddCommand, discord.Reaction, discord.Member or discord.User, discord.Client) -> None
+        '''(AdminReactionCommand, discord.Reaction, discord.Member or discord.User, discord.Client) -> None
         Reacts to a Reaction '''
         pass
 
-class AdminReactionRemoveCommand(ReactionRemoveCommand):
-    '''Extending AdminReactionRemoveCommand will make the command have access to the bot object (discord.Client object)'''
+class AdminReactionAddCommand(AdminReactionCommand, ReactionAddCommand):
+    '''Extending AdminReactionAddCommand will make the command have access to the bot object (discord.Client object)
+    and will make the command's matches() run whenever a Reaction is added'''
 
-    def _action(self, reaction, user, client):
-        '''(AdminReactionRemoveCommand, discord.Reaction, discord.Member or discord.User, discord.Client) -> None
-        This calls action()
+    pass
 
-        Reacts to a Reaction '''
-        yield from self.action(reaction, user, client)
+class AdminReactionRemoveCommand(AdminReactionCommand, ReactionRemoveCommand):
+    '''Extending AdminReactionRemoveCommand will make the command have access to the bot object (discord.Client object)
+    and will make the command's matches() run whenever a Reaction is removed'''
 
-    def action(self, reaction, user, client):
-        '''(AdminReactionRemoveCommand, discord.Reaction, discord.Member or discord.User, discord.Client) -> None
-        Reacts to a Reaction '''
-        pass
+    pass
+
+class PrivateReactionCommand(ReactionCommand):
+    '''Extending PrivateReactionCommand will make the command's action() only run when the reaction
+    is to a message in a private message (ie severless)'''
+
+    def _matches(self, reaction, user):
+        return reaction.message.server == None and super()._matches()
