@@ -177,8 +177,8 @@ if __name__ == '__main__':
     bot.register_command(statistics.GetStats(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, STATISTICS_PERM)))
     bot.register_command(todo.ToDoCommand(user=user_func, saveloc=bot.data_config["todosavedir"]))
     bot.register_command(roles.RolesCommand(role_messages=role_messages))
-    bot.register_command(colourroles.CreateColourRoleMessage(role_messages=role_messages, user=user_func))
-    bot.register_command(colourroles.DeleteColourRoles(user=user_func))
+    bot.register_command(colourroles.CreateColourRoleMessage(role_messages=role_messages, user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_ROLES_PERM)))
+    bot.register_command(colourroles.DeleteColourRoles(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_ROLES_PERM)))
 
     #bot.register_reaction_command(<command>) can go here
     bot.register_reaction_command(retry.RetryCommand(all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "retry")))
