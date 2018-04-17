@@ -3,7 +3,7 @@ import discord, asyncio, time
 
 dc = discord.Colour
 RAINBOW = {dc.teal():"teal", dc.green():"green", dc.dark_green():"dark_green",
-dc.blue():"blue", dc.dark_blue():"dark_blue", dc.purple():"purple", 
+dc.blue():"blue", dc.dark_blue():"dark_blue", dc.purple():"purple",
 dc(0xFF00FF):"magenta", dc.gold():"gold", dc.orange():"orange",
 dc.red():"red", dc.dark_red():"dark_red", dc.lighter_grey():"lighter_grey",
 dc.darker_grey():"darker_grey", dc(0x010101):"black", dc(0xffffff):"white", dc(0xFFC0CB):"pink", dc(0x964B00):"brown"}
@@ -15,7 +15,7 @@ for i in RAINBOW:
     RAINBOW_MESSAGE+=RAINBOW[i]+" : "+EMOJIS[n]+"\n"
     n+=1
 
-class CreateColourRoleMessage(command.AdminCommand, command.DirectOnlyCommand):
+class CreateColourRoleMessage(command.AdminCommand, command.DirectOnlyCommand, command.WatchCommand):
     def __init__(self, role_messages, **kwargs):
         super().__init__(**kwargs)
         self.role_messages=role_messages
@@ -37,7 +37,10 @@ class CreateColourRoleMessage(command.AdminCommand, command.DirectOnlyCommand):
         for emoji in EMOJIS:
             yield from bot.add_reaction(roleMessage, emoji)
             time.sleep(speed)
+        self.always_watch_messages.add(roleMessage)
         self.role_messages[roleMessage.id]=colourRoleDict
+        for emoji in colourRoleDict:
+            yield from bot.remove_roles(message.server.me, colourRoleDict[emoji])
 
 class DeleteColourRoles(command.AdminCommand, command.DirectOnlyCommand):
     def matches(self,message):

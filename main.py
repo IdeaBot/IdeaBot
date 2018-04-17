@@ -36,11 +36,15 @@ from libs import configloader, scraperff, dataloader, scrapert, scraperred, embe
 
 EMOJIS_LOCATION = 'emojiloc'
 PERMISSIONS_LOCATION = 'permissionsloc'
+MSG_BACKUP_LOCATION='msgbackuploc'
+WATCH_MSG_LOCATION='alwayswatchmsgloc'
+ROLE_MSG_LOCATION='rolemessagesloc'
+
 EXECUTION_PERM = 'executionperm'
 SHUTDOWN_PERM = 'shutdownperm'
 MANAGE_VOTE_PERM = 'managevoteperm'
 DEV_PERM = 'devperm'
-STATISTICS_PERM = "statsperm"
+STATISTICS_PERM = 'statsperm'
 MANAGE_ROLES_PERM = 'manageroleperm'
 
 FORUM_URL = r"http://ideahavers.freeforums.net/"
@@ -122,6 +126,23 @@ def doChecks(bot):
         comment = qReddit.get()
         yield from bot.send_message(bot.redditchannel, embed=embed.create_embed(description="A comment has been posted here: " + comment[0] + " (direct link: "+comment[1]+" )", footer={"text":"Reddit", "icon_url":REDDIT_LOGO}))
 
+    #backup bot.messages deque
+    messagefile = dataloader.newdatafile(dataloader.datafile("./data/config.config").content["DEFAULT"][MSG_BACKUP_LOCATION])
+    for msg in bot.messages:
+        messagefile.content.append(msg.channel.id + ":" + msg.id)
+    messagefile.save()
+
+    #backup bot.always_watch_messages set
+    watchfile = dataloader.newdatafile(dataloader.datafile("./data/config.config").content["DEFAULT"][WATCH_MSG_LOCATION])
+    for msg in bot.always_watch_messages:
+        watchfile.content.append(msg.channel.id + ":" + msg.id)
+    watchfile.save()
+
+    #ensure bot.messages contains all the necessary messages in the watch list
+    for msg in bot.always_watch_messages:
+        if msg not in bot.messages:
+            bot.messages.append(msg)
+
 
 if __name__ == '__main__':
     # main
@@ -141,18 +162,25 @@ if __name__ == '__main__':
     log = mainLogging()
 
     stop = Queue()
-    bot = botlib.Bot("./data/config.config", log, doChecks, stop)
+
+    always_watch_messages = set()
+
+    bot = botlib.Bot("./data/config.config", log, doChecks, stop, always_watch_messages)
     bot.add_data(PERMISSIONS_LOCATION)
     bot.add_data(botlib.CHANNEL_LOC)
     bot.add_data(EMOJIS_LOCATION)
     # user_func uses lambda to create a closure on bot. This way when bot.user
     # updates it's available to DirectOnlyCommand's without giving extra info.
     user_func = lambda: bot.user
+    all_emojis_func = bot.get_all_emojis
 
     vote_dict=dict()
     ballot=dict()
-    role_messages = dict()
 
+    role_messages = rolegiver.load_role_messages(config.content[ROLE_MSG_LOCATION], all_emojis_func)
+
+
+    #bot.register_command(<command>) can go here
     bot.register_command(ping.PingCommand(user=user_func))
     bot.register_command(execute.ExecuteCommand(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, EXECUTION_PERM)))
     bot.register_command(shutdown.ShutdownCommand(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, SHUTDOWN_PERM), logout_func=bot.logout))
@@ -168,8 +196,7 @@ if __name__ == '__main__':
     karma_down_data = dataloader.datafile(config.content["karmadownloc"])
     bot.register_command(karma.KarmaAdderCommand(karma_up_data=karma_up_data, karma_down_data=karma_down_data))
     bot.register_command(karma.KarmaValueCommand(user=user_func))
-    #bot.register_command(privatevote.VoteCommand())
-    bot.register_command(advancedvoteC.StartVoteCommand(vote_dict=vote_dict, user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_VOTE_PERM)))
+    bot.register_command(advancedvoteC.StartVoteCommand(always_watch_messages=always_watch_messages, vote_dict=vote_dict, user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_VOTE_PERM)))
     bot.register_command(advancedvoteC.EndVoteCommand(vote_dict=vote_dict, user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_VOTE_PERM)))
     bot.register_command(advancedvoteC.StartBallot(vote_dict=vote_dict, user=user_func, ballots=ballot))
     bot.register_command(retrievequote.DisplayQuote(saveloc=bot.data_config["quotesavedir"]))
@@ -177,22 +204,22 @@ if __name__ == '__main__':
     bot.register_command(statistics.GetStats(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, STATISTICS_PERM)))
     bot.register_command(todo.ToDoCommand(user=user_func, saveloc=bot.data_config["todosavedir"]))
     bot.register_command(roles.RolesCommand(role_messages=role_messages))
-    bot.register_command(colourroles.CreateColourRoleMessage(role_messages=role_messages, user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_ROLES_PERM)))
+    bot.register_command(colourroles.CreateColourRoleMessage(always_watch_messages=always_watch_messages, role_messages=role_messages, user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_ROLES_PERM)))
     bot.register_command(colourroles.DeleteColourRoles(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_ROLES_PERM)))
 
     #bot.register_reaction_command(<command>) can go here
-    bot.register_reaction_command(retry.RetryCommand(all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "retry")))
-    bot.register_reaction_command(simplevote.VoteAddReaction(bot.get_data(EMOJIS_LOCATION, "yes_vote"), bot.get_data(EMOJIS_LOCATION, "no_vote"), all_emojis_func=bot.get_all_emojis))
-    bot.register_reaction_command(simplevote.VoteRemoveReaction(bot.get_data(EMOJIS_LOCATION, "yes_vote"), bot.get_data(EMOJIS_LOCATION, "no_vote"), all_emojis_func=bot.get_all_emojis))
-    bot.register_reaction_command(simplevote.VoteTallyReaction(all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "tally_vote"), perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_VOTE_PERM)))
-    bot.register_reaction_command(quote.SaveQuote(saveloc=bot.data_config["quotesavedir"],all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "save")))
-    bot.register_reaction_command(quote.DisplayQuote(all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "quote")))
-    bot.register_reaction_command(pin.PinReaction(all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "pin")))
-    bot.register_reaction_command(advancedvoteR.StartBallot(vote_dict=vote_dict, ballots=ballot, all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "vote")))
+    bot.register_reaction_command(retry.RetryCommand(all_emojis_func=all_emojis_func, emoji=bot.get_data(EMOJIS_LOCATION, "retry")))
+    bot.register_reaction_command(simplevote.VoteAddReaction(bot.get_data(EMOJIS_LOCATION, "yes_vote"), bot.get_data(EMOJIS_LOCATION, "no_vote"), all_emojis_func=all_emojis_func))
+    bot.register_reaction_command(simplevote.VoteRemoveReaction(bot.get_data(EMOJIS_LOCATION, "yes_vote"), bot.get_data(EMOJIS_LOCATION, "no_vote"), all_emojis_func=all_emojis_func))
+    bot.register_reaction_command(simplevote.VoteTallyReaction(all_emojis_func=all_emojis_func, emoji=bot.get_data(EMOJIS_LOCATION, "tally_vote"), perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_VOTE_PERM)))
+    bot.register_reaction_command(quote.SaveQuote(saveloc=bot.data_config["quotesavedir"],all_emojis_func=all_emojis_func, emoji=bot.get_data(EMOJIS_LOCATION, "save")))
+    bot.register_reaction_command(quote.DisplayQuote(all_emojis_func=all_emojis_func, emoji=bot.get_data(EMOJIS_LOCATION, "quote")))
+    bot.register_reaction_command(pin.PinReaction(all_emojis_func=all_emojis_func, emoji=bot.get_data(EMOJIS_LOCATION, "pin")))
+    bot.register_reaction_command(advancedvoteR.StartBallot(always_watch_messages=always_watch_messages, vote_dict=vote_dict, ballots=ballot, all_emojis_func=all_emojis_func, emoji=bot.get_data(EMOJIS_LOCATION, "vote")))
     bot.register_reaction_command(advancedvoteR.RegisterVote(vote_dict=vote_dict, ballots=ballot))
-    bot.register_reaction_command(rolegiver.RoleGiveReaction(all_emojis_func=bot.get_all_emojis, role_messages=role_messages))
-    bot.register_reaction_command(rolegiver.RoleRemoveReaction(all_emojis_func=bot.get_all_emojis, role_messages=role_messages))
-    bot.register_reaction_command(rolegiver.RoleMessageCreate(role_messages=role_messages, all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "rolemessagecreate"), perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_ROLES_PERM)))
+    bot.register_reaction_command(rolegiver.RoleGiveReaction(all_emojis_func=all_emojis_func, role_messages=role_messages))
+    bot.register_reaction_command(rolegiver.RoleRemoveReaction(all_emojis_func=all_emojis_func, role_messages=role_messages))
+    bot.register_reaction_command(rolegiver.RoleMessageCreate(always_watch_messages=always_watch_messages, role_messages=role_messages, all_emojis_func=all_emojis_func, emoji=bot.get_data(EMOJIS_LOCATION, "rolemessagecreate"), perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_ROLES_PERM)))
 
 
     qForum = Queue()
@@ -217,13 +244,14 @@ if __name__ == '__main__':
         loop.run_until_complete(bot.login(credentials.content["token"]))
     else:
         loop.run_until_complete(bot.login(credentials.content["username"], credentials.content["password"]))
-    #print(timezones.FullTime(timezones.SimpleTime("12pm"), timezones.Timezone("EST")).convertTo("CHUT"))
+
     #run until logged out
     while stop.empty():
         try:
             loop.run_until_complete(bot.connect())
         except KeyboardInterrupt:
             stop.put("KeyboardInterrupt")
+            print("KeyboardInterrupting tf outta here")
         except:
             exception = sys.exc_info()
             print("Something went wrong", str(exception[0]).replace("'>", "").replace("<class '", "") + ":" + str(exception[1]))
@@ -234,6 +262,9 @@ if __name__ == '__main__':
     for key in karma.Karma.karma:
         karma_entity_sum += len(key)
     log.info("karma would take about %d bytes to save" % karma_entity_sum)
+
+    rolegiver.save_role_messages(config.content[ROLE_MSG_LOCATION], role_messages)
+    log.info("Saved role_messages")
 
     twitterScraper.join()
     forumScraper.join()

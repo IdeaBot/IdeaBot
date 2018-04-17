@@ -13,7 +13,7 @@ DEFAULT_NAME_GEN=time.time #function
 DEFAULT_OPTIONS=["Yes", "No"] #list
 DEFAULT_TRANSFERABLES=3 #int
 
-class StartVoteCommand(command.DirectOnlyCommand):
+class StartVoteCommand(command.DirectOnlyCommand, command.WatchCommand):
 
     def __init__(self, vote_dict=None, **kwargs):
         super().__init__(**kwargs)
@@ -70,6 +70,7 @@ class StartVoteCommand(command.DirectOnlyCommand):
             yield from send_func(message.author, reply) #send error msg (if any)
         embed_message = yield from send_func(message.channel, embed=embed.create_embed(title=temp_dict[NAME], description="Options: "+str(temp_dict[VOTES].options)+"\nMode: "+temp_dict[MODE], footer={"text":"Voting started", "icon_url":None}, colour=0x33ee33))
         self.vote_dict[embed_message.id]=dict(temp_dict)
+        self.always_watch_messages.add(embed_message) # never stop watching for reactions to embed_message
         return
 
 

@@ -8,7 +8,7 @@ MODE = "mode"
 VOTES = "votes"
 NAME = "name"
 
-class StartBallot(reactioncommand.AdminReactionAddCommand):
+class StartBallot(reactioncommand.AdminReactionAddCommand, reactioncommand.WatchReactionCommand):
     def __init__(self, vote_dict=None, ballots=dict(), **kwargs):
         super().__init__(**kwargs)
         self.vote_dict=vote_dict
@@ -24,7 +24,8 @@ class StartBallot(reactioncommand.AdminReactionAddCommand):
 Please place your vote by reacting with your choice(s).
 In the event that multiple choices are accepted, choices will be considered in chronological order (ie first reaction is first choice, second reaction is second choice, etc).
 **No take-backsies.**"""
-        yield from client.send_message(user, message)
+        msg = yield from client.send_message(user, message)
+        self.always_watch_messages.add(msg)
 
 class RegisterVote(reactioncommand.AdminReactionAddCommand):
     def __init__(self, vote_dict=None, ballots=dict(), **kwargs):

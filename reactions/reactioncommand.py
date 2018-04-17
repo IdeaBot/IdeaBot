@@ -119,3 +119,14 @@ class PrivateReactionCommand(ReactionCommand):
 
     def _matches(self, reaction, user):
         return reaction.message.server == None and super()._matches()
+
+class WatchReactionCommand(ReactionCommand):
+    '''Extending WatchCommand will make it possible for the command
+    to add discord.Messages for the bot to always keep track of
+
+    To add a message to the watchlist, use self.always_watch_messages.add(<discord.Message object>)
+    self.always_watch_messages is a set()'''
+
+    def __init__(self, always_watch_messages, **kwargs):
+        super().__init__(**kwargs)
+        self.always_watch_messages=always_watch_messages

@@ -17,12 +17,14 @@ from libs import dataloader, embed
 
 DEFAULT = 'DEFAULT'
 CHANNEL_LOC = 'channelsloc'
+MSG_BACKUP_LOCATION='msgbackuploc'
+WATCH_MSG_LOCATION='alwayswatchmsgloc'
 
 class Bot(discord.Client):
     '''A Discord client which has config data and a list of commands to try when
     a message is received.'''
 
-    def __init__(self, config, log, checks, stop_queue):
+    def __init__(self, config, log, checks, stop_queue, always_watch_messages):
         '''(str, Logger, fun) -> Bot
         config: a string which is the loaction of the base config file
         log: a Logger for dumping info
@@ -41,6 +43,7 @@ class Bot(discord.Client):
         self.reaction_remove_commands = list()
         self.plugins = list()
         self.stop_queue=stop_queue
+        self.always_watch_messages=always_watch_messages
 
     def add_data(self, name, content_from=DEFAULT):
         '''(str, str) -> None
@@ -120,7 +123,7 @@ class Bot(discord.Client):
         self.log.info('Email: ' + str(self.email))
         self.log.info(str([i for i in self.servers]))
         self.setup_channels()
-        #yield from self.send_message(self.twitterchannel, 'Hello humans...', embed=embed.create_embed(title="Test", description="Potato"))
+        yield from self.load_messages()
         yield from self.checks(self)
 
     def setup_channels(self):
@@ -136,3 +139,27 @@ class Bot(discord.Client):
             if i.name == self.get_data(CHANNEL_LOC, 'reddit'):
                 self.redditchannel = i
                 self.log.info('reddit channel found')
+
+    @asyncio.coroutine
+    def load_messages(self):
+        '''() -> None
+        Convenience function for loading the messages the bot might need from before it's last restart'''
+        #load messages from file
+        messagefile = dataloader.datafile(self.data_config[MSG_BACKUP_LOCATION])
+        for msg_str in messagefile.content:
+            channel_id, msg_id = msg_str.strip().split(":")
+            msg = yield from self.get_message(discord.Object(channel_id), msg_id)
+            self.messages.append(msg)
+
+        #load always_watch_messages from file
+        watchfile = dataloader.datafile(self.data_config[MSG_BACKUP_LOCATION])
+        for msg_str in watchfile.content:
+            channel_id, msg_id = msg_str.strip().split(":")
+            msg = yield from self.get_message(discord.Object(channel_id), msg_id)
+            if msg not in self.messages:
+                self.messages.append(msg)
+            self.always_watch_messages.add(msg)
+        print(self.always_watch_messages)
+        print()
+        print(self.messages)
+        print("All messages loaded")
