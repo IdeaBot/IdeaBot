@@ -60,7 +60,6 @@ def save_role_messages(filename, role_messages):
                 new_role_messages[msg_id][emoji.id]=role_messages[msg_id][emoji].id # turns into dict of {discord.Emoji.id:discord.Role.id}
     role_messages_file.content = new_role_messages
     role_messages_file.save(save_as='json')
-    print(new_role_messages)
 
 def load_role_messages(filename, all_emojis_func):
     '''(str) -> dict
@@ -76,7 +75,6 @@ def load_role_messages(filename, all_emojis_func):
         role_messages[msg_id]=dict()
         for emoji_id in role_messages_file.content[msg_id]:
             role_messages[msg_id][matchemoji(all_emojis_func, emoji_id)]=discord.Object(role_messages_file.content[msg_id][emoji_id])
-    print(role_messages)
     return role_messages
 
 def matchemoji(all_emojis_func, emoji_id):

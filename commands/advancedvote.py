@@ -1,5 +1,5 @@
 from commands import command
-from libs import voting, embed
+from libs import voting, embed, dataloader
 
 import re, time
 
@@ -126,7 +126,7 @@ class EndVoteCommand(command.DirectOnlyCommand):
 class StartBallot(command.DirectOnlyCommand):
     def __init__(self, vote_dict=dict(), ballots=dict(), **kwargs):
         super().__init__(**kwargs)
-        self.vote_dict=vote_dict
+        self.vote_dict = vote_dict
         self.ballots = ballots
 
     def matches(self, message):
@@ -147,4 +147,54 @@ class StartBallot(command.DirectOnlyCommand):
 Please place your vote by reacting with your choice(s).
 In the event that multiple choices are accepted, choices will be considered in chronological order (ie first reaction is first choice, second reaction is second choice, etc).
 **No take-backsies.**"""
-        yield from send_func(message.author, reply)
+        msg = yield from send_func(message.author, reply)
+        self.always_watch_messages.add(msg)
+
+def save_vote_dict(filename, vote_dict):
+    '''(str, dict) -> None
+    Saves vote_dict to filename in a format interpretable by load_vote_dict(filename)'''
+    vote_dict_file = dataloader.newdatafile(filename)
+    new_vote_dict=dict()
+    for poll_msg_id in vote_dict:
+        new_vote_dict[poll_msg_id]=vote_dict[poll_msg_id]
+        new_vote_dict[poll_msg_id][VOTES]=vote_dict[poll_msg_id][VOTES].__dict__ #dict representation of variables contained in Poll object
+    vote_dict_file.content = new_vote_dict
+    vote_dict_file.save(save_as="json")
+
+def load_vote_dict(filename):
+    '''(str) -> dict
+    Loads vote_dict from filename'''
+    vote_dict=dict()
+    try:
+        vote_dict = dataloader.datafile(filename, load_as="json").content
+    except:
+        print("The %a file is either missing or corrupted; unable to load" %filename)
+    finally:
+        for poll_msg_id in vote_dict:
+            if vote_dict[poll_msg_id][MODE] == 'stv':
+                vote_dict[poll_msg_id][VOTES]=voting.STV(**vote_dict[poll_msg_id][VOTES])
+            elif vote_dict[poll_msg_id][MODE] in VALID_MODES:
+                vote_dict[poll_msg_id][VOTES]=voting.FPTP(**vote_dict[poll_msg_id][VOTES])
+            else:
+                try:
+                    vote_dict[poll_msg_id][VOTES]=Poll(**vote_dict[poll_msg_id][VOTES])
+                except:
+                    del(vote_dict[poll_msg_id])
+        return vote_dict
+
+def save_ballot(filename, ballot):
+    '''(str, dict) -> None
+    Saves ballot to filename in a format interpretable by load_ballot(filename)
+    In this case it's simply converted to JSON format'''
+    ballot_file = dataloader.newdatafile(filename)
+    ballot_file.content = ballot
+    ballot_file.save(save_as="json")
+
+def load_ballot(filename):
+    ballot=dict()
+    try:
+        ballot = dataloader.datafile(filename, load_as="json").content
+    except:
+        print("The %a file is either missing or corrupted; unable to load" %filename)
+    finally:
+        return ballot

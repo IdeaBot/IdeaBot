@@ -1,5 +1,5 @@
 import discord
-import logging, time, asyncio, random, sys, configparser
+import logging, time, asyncio, random, sys, configparser, traceback
 from multiprocessing import Process, Queue
 import bot as botlib
 from commands import ping
@@ -21,6 +21,7 @@ from commands import statistics
 from commands import todo
 from commands import roles
 from commands import colourroles
+from commands import spoiler
 
 from reactions import invalid as invalidreaction
 from reactions import retry
@@ -39,6 +40,8 @@ PERMISSIONS_LOCATION = 'permissionsloc'
 MSG_BACKUP_LOCATION='msgbackuploc'
 WATCH_MSG_LOCATION='alwayswatchmsgloc'
 ROLE_MSG_LOCATION='rolemessagesloc'
+VOTE_DICT_LOCATION='votedictloc'
+BALLOT_LOCATION='ballotloc'
 
 EXECUTION_PERM = 'executionperm'
 SHUTDOWN_PERM = 'shutdownperm'
@@ -126,24 +129,6 @@ def doChecks(bot):
         comment = qReddit.get()
         yield from bot.send_message(bot.redditchannel, embed=embed.create_embed(description="A comment has been posted here: " + comment[0] + " (direct link: "+comment[1]+" )", footer={"text":"Reddit", "icon_url":REDDIT_LOGO}))
 
-    #backup bot.messages deque
-    messagefile = dataloader.newdatafile(dataloader.datafile("./data/config.config").content["DEFAULT"][MSG_BACKUP_LOCATION])
-    for msg in bot.messages:
-        messagefile.content.append(msg.channel.id + ":" + msg.id)
-    messagefile.save()
-
-    #backup bot.always_watch_messages set
-    watchfile = dataloader.newdatafile(dataloader.datafile("./data/config.config").content["DEFAULT"][WATCH_MSG_LOCATION])
-    for msg in bot.always_watch_messages:
-        watchfile.content.append(msg.channel.id + ":" + msg.id)
-    watchfile.save()
-
-    #ensure bot.messages contains all the necessary messages in the watch list
-    for msg in bot.always_watch_messages:
-        if msg not in bot.messages:
-            bot.messages.append(msg)
-
-
 if __name__ == '__main__':
     # main
     # init stuff
@@ -163,7 +148,7 @@ if __name__ == '__main__':
 
     stop = Queue()
 
-    always_watch_messages = set()
+    always_watch_messages = {botlib.LOADING_WARNING}
 
     bot = botlib.Bot("./data/config.config", log, doChecks, stop, always_watch_messages)
     bot.add_data(PERMISSIONS_LOCATION)
@@ -171,11 +156,13 @@ if __name__ == '__main__':
     bot.add_data(EMOJIS_LOCATION)
     # user_func uses lambda to create a closure on bot. This way when bot.user
     # updates it's available to DirectOnlyCommand's without giving extra info.
+
+    # variable that need to be shared between multiple commands classes and files should be declared here
     user_func = lambda: bot.user
     all_emojis_func = bot.get_all_emojis
 
-    vote_dict=dict()
-    ballot=dict()
+    vote_dict=advancedvoteC.load_vote_dict(config.content[VOTE_DICT_LOCATION])
+    ballot=advancedvoteC.load_ballot(config.content[BALLOT_LOCATION])
 
     role_messages = rolegiver.load_role_messages(config.content[ROLE_MSG_LOCATION], all_emojis_func)
 
@@ -206,6 +193,7 @@ if __name__ == '__main__':
     bot.register_command(roles.RolesCommand(role_messages=role_messages))
     bot.register_command(colourroles.CreateColourRoleMessage(always_watch_messages=always_watch_messages, role_messages=role_messages, user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_ROLES_PERM)))
     bot.register_command(colourroles.DeleteColourRoles(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_ROLES_PERM)))
+    bot.register_command(spoiler.Spoiler(user=user_func))
 
     #bot.register_reaction_command(<command>) can go here
     bot.register_reaction_command(retry.RetryCommand(all_emojis_func=all_emojis_func, emoji=bot.get_data(EMOJIS_LOCATION, "retry")))
@@ -253,8 +241,8 @@ if __name__ == '__main__':
             stop.put("KeyboardInterrupt")
             print("KeyboardInterrupting tf outta here")
         except:
-            exception = sys.exc_info()
-            print("Something went wrong", str(exception[0]).replace("'>", "").replace("<class '", "") + ":" + str(exception[1]))
+            print("Something went wrong")
+            traceback.print_exc()
         if stop.empty():
             print("Something tripped up - reconnecting Discord API")
 
@@ -262,9 +250,12 @@ if __name__ == '__main__':
     for key in karma.Karma.karma:
         karma_entity_sum += len(key)
     log.info("karma would take about %d bytes to save" % karma_entity_sum)
-
+    # variables that need to be saved on shutdown should be saved here
     rolegiver.save_role_messages(config.content[ROLE_MSG_LOCATION], role_messages)
-    log.info("Saved role_messages")
+    log.info("Saved role messages info")
+    advancedvoteC.save_vote_dict(config.content[VOTE_DICT_LOCATION], vote_dict)
+    advancedvoteC.save_ballot(config.content[BALLOT_LOCATION], ballot)
+    log.info("Saved voting info")
 
     twitterScraper.join()
     forumScraper.join()
