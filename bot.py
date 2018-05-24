@@ -96,7 +96,7 @@ class Bot(discord.Client):
                         yield from cmd._action(message, self.send_message, self)
                     else:
                         yield from cmd._action(message, self.send_message)
-                    if cmd.break_on_match:
+                    if cmd.breaks_on_match:
                         break
             except Exception as e:
                 # Catch all problems that happen in matching/executing a command.
