@@ -22,6 +22,7 @@ class Command():
         kwargs: included for sub-classing.'''
         # TODO: more verification on the structure of perms
         self.perms = perms
+        self.breaks_on_match = False
 
     def _matches(self, message):
         '''(discord.Message) -> bool
@@ -80,6 +81,7 @@ class DirectOnlyCommand(Command):
         if user is None or type(user) is not types.FunctionType:
             raise ValueError('DirectOnlyCommand requires a user func to be passed in')
         self.user = user
+        self.breaks_on_match = True
 
     def _matches(self, message):
         mentioned = self.user().mention in message.content

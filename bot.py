@@ -85,13 +85,19 @@ class Bot(discord.Client):
     def on_message(self, message):
         yield from self.checks(self)
         for cmd in self.commands:
-            if cmd._matches(message):
-                if isinstance(cmd, command.AdminCommand):
-                    yield from cmd._action(message, self.send_message, self)
-                else:
-                    yield from cmd._action(message, self.send_message)
-                # TOOD(14flash): is break necessary? Can this be done per command?
-                break
+            try:
+                if cmd._matches(message):
+                    if isinstance(cmd, command.AdminCommand):
+                        yield from cmd._action(message, self.send_message, self)
+                    else:
+                        yield from cmd._action(message, self.send_message)
+                    if cmd.break_on_match:
+                        break
+            except Exception as e:
+                # Catch all problems that happen in matching/executing a command.
+                # This means that if there's a bug that would cause execution to
+                # break, other commands can still be tried.
+                self.log.warning('command %s raised an exception during its execution: %s', cmd, e)
 
     @asyncio.coroutine
     def on_reaction_add(self, reaction, user):
