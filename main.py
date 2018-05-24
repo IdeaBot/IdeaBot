@@ -21,6 +21,7 @@ from commands import statistics
 from commands import todo
 from commands import roles
 from commands import colourroles
+from commands import cancer
 
 from reactions import invalid as invalidreaction
 from reactions import retry
@@ -179,6 +180,7 @@ if __name__ == '__main__':
     bot.register_command(roles.RolesCommand(role_messages=role_messages))
     bot.register_command(colourroles.CreateColourRoleMessage(role_messages=role_messages, user=user_func))
     bot.register_command(colourroles.DeleteColourRoles(user=user_func))
+    bot.register_command(cancer.CancerCommand())
 
     #bot.register_reaction_command(<command>) can go here
     bot.register_reaction_command(retry.RetryCommand(all_emojis_func=bot.get_all_emojis, emoji=bot.get_data(EMOJIS_LOCATION, "retry")))
