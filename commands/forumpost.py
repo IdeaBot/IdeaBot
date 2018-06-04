@@ -5,20 +5,19 @@ Created on Sun Jan 14 13:08:24 2018
 @author: 14flash
 """
 
-from commands import command
+from libs import command
 import re
 
-class ForumPostCommand(command.Command):
+class Command(command.AdminCommand):
     '''ForumPostCommand adds an emoji reaction to any message that has
     the words "forum post".'''
 
-    def __init__(self, add_reaction_func, emoji, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.add_reaction = add_reaction_func
-        self.emoji = emoji
+        self.emoji = r'🥔'
 
     def matches(self, message):
         return re.search(r'\bforum post\b', message.content, re.IGNORECASE)
 
-    def action(self, message, send_func):
-        yield from self.add_reaction(message, self.emoji)
+    def action(self, message, send_func, bot):
+        yield from bot.add_reaction(message, self.emoji)

@@ -1,4 +1,4 @@
-from commands import command
+from libs import command
 import discord, asyncio, time
 
 dc = discord.Colour
@@ -15,7 +15,7 @@ for i in RAINBOW:
     RAINBOW_MESSAGE+=RAINBOW[i]+" : "+EMOJIS[n]+"\n"
     n+=1
 
-class CreateColourRoleMessage(command.AdminCommand, command.DirectOnlyCommand, command.WatchCommand):
+class Command(command.AdminCommand, command.DirectOnlyCommand, command.WatchCommand):
     def __init__(self, role_messages, **kwargs):
         super().__init__(**kwargs)
         self.role_messages=role_messages
@@ -41,15 +41,6 @@ class CreateColourRoleMessage(command.AdminCommand, command.DirectOnlyCommand, c
         self.role_messages[roleMessage.id]=colourRoleDict
         for emoji in colourRoleDict:
             yield from bot.remove_roles(message.server.me, colourRoleDict[emoji])
-
-class DeleteColourRoles(command.AdminCommand, command.DirectOnlyCommand):
-    def matches(self,message):
-        return "remove colour roles" in message.content.lower()
-
-    @asyncio.coroutine
-    def action(self, message, send_func, bot):
-        count = yield from deleteColourRoles(message.server, bot)
-        yield from send_func(message.channel, "Deleted "+str(count)+" roles. Rerun this if I missed something - I'm sort of a pacifist.")
 
 def deleteColourRoles(server, bot, speed=SPEED):
     count = 0

@@ -1,8 +1,8 @@
-from commands import command
+from libs import command
 from libs import embed
 import re
 
-class Spoiler(command.DirectOnlyCommand):
+class Command(command.DirectOnlyCommand):
     def matches(self, message):
         args = re.search(r'\bspoiler\s([\d]{1,2})', message.content, re.I)
         return args != None

@@ -6,10 +6,10 @@ Created on Sat Jan 13 13:23:56 2018
 @author: 14flash
 """
 
-from commands import command
+from libs import command
 import re
 
-class BlameJoshCommand(command.Command):
+class Command(command.Command):
     '''BlameJoshCommand blames josh when anyone says to blame josh.'''
 
     def matches(self, message):

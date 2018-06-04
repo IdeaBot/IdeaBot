@@ -1,6 +1,6 @@
-from reactions import reactioncommand
+from libs import reaction #as reactioncommand
 
-class IdCommand(reactioncommand.AdminReactionAddCommand):
+class Reaction(reaction.AdminReactionAddCommand):
     def matches(self, reaction, user):
         return " id " in reaction.message.content.lower() or " id" == reaction.message.content.lower()[-3:] or "id " == reaction.message.content.lower()[:3] or "id"==reaction.message.content.lower()
 
@@ -9,3 +9,4 @@ class IdCommand(reactioncommand.AdminReactionAddCommand):
             yield from client.send_message(reaction.message.channel, "Name: `" + reaction.emoji.name + "`\nID: `" + reaction.emoji.id + "`")
         except AttributeError:
             yield from client.send_message(reaction.message.channel, reaction.emoji + " doesn't have an ID")
+            print(reaction.emoji)

@@ -1,13 +1,14 @@
-from commands import command
+from libs import command
 from libs import dataloader, embed
 import re, asyncio
 
 todoFiles=dict()
+TODO_LOC = "todosavedir"
 
-class ToDoCommand(command.DirectOnlyCommand):
+class Command(command.DirectOnlyCommand, command.Config):
     def __init__(self, saveloc="./", **kwargs):
         super().__init__(**kwargs)
-        self.saveloc = saveloc
+        self.saveloc = self.config.content["DEFAULT"][TODO_LOC]
 
     def matches(self, message):
         return re.search(r'\bto\s?do:?\s*', message.content, re.I)!=None
@@ -34,7 +35,7 @@ class ToDoCommand(command.DirectOnlyCommand):
                 del(todoFiles[message.author.id])
             return
         todoFiles[message.author.id].content.append(args.group(1))
-        todoFiles[message.author.id].save()
+        #todoFiles[message.author.id].save()
 
     def todo2string(self, todoFile):
         if len(todoFile.content)==0:
@@ -43,3 +44,8 @@ class ToDoCommand(command.DirectOnlyCommand):
         for i in range(len(todoFile.content)):
             result+=str(i+1)+". "+todoFile.content[i]+"\n"
         return result[:-1]
+
+    def shutdown(self):
+        for user_id in todoFiles:
+            if todoFiles[user_id].content:
+                todoFiles[user_id].save()

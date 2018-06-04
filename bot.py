@@ -10,10 +10,9 @@ Created on Wed Jan 10 20:05:03 2018
 
 import discord
 import asyncio
-from commands import command
-from reactions import reactioncommand
 
-from libs import dataloader, embed
+from libs import dataloader, embed, command
+from libs import reaction as reactioncommand
 
 DEFAULT = 'DEFAULT'
 CHANNEL_LOC = 'channelsloc'
@@ -39,9 +38,8 @@ class Bot(discord.Client):
         # TODO(14flash): Plugin refactor, where we won't need a doCheck() func anymore
         self.checks = checks
         self.data = dict()
-        self.commands = list()
-        self.reaction_add_commands = list()
-        self.reaction_remove_commands = list()
+        self.commands = dict() # maps names to commands
+        self.reactions = dict() # maps names to reaction commands
         self.plugins = list()
         self.stop_queue=stop_queue
         self.always_watch_messages=always_watch_messages
@@ -62,12 +60,12 @@ class Bot(discord.Client):
             return self.data[name][key]
         return self.data[name]
 
-    def register_command(self, cmd):
+    def register_command(self, cmd, name):
         '''(Command) -> None
         Registers a Command for execution when a message is received.'''
         if not isinstance(cmd, command.Command):
             raise ValueError('Only commands may be registered in Bot::register_command')
-        self.commands.append(cmd)
+        self.commands[name]=cmd
 
     def register_plugin(self, plugin):
         '''(Plugin) -> None
@@ -75,54 +73,51 @@ class Bot(discord.Client):
         # TODO(14flash): Plugin refactor.
         pass
 
-    def register_reaction_command(self, cmd):
+    def register_reaction_command(self, cmd, name):
         '''(discord.Client, reactions.Command) -> None
         Registers a reaction command for execution when a message is reacted to'''
-        if not (isinstance(cmd, reactioncommand.ReactionAddCommand) or isinstance(cmd, reactioncommand.ReactionRemoveCommand)):
-            raise ValueError("Only reaction add/remove commands may be registered in Bot::register_reaction_command")
-        if isinstance(cmd, reactioncommand.ReactionAddCommand):
-            self.reaction_add_commands.append(cmd)
-        if isinstance(cmd, reactioncommand.ReactionRemoveCommand):
-            self.reaction_remove_commands.append(cmd)
-
+        if not (isinstance(cmd, reactioncommand.ReactionAddCommand) or isinstance(cmd, reactioncommand.ReactionRemoveCommand) or isinstance(cmd, reactioncommand.Dummy)):
+            raise ValueError("%s is not a reaction command. Only reaction add/remove commands may be registered in Bot::register_reaction_command" % name)
+        self.reactions[name]=cmd
     @asyncio.coroutine
     def on_message(self, message):
         yield from self.checks(self)
         yield from self.message_stuff()
         for cmd in self.commands:
-            if cmd._matches(message):
-                if isinstance(cmd, command.AdminCommand):
-                    yield from cmd._action(message, self.send_message, self)
+            if self.commands[cmd]._matches(message):
+                if isinstance(self.commands[cmd], command.AdminCommand):
+                    yield from self.commands[cmd]._action(message, self.send_message, self)
                 else:
-                    yield from cmd._action(message, self.send_message)
-                # TOOD(14flash): is break necessary? Can this be done per command?
+                    yield from self.commands[cmd]._action(message, self.send_message)
+                # TODO(14flash): is break necessary? Can this be done per command?
                 break
 
     @asyncio.coroutine
     def on_reaction_add(self, reaction, user):
-        for cmd in self.reaction_add_commands:
-            if cmd._matches(reaction, user):
-                if isinstance(cmd, reactioncommand.AdminReactionAddCommand):
-                    yield from cmd._action(reaction, user, self)
+        for cmd in self.reactions:
+            print(cmd)
+            if isinstance(self.reactions[cmd], reactioncommand.ReactionAddCommand) and self.reactions[cmd]._matches(reaction, user):
+                if isinstance(self.reactions[cmd], reactioncommand.AdminReactionCommand):
+                    yield from self.reactions[cmd]._action(reaction, user, self)
                 else:
-                    yield from cmd._action(reaction, user)
+                    yield from self.reactions[cmd]._action(reaction, user)
                 break
 
     @asyncio.coroutine
     def on_reaction_remove(self, reaction, user):
-        for cmd in self.reaction_remove_commands:
-            if cmd._matches(reaction, user):
-                if isinstance(cmd, reactioncommand.AdminReactionRemoveCommand):
-                    yield from cmd._action(reaction, user, self)
+        for cmd in self.reactions:
+            if isinstance(self.reactions[cmd], reactioncommand.ReactionRemoveCommand) and self.reactions[cmd]._matches(reaction, user):
+                if isinstance(self.reactions[cmd], reactioncommand.AdminReactionCommand):
+                    yield from self.reactions[cmd]._action(reaction, user, self)
                 else:
-                    yield from cmd._action(reaction, user)
+                    yield from self.reactions[cmd]._action(reaction, user)
                 break
 
     @asyncio.coroutine
     def on_ready(self):
         self.log.info('API connection created successfully')
         self.log.info('Username: ' + str(self.user.name))
-        self.log.info('Email: ' + str(self.email))
+        #self.log.info('Email: ' + str(self.email))
         self.log.info('Connected to %s servers' %len(self.servers))
         self.setup_channels()
         yield from self.load_messages()
@@ -142,13 +137,17 @@ class Bot(discord.Client):
                 self.redditchannel = i
                 self.log.info('reddit channel found')
 
-    @asyncio.coroutine
     def load_messages(self):
         '''() -> None
         Convenience function for loading the messages the bot might need from before it's last restart'''
         #load messages from file
         self.always_watch_messages.add(LOADING_WARNING)
-        messagefile = dataloader.datafile(self.data_config[MSG_BACKUP_LOCATION])
+        try:
+            messagefile = dataloader.datafile(self.data_config[MSG_BACKUP_LOCATION])
+        except FileNotFoundError:
+            messagefile = dataloader.newdatafile(self.data_config[MSG_BACKUP_LOCATION])
+            messagefile.content = list()
+
         self.log.info("Loading %a messages" % len(messagefile.content))
         for msg_str in messagefile.content:
             channel_id, msg_id = msg_str.strip().split(":")
@@ -158,9 +157,15 @@ class Bot(discord.Client):
                     self.messages.append(msg)
             except discord.NotFound:
                 self.log.warning("Unable to find %a message" % msg_id)
+        self.log.info("Finished loading messages")
 
         #load always_watch_messages from file
-        watchfile = dataloader.datafile(self.data_config[WATCH_MSG_LOCATION])
+        try:
+            watchfile = dataloader.datafile(self.data_config[WATCH_MSG_LOCATION])
+        except FileNotFoundError:
+            watchfile = dataloader.newdatafile(self.data_config[WATCH_MSG_LOCATION])
+            watchfile.content = list()
+
         self.log.info("Loading %a watched messages" % len(watchfile.content))
         for msg_str in watchfile.content:
             channel_id, msg_id = msg_str.strip().split(":")
@@ -173,6 +178,7 @@ class Bot(discord.Client):
             except discord.NotFound:
                 self.log.warning("Unable to find %a message" % msg_id)
         self.always_watch_messages.remove(LOADING_WARNING)
+        self.log.info("Finished loading watched messages")
 
 
     @asyncio.coroutine
@@ -196,6 +202,8 @@ class Bot(discord.Client):
                     msg.server = server
                     msg.channel = channel
                     break
+        if isinstance(msg, str):
+            print("What the fuck", msg_id)
         return msg
 
     @asyncio.coroutine
@@ -234,5 +242,5 @@ class Bot(discord.Client):
         '''(Bot) -> None
         ensure self.messages contains all the necessary messages in the watch list'''
         for msg in self.always_watch_messages:
-            if msg not in self.messages:
+            if msg not in self.messages and msg!=LOADING_WARNING:
                 self.messages.append(msg)

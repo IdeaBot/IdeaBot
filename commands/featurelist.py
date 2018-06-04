@@ -5,10 +5,10 @@ Created on Mon Jan 22 19:11:09 2018
 @author: Yuhas
 """
 
-from commands import command
+from libs import command
 import re
 
-class FeatureListCommand(command.DirectOnlyCommand):
+class Command(command.DirectOnlyCommand):
 
     MESSAGE = (
         'You can see the requested features or add more here: '

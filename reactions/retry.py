@@ -1,9 +1,9 @@
-from reactions import reactioncommand
+from libs import reaction as reactioncommand
 
-class RetryCommand(reactioncommand.AdminReactionAddCommand):
+class Reaction(reactioncommand.AdminReactionAddCommand):
 
     def matches(self, reaction, user):
-        return reaction.emoji == (self.matchemoji(self.emoji) or False) and user == reaction.message.author
+        return user == reaction.message.author
         # (None or False) = False ; this prevents returning a NoneType when expecting a bool
 
     def action(self, reaction, user, client):

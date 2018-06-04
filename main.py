@@ -1,7 +1,12 @@
 import discord
-import logging, time, asyncio, random, sys, configparser, traceback
+import logging, time, asyncio, random, sys, configparser, traceback, importlib
 from multiprocessing import Process, Queue
+from os import listdir
+from os.path import isfile, join
+
 import bot as botlib
+
+"""
 from commands import ping
 from commands import id
 from commands import blamejosh
@@ -22,7 +27,8 @@ from commands import todo
 from commands import roles
 from commands import colourroles
 from commands import spoiler
-
+"""
+"""
 from reactions import invalid as invalidreaction
 from reactions import retry
 from reactions import id as emojid #I'm sorry, I'm not even sure what I did there
@@ -31,17 +37,23 @@ from reactions import quote
 from reactions import advancedvote as advancedvoteR
 from reactions import pin
 from reactions import rolegiver
+"""
 
-sys.path.append('./libs')
-from libs import configloader, scraperff, dataloader, scrapert, scraperred, embed
+from libs import configloader, scraperff, dataloader, scrapert, scraperred, embed, command, reaction, savetome
 
 EMOJIS_LOCATION = 'emojiloc'
 PERMISSIONS_LOCATION = 'permissionsloc'
+#PERMS_LOCATION = './data/perms.json'
 MSG_BACKUP_LOCATION='msgbackuploc'
 WATCH_MSG_LOCATION='alwayswatchmsgloc'
 ROLE_MSG_LOCATION='rolemessagesloc'
-VOTE_DICT_LOCATION='votedictloc'
-BALLOT_LOCATION='ballotloc'
+COMMANDS_DIR = './commands'
+REACTIONS_DIR = './reactions'
+PERMS = 'perms'
+COMMAND = 'command'
+REACTION = 'reaction'
+EMOJIS = 'emojis'
+CONFIGEND = 'configend'
 
 EXECUTION_PERM = 'executionperm'
 SHUTDOWN_PERM = 'shutdownperm'
@@ -99,12 +111,38 @@ def loadConfig(filename):
     config.read(filename)
     return config
 
-def convertTime(string):
-    '''(str)->str
-    does nothing'''
-    return "Cheaky bastard"
-
 configureDiscordLogging()
+
+def init_command(filename, namespace, package="", **kwargs):
+    config_end=bot.data_config[CONFIGEND]
+    parameters = {'user':user_func, 'namespace':namespace, 'always_watch_messages':always_watch_messages, 'role_messages':role_messages}
+    if package:
+        package=package+"."
+    temp_lib = importlib.import_module("commands."+package+filename[:-len(".py")])
+    parameters['perms_loc']=perms_dir+package+filename[:-len(".py")]+".json"
+    try:
+        parameters['config']=bot.data_config[filename[:-len(".py")]+config_end]
+    except KeyError:
+        parameters['config']=None
+    return temp_lib.Command(**parameters, **kwargs)
+
+def init_reaction(filename, namespace, package="", emoji_dir="/", **kwargs):
+    config_end=bot.data_config[CONFIGEND]
+    parameters = {'user':user_func, 'namespace':namespace, 'always_watch_messages':always_watch_messages, 'role_messages':role_messages}
+    if package!="":
+        package=package+"."
+    temp_lib = importlib.import_module("reactions."+package+filename[:-len(".py")])#, ".reactions"+package)
+    parameters['perms_loc']=perms_dir+package+filename[:-len(".py")]+".json"
+    parameters['emoji_loc']=emoji_dir+package+filename[:-len(".py")]+".json"
+    try:
+        parameters['config']=bot.data_config[filename[:-len(".py")]+config_end]
+    except KeyError:
+        parameters['config']=None
+    return temp_lib.Reaction(**parameters, **kwargs)
+
+class CustomNamespace:
+    '''For creating custom namespaces wherever necessary'''
+    pass
 
 @asyncio.coroutine
 def doChecks(bot):
@@ -139,8 +177,6 @@ if __name__ == '__main__':
     credentials.content = credentials.content["DEFAULT"]
     channels = dataloader.datafile(config.content["channelsloc"])
     channels.content = channels.content["DEFAULT"]
-    perms = dataloader.datafile(config.content["permissionsloc"])
-    perms.content = perms.content["DEFAULT"]
     forumdiscorduser = dataloader.datafile(config.content["forumdiscorduserloc"])
     forumdiscorduser.content = forumdiscorduser.content["DEFAULT"]
 
@@ -150,65 +186,23 @@ if __name__ == '__main__':
 
     always_watch_messages = {botlib.LOADING_WARNING}
 
+    commands = dict()
+    reactions = dict()
+
     bot = botlib.Bot("./data/config.config", log, doChecks, stop, always_watch_messages)
-    bot.add_data(PERMISSIONS_LOCATION)
     bot.add_data(botlib.CHANNEL_LOC)
-    bot.add_data(EMOJIS_LOCATION)
+
+    # variables that should be accessible to all other commands are declared here
+
     # user_func uses lambda to create a closure on bot. This way when bot.user
     # updates it's available to DirectOnlyCommand's without giving extra info.
-
-    # variable that need to be shared between multiple commands classes and files should be declared here
     user_func = lambda: bot.user
-    all_emojis_func = bot.get_all_emojis
-
+    all_emojis_func = bot.get_all_emojis #lambda: bot.get_all_emojis wasn't working predictably
+    role_messages = savetome.load_role_messages(config.content[ROLE_MSG_LOCATION], all_emojis_func)
+    '''
     vote_dict=advancedvoteC.load_vote_dict(config.content[VOTE_DICT_LOCATION])
     ballot=advancedvoteC.load_ballot(config.content[BALLOT_LOCATION])
-
-    role_messages = rolegiver.load_role_messages(config.content[ROLE_MSG_LOCATION], all_emojis_func)
-
-
-    #bot.register_command(<command>) can go here
-    bot.register_command(ping.PingCommand(user=user_func))
-    bot.register_command(execute.ExecuteCommand(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, EXECUTION_PERM)))
-    bot.register_command(shutdown.ShutdownCommand(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, SHUTDOWN_PERM), logout_func=bot.logout))
-    bot.register_command(id.IdCommand(user=user_func))
-    bot.register_command(timezone.TimeZoneCommand(user=user_func))
-    snark_data = dataloader.datafile(config.content["snarkloc"])
-    bot.register_command(snark.SnarkCommand(user=user_func, snark_data=snark_data))
-    bot.register_command(featurelist.FeatureListCommand(user=user_func))
-    bot.register_command(blamejosh.BlameJoshCommand())
-    emoji = config.content["forumpostemoji"]
-    bot.register_command(forumpost.ForumPostCommand(add_reaction_func=bot.add_reaction, emoji=emoji))
-    karma_up_data = dataloader.datafile(config.content["karmauploc"])
-    karma_down_data = dataloader.datafile(config.content["karmadownloc"])
-    bot.register_command(karma.KarmaAdderCommand(karma_up_data=karma_up_data, karma_down_data=karma_down_data))
-    bot.register_command(karma.KarmaValueCommand(user=user_func))
-    bot.register_command(advancedvoteC.StartVoteCommand(always_watch_messages=always_watch_messages, vote_dict=vote_dict, user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_VOTE_PERM)))
-    bot.register_command(advancedvoteC.EndVoteCommand(vote_dict=vote_dict, user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_VOTE_PERM)))
-    bot.register_command(advancedvoteC.StartBallot(vote_dict=vote_dict, user=user_func, ballots=ballot))
-    bot.register_command(retrievequote.DisplayQuote(saveloc=bot.data_config["quotesavedir"]))
-    bot.register_command(picommand.PiCommand(bot.data_config["pifile"], user=user_func))
-    bot.register_command(statistics.GetStats(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, STATISTICS_PERM)))
-    bot.register_command(todo.ToDoCommand(user=user_func, saveloc=bot.data_config["todosavedir"]))
-    bot.register_command(roles.RolesCommand(role_messages=role_messages))
-    bot.register_command(colourroles.CreateColourRoleMessage(always_watch_messages=always_watch_messages, role_messages=role_messages, user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_ROLES_PERM)))
-    bot.register_command(colourroles.DeleteColourRoles(user=user_func, perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_ROLES_PERM)))
-    bot.register_command(spoiler.Spoiler(user=user_func))
-
-    #bot.register_reaction_command(<command>) can go here
-    bot.register_reaction_command(retry.RetryCommand(all_emojis_func=all_emojis_func, emoji=bot.get_data(EMOJIS_LOCATION, "retry")))
-    bot.register_reaction_command(simplevote.VoteAddReaction(bot.get_data(EMOJIS_LOCATION, "yes_vote"), bot.get_data(EMOJIS_LOCATION, "no_vote"), all_emojis_func=all_emojis_func))
-    bot.register_reaction_command(simplevote.VoteRemoveReaction(bot.get_data(EMOJIS_LOCATION, "yes_vote"), bot.get_data(EMOJIS_LOCATION, "no_vote"), all_emojis_func=all_emojis_func))
-    bot.register_reaction_command(simplevote.VoteTallyReaction(all_emojis_func=all_emojis_func, emoji=bot.get_data(EMOJIS_LOCATION, "tally_vote"), perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_VOTE_PERM)))
-    bot.register_reaction_command(quote.SaveQuote(saveloc=bot.data_config["quotesavedir"],all_emojis_func=all_emojis_func, emoji=bot.get_data(EMOJIS_LOCATION, "save")))
-    bot.register_reaction_command(quote.DisplayQuote(all_emojis_func=all_emojis_func, emoji=bot.get_data(EMOJIS_LOCATION, "quote")))
-    bot.register_reaction_command(pin.PinReaction(all_emojis_func=all_emojis_func, emoji=bot.get_data(EMOJIS_LOCATION, "pin")))
-    bot.register_reaction_command(advancedvoteR.StartBallot(always_watch_messages=always_watch_messages, vote_dict=vote_dict, ballots=ballot, all_emojis_func=all_emojis_func, emoji=bot.get_data(EMOJIS_LOCATION, "vote")))
-    bot.register_reaction_command(advancedvoteR.RegisterVote(vote_dict=vote_dict, ballots=ballot))
-    bot.register_reaction_command(rolegiver.RoleGiveReaction(all_emojis_func=all_emojis_func, role_messages=role_messages))
-    bot.register_reaction_command(rolegiver.RoleRemoveReaction(all_emojis_func=all_emojis_func, role_messages=role_messages))
-    bot.register_reaction_command(rolegiver.RoleMessageCreate(always_watch_messages=always_watch_messages, role_messages=role_messages, all_emojis_func=all_emojis_func, emoji=bot.get_data(EMOJIS_LOCATION, "rolemessagecreate"), perms=bot.get_data(PERMISSIONS_LOCATION, MANAGE_ROLES_PERM)))
-
+    '''
 
     qForum = Queue()
     qTwitter = Queue()
@@ -216,9 +210,46 @@ if __name__ == '__main__':
     global qRedditURLAdder
     qRedditURLAdder = Queue()
 
-    bot.register_reaction_command(emojid.IdCommand(perms=bot.get_data(PERMISSIONS_LOCATION, DEV_PERM)))
-    bot.register_reaction_command(invalidreaction.InvalidCommand())
-    bot.register_command(urladder.UrlAdderCommand(user=user_func, url_adder=qRedditURLAdder))
+    # load commands, up to two levels deep (ie in ./commands and in ./commands/*, but no deeper)
+    namespace=CustomNamespace()
+    sub_namespaces=dict()
+    perms_dir=config.content[PERMISSIONS_LOCATION]
+    emoji_dir=config.content[EMOJIS_LOCATION]
+
+    for item in sorted(listdir(COMMANDS_DIR)):
+        if isfile(join(COMMANDS_DIR, item)):
+            if item[-len(".py"):] == ".py" and item[0]!="_":
+                log.info("Loading command in %a " % item)
+                commands[item[:-len(".py")]]=init_command(item, namespace, url_adder=qRedditURLAdder)
+        elif item[0] != "_": # second level
+            if item not in sub_namespaces:
+                sub_namespaces[item]=CustomNamespace()
+            for sub_item in sorted(listdir(join(COMMANDS_DIR, item))):
+                if isfile(join(join(COMMANDS_DIR, item), sub_item)):
+                    if sub_item[-len(".py"):] == ".py" and sub_item[0]!="_":
+                        log.info("Loading command in %a " % join(item, sub_item))
+                        commands[sub_item[:-len(".py")]]=init_command(sub_item, sub_namespaces[item], package=item, url_adder=qRedditURLAdder)
+    #register commands
+    for cmd_name in commands:
+        bot.register_command(commands[cmd_name], cmd_name)
+
+    # load reactions, up to two levels deep
+    for item in sorted(listdir(REACTIONS_DIR)):
+        if isfile(join(REACTIONS_DIR, item)):
+            if item[-len(".py"):] == ".py" and item[0]!="_":
+                log.info("Loading reaction in %a " % item)
+                reactions[item[:-len(".py")]]=init_reaction(item, namespace, all_emojis_func=all_emojis_func, emoji_dir=emoji_dir)
+        elif item[0] != "_": # second level
+            if item not in sub_namespaces:
+                sub_namespaces[item]=CustomNamespace()
+            for sub_item in sorted(listdir(join(REACTIONS_DIR, item))):
+                if isfile(join(REACTIONS_DIR, item, sub_item)):
+                    if sub_item[-len(".py"):] == ".py" and sub_item[0]!="_":
+                        log.info("Loading reaction in %a " % join(item, sub_item))
+                        reactions[sub_item[:-len(".py")]]=init_reaction(sub_item, sub_namespaces[item], package=item, all_emojis_func=all_emojis_func, emoji_dir=emoji_dir)
+    # register reactions
+    for cmd_name in reactions:
+        bot.register_reaction_command(reactions[cmd_name], cmd_name)
 
     forumScraper = Process(target = scraperff.continuousScrape, args = (qForum, stop, ))
     forumScraper.start()
@@ -227,7 +258,7 @@ if __name__ == '__main__':
     redditScraper = Process(target = scraperred.continuousScrape, args = (qReddit, stop, qRedditURLAdder, ))
     redditScraper.start()
 
-    bot.register_command(invalid.InvalidCommand(user=user_func, invalid_message=config.content["invalidmessagemessage"]))
+    # bot.register_command(invalid.InvalidCommand(user=user_func, invalid_message=config.content["invalidmessagemessage"]))
     if "token" in credentials.content:
         loop.run_until_complete(bot.login(credentials.content["token"]))
     else:
@@ -245,18 +276,18 @@ if __name__ == '__main__':
             traceback.print_exc()
         if stop.empty():
             print("Something tripped up - reconnecting Discord API")
-
+    '''
     karma_entity_sum = 0
     for key in karma.Karma.karma:
         karma_entity_sum += len(key)
-    log.info("karma would take about %d bytes to save" % karma_entity_sum)
-    # variables that need to be saved on shutdown should be saved here
-    rolegiver.save_role_messages(config.content[ROLE_MSG_LOCATION], role_messages)
-    log.info("Saved role messages info")
-    advancedvoteC.save_vote_dict(config.content[VOTE_DICT_LOCATION], vote_dict)
-    advancedvoteC.save_ballot(config.content[BALLOT_LOCATION], ballot)
-    log.info("Saved voting info")
+    log.info("karma would take about %d bytes to save" % karma_entity_sum)'''
+    # do command shutdown
+    for cmd_name in commands:
+        commands[cmd_name].shutdown()
+    for cmd_name in reactions:
+        reactions[cmd_name].shutdown()
 
+    savetome.save_role_messages(config.content[ROLE_MSG_LOCATION], role_messages)
     twitterScraper.join()
     forumScraper.join()
     redditScraper.join()

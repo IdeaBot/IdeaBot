@@ -12,16 +12,23 @@ import time
 import re
 import types
 
+from libs import dataloader
+
 class Command():
     '''Command represents a command that the discord bot can use to take action
     based on messages posted in any discord channels it listens to.'''
 
-    def __init__(self, perms=None, **kwargs):
+    def __init__(self, perms_loc, **kwargs):
         '''(str, dict) -> Command
         perms: string of users who have permission to use this command
         kwargs: included for sub-classing.'''
         # TODO: more verification on the structure of perms
-        self.perms = perms
+        try:
+            self.perms_file = dataloader.datafile(perms_loc, load_as="json")
+            self.perms = self.perms_file.content
+        except FileNotFoundError:
+            self.perms_file = dataloader.newdatafile(perms_loc)
+            self.perms = None
 
     def _matches(self, message):
         '''(discord.Message) -> bool
@@ -50,6 +57,14 @@ class Command():
         '''(discord.Message, func) -> None
         Reacts to a message.'''
         pass
+
+    def shutdown(self):
+        '''(Command) -> None
+        This is called during bot shutdown
+        Use this to save any variables that need to be loaded again when the bot restarts'''
+        if self.perms != None: # save permissions
+            self.perms_file.content = self.perms
+            self.perms_file.save()
 
 
 class BenchmarkableCommand(Command):
@@ -114,3 +129,33 @@ class WatchCommand(Command):
     def __init__(self, always_watch_messages, **kwargs):
         super().__init__(**kwargs)
         self.always_watch_messages=always_watch_messages
+
+class Multi(Command):
+    '''Extending Multi will make it possible for the command to access the namespace (ie variables) of
+    other commands contained in the same folder or within the same folder name (not necessarily the same folder path)'''
+
+    def __init__(self, namespace, **kwargs):
+        super().__init__(**kwargs)
+        self.public_namespace = namespace
+
+class Dummy(Command):
+    '''Extending Dummy will make the command a dummy command (ie the command won't do anything)
+
+    Great for setting up the data structure of the public_namespace in Multi'''
+
+    def _matches(self, *args):
+        return False
+
+    def _action(self, *args):
+        pass
+
+class Config(Command):
+    '''Extending Config will make the command "catch" the configuration file for the command in self.config
+    The usage of self.config is the same as any other dataloader.datafile class'''
+
+    def __init__(self, config=None, **kwargs):
+        super().__init__(**kwargs)
+        if config:
+            self.config = dataloader.datafile(config)
+        else:
+            self.config = None

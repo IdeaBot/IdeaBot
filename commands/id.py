@@ -2,17 +2,17 @@
 """
 Created on Sat Jan 13 12:23:16 2018
 
-@author: 14flash
+@author: 14flash & NGnius
 """
 
-from commands import command
+from libs import command
 import re
 
-class IdCommand(command.DirectOnlyCommand):
+class Command(command.DirectOnlyCommand):
     '''IdCommand responds with the id of the user who called this command.'''
 
     def matches(self, message):
-        return re.search(r'\bwhat\s+id\b', message.content, re.IGNORECASE)
+        return re.search(r'\bwhat(\'s\s*)?(my)?\s+id\b', message.content, re.I)
 
     def action(self, message, send_func):
         yield from send_func(message.channel, message.author.id)

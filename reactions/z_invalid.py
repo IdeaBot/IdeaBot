@@ -1,8 +1,8 @@
-from reactions import reactioncommand as rc
+from libs import reaction as rc
 
 import asyncio
 
-class InvalidCommand(rc.ReactionAddCommand, rc.ReactionRemoveCommand):
+class Reaction(rc.ReactionAddCommand, rc.ReactionRemoveCommand):
     def matches(self, reaction, user):
         return True
 
