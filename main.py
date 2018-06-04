@@ -6,39 +6,6 @@ from os.path import isfile, join
 
 import bot as botlib
 
-"""
-from commands import ping
-from commands import id
-from commands import blamejosh
-from commands import timezone
-from commands import snark
-from commands import execute
-from commands import shutdown
-from commands import urladder
-from commands import forumpost
-from commands import invalid
-from commands import karma
-from commands import featurelist
-from commands import advancedvote as advancedvoteC
-from commands import retrievequote
-from commands import pi as picommand
-from commands import statistics
-from commands import todo
-from commands import roles
-from commands import colourroles
-from commands import spoiler
-"""
-"""
-from reactions import invalid as invalidreaction
-from reactions import retry
-from reactions import id as emojid #I'm sorry, I'm not even sure what I did there
-from reactions import simplevote
-from reactions import quote
-from reactions import advancedvote as advancedvoteR
-from reactions import pin
-from reactions import rolegiver
-"""
-
 from libs import configloader, scraperff, dataloader, scrapert, scraperred, embed, command, reaction, savetome
 
 EMOJIS_LOCATION = 'emojiloc'
@@ -199,10 +166,6 @@ if __name__ == '__main__':
     user_func = lambda: bot.user
     all_emojis_func = bot.get_all_emojis #lambda: bot.get_all_emojis wasn't working predictably
     role_messages = savetome.load_role_messages(config.content[ROLE_MSG_LOCATION], all_emojis_func)
-    '''
-    vote_dict=advancedvoteC.load_vote_dict(config.content[VOTE_DICT_LOCATION])
-    ballot=advancedvoteC.load_ballot(config.content[BALLOT_LOCATION])
-    '''
 
     qForum = Queue()
     qTwitter = Queue()
