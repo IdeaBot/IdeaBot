@@ -29,17 +29,19 @@ def get_url(bso):
     '''(BeautifulSoup object) -> str
     gets the text from guid'''
     return bso.find("guid").get_text()
-def is_new_tweet(url):
+def is_new_tweet(url, second=False):
     '''(str) -> bool
     returns True if the url is new, False otherwise'''
     is_new = True
     if len(data.content) > 0:
         for i in range(len(data.content)):
-            if data.content[i][:len("Most Recent Tweet:")].lower() == "most recent tweet:" : # if it's the file line about most recent thread
+            if data.content[i][:len("Most Recent Tweet:")].lower() == "most recent tweet:" and not second: # if it's the file line about most recent thread
                 if url == data.content[i][len("Most Recent Tweet:"):len("Most Recent Tweet:")+len(url)]:
                     is_new = False
-                else:
-                    break
+            if data.content[i][:len("Second Most Recent Tweet:")].lower() == "second most recent tweet:" :
+                if url == data.content[i][len("Second Most Recent Tweet:"):len("Second Most Recent Tweet:")+len(url)]:
+                    is_new = False
+
     return is_new
 def delete_entry(string):
     '''(str [, bool])->bool
@@ -64,9 +66,11 @@ def continuousScrape(q, stop):
             try:
                 rss = BeautifulSoup(pageRet.pageRet(config.content["url"]).decode(), "html.parser") # rss page
                 items = rss.find_all("item")
-                tweets = [[get_url(x), get_tweet(x)] for x in items][1:] # create list of [url to tweet, tweet content], discard first tweet because it's pinned
+                tweets = [[get_url(x), get_tweet(x)] for x in items] # create list of [url to tweet, tweet content]
+                pinned_tweet = tweets[0]
+                tweets = tweets[1:] # remove first tweet since it's pinned
 
-                if len(tweets)>0 and is_new_tweet(tweets[0][0]):
+                if len(tweets)>1 and is_new_tweet(tweets[0][0]) and is_new_tweet(tweets[1][0], second=True):
                     for i in tweets:
                         if is_new_tweet(i[0]):
                             twitLog.info("New tweet found: " + i[0])
@@ -75,8 +79,10 @@ def continuousScrape(q, stop):
                             break
                     delete_entry("most recent tweet:")
                     data.content.append("most recent tweet:"+tweets[0][0])
+                    data.content.append("second most recent tweet:"+tweets[1][0])
                     data.save()
                     twitLog.info("Most recent tweet is now: " + tweets[0][0])
+                    twitLog.info("Second most recent tweet is now: " + tweets[1][0])
                 twitLog.info("Finished scraping run in "+ str(time.time() - mostrecentrunstart))
             except:
                 twitLog.warning("Scraping run failed. Either the page has changed or the page is unavailable...")
