@@ -99,7 +99,7 @@ class DirectOnlyCommand(Command):
         self.breaks_on_match = True
 
     def _matches(self, message):
-        mentioned = self.user().mention in message.content
+        mentioned = re.search(r'<@!?'+self.user().id+r'>', message.content, re.I) != None
         return mentioned and super()._matches(message)
 
 class PrivateCommand(Command):
