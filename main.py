@@ -115,8 +115,11 @@ class CustomNamespace:
 def doChecks(bot):
     '''(discord.Client) -> None
     checks to make sure no messages need to be sent about something special, like scraper updates'''
+    threads = list()
     while not qForum.empty():
-        thread = qForum.get()
+        threads.append(qForum.get())
+    for thread in threads[::-1]:
+        #thread = qForum.get()
         #yield from bot.send_message(bot.forumchannel, "BEEP BOOP. This is a debug msg:"+str(thread[1]))
         users = []
         for i in thread[1]:
@@ -127,14 +130,20 @@ def doChecks(bot):
             yield from bot.send_message(bot.forumchannel, mentionChain(users), embed=embed.create_embed(description="In: "+thread[0], author={"name" : thread[1][-1]["name"], "url" : FORUM_URL+thread[1][-1]["url"], "icon_url" : None}, footer={"text":"Forum", "icon_url":None}))
         else:
             yield from bot.send_message(bot.forumchannel, embed=embed.create_embed(description="In: "+thread[0], author={"name" : thread[1][-1]["name"], "url" : FORUM_URL+thread[1][-1]["url"], "icon_url" : None}, footer={"text":"Forum", "icon_url":None}))
+    tweets = list()
     while not qTwitter.empty():
-        tweet = qTwitter.get()
+        tweets.append(qTwitter.get())
+    for tweet in tweets[::-1]:
+        #tweet = qTwitter.get()
         if not tweet["retweet"]:
             yield from bot.send_message(bot.twitterchannel, embed=embed.create_embed(author={"name":tweet["author"], "url":tweet["url"], "icon_url":TWITTER_PROFILE_ICON}, description=tweet["content"], footer={"text":"Twitter", "icon_url":TWITTER_LOGO}))
         else:
             yield from bot.send_message(bot.twitterchannel, embed=embed.create_embed(author={"name":"openideaproject retweeted "+tweet["author"], "url":tweet["url"], "icon_url":TWITTER_PROFILE_ICON}, description=tweet["content"], footer={"text":"Twitter", "icon_url":TWITTER_LOGO}))
+    comments = list()
     while not qReddit.empty():
-        comment = qReddit.get()
+        comments.append(qReddit.get())
+    for comment in comments[::-1]:
+        #comment = qReddit.get()
         yield from bot.send_message(bot.redditchannel, embed=embed.create_embed(description="A comment has been posted here: " + comment[0] + " (direct link: "+comment[1]+" )", footer={"text":"Reddit", "icon_url":REDDIT_LOGO}))
 
 if __name__ == '__main__':
