@@ -5,7 +5,9 @@ import sys
 sys.path.append('./libs/scraperlibs')
 import pageRet
 
-config = dataloader.datafile('./data/twitter.config')
+CONFIG_LOC = './data/twitter.config'
+
+config = dataloader.datafile(CONFIG_LOC)
 config.content = config.content["DEFAULT"]
 print(config.content["datafilepath"])
 data = dataloader.datafile(config.content["datafilepath"])
@@ -30,7 +32,7 @@ def get_url(bso):
     gets the text from guid'''
     return bso.find("guid").get_text()
 def is_new_tweet(url, second=False):
-    '''(str) -> bool
+    '''(str [, bool]) -> bool
     returns True if the url is new, False otherwise'''
     is_new = True
     if len(data.content) > 0:
@@ -44,7 +46,7 @@ def is_new_tweet(url, second=False):
 
     return is_new
 def delete_entry(string):
-    '''(str [, bool])->bool
+    '''(str)->bool
     delete the first entry in data.content that contains string, if it exists'''
     for i in range(len(data.content)):
         if string.lower() in data.content[i].lower():
@@ -52,13 +54,24 @@ def delete_entry(string):
             return True
     return False
 
+def get_author(bso):
+    '''(BeautifulSoup object) -> str
+    find the author's twitter handle '''
+    return bso.find("dc:creator").get_text().strip(" (@)")
+
+def get_author_from_url(url):
+    '''(str) -> str
+    find the author's twitter handle in the url'''
+    return url.split("=")[-1].strip("/")
+
 def continuousScrape(q, stop):
     '''(Queue object, Queue object) -> None
     checks continuously for new tweets from the official twitter. A [url (str), tweet (str)] object is reported through q when anything changes
-    This should be run in a different thread since it is blocking (it's a fucking while loop ffs)
+    This should be run in a different thread since it is blocking (it's a while loop ffs)
     stop.put(anything) will stop the loop'''
     twitLog.info("Thread started")
     mostrecentrunstart = -999999
+    author = get_author_from_url(config.content["url"])
     while stop.empty(): # run continuously unless there's something in stop
         if time.time() - mostrecentrunstart >= int(config.content["period"]):
             twitLog.info("Starting scraping run")
@@ -66,7 +79,8 @@ def continuousScrape(q, stop):
             try:
                 rss = BeautifulSoup(pageRet.pageRet(config.content["url"]).decode(), "html.parser") # rss page
                 items = rss.find_all("item")
-                tweets = [[get_url(x), get_tweet(x)] for x in items] # create list of [url to tweet, tweet content]
+                #print(items)
+                tweets = [[get_url(x), get_tweet(x), x] for x in items] # create list of [url to tweet, tweet content]
                 pinned_tweet = tweets[0]
                 tweets = tweets[1:] # remove first tweet since it's pinned
 
@@ -74,7 +88,11 @@ def continuousScrape(q, stop):
                     for i in tweets:
                         if is_new_tweet(i[0]):
                             twitLog.info("New tweet found: " + i[0])
-                            q.put(i)
+                            tweet_author = get_author(i[2])
+                            q_entry = {"url":i[0], "content":i[1], "author":tweet_author, "retweet":False}
+                            if author != tweet_author:
+                                q_entry["retweet"] = True
+                            q.put(q_entry)
                         else:
                             break
                     delete_entry("most recent tweet:")

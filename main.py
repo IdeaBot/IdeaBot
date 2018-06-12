@@ -126,10 +126,13 @@ def doChecks(bot):
         if len(users)>0:
             yield from bot.send_message(bot.forumchannel, mentionChain(users), embed=embed.create_embed(description="In: "+thread[0], author={"name" : thread[1][-1]["name"], "url" : FORUM_URL+thread[1][-1]["url"], "icon_url" : None}, footer={"text":"Forum", "icon_url":None}))
         else:
-            yield from bot.send_message(bot.forumchannel, embed=embed.create_embed(description="In: "+thread[0], author={"name" : thread[1][-1]["name"], "url" : FORUM_URL+thread[1][-1]["url"], "icon_url" : None}, footer={"text":"forum", "icon_url":None}))
+            yield from bot.send_message(bot.forumchannel, embed=embed.create_embed(description="In: "+thread[0], author={"name" : thread[1][-1]["name"], "url" : FORUM_URL+thread[1][-1]["url"], "icon_url" : None}, footer={"text":"Forum", "icon_url":None}))
     while not qTwitter.empty():
         tweet = qTwitter.get()
-        yield from bot.send_message(bot.twitterchannel, embed=embed.create_embed(author={"name":"Idea Project", "url":TWITTER_URL, "icon_url":TWITTER_PROFILE_ICON}, description=tweet[1], footer={"text":"Twitter", "icon_url":TWITTER_LOGO}))
+        if not tweet["retweet"]:
+            yield from bot.send_message(bot.twitterchannel, embed=embed.create_embed(author={"name":tweet["author"], "url":tweet["url"], "icon_url":TWITTER_PROFILE_ICON}, description=tweet["content"], footer={"text":"Twitter", "icon_url":TWITTER_LOGO}))
+        else:
+            yield from bot.send_message(bot.twitterchannel, embed=embed.create_embed(author={"name":"openideaproject retweeted "+tweet["author"], "url":tweet["url"], "icon_url":TWITTER_PROFILE_ICON}, description=tweet["content"], footer={"text":"Twitter", "icon_url":TWITTER_LOGO}))
     while not qReddit.empty():
         comment = qReddit.get()
         yield from bot.send_message(bot.redditchannel, embed=embed.create_embed(description="A comment has been posted here: " + comment[0] + " (direct link: "+comment[1]+" )", footer={"text":"Reddit", "icon_url":REDDIT_LOGO}))
