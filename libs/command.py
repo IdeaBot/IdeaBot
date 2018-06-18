@@ -132,6 +132,13 @@ class WatchCommand(Command):
         super().__init__(**kwargs)
         self.always_watch_messages=always_watch_messages
 
+class RoleCommand(Command):
+    '''Extending RoleCommand will make the command "catch" the role_messages variables'''
+
+    def __init__(self, role_messages, **kwargs):
+        super().__init__(**kwargs)
+        self.role_messages=role_messages
+
 class Multi(Command):
     '''Extending Multi will make it possible for the command to access the namespace (ie variables) of
     other commands contained in the same folder or within the same folder name (not necessarily the same folder path)'''

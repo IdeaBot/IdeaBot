@@ -1,12 +1,10 @@
 import discord
 import logging, time, asyncio, random, sys, configparser, traceback, importlib
 from multiprocessing import Process, Queue
-from os import listdir
-from os.path import isfile, join
 
 import bot as botlib
 
-from libs import configloader, scraperff, dataloader, scrapert, scraperred, embed, command, reaction, savetome
+from libs import configloader, scraperff, dataloader, scrapert, scraperred, embed, command, reaction, savetome, loader
 
 EMOJIS_LOCATION = 'emojiloc'
 PERMISSIONS_LOCATION = 'permissionsloc'
@@ -191,37 +189,15 @@ if __name__ == '__main__':
     perms_dir=config.content[PERMISSIONS_LOCATION]
     emoji_dir=config.content[EMOJIS_LOCATION]
 
-    for item in sorted(listdir(COMMANDS_DIR)):
-        if isfile(join(COMMANDS_DIR, item)):
-            if item[-len(".py"):] == ".py" and item[0]!="_":
-                log.info("Loading command in %a " % item)
-                commands[item[:-len(".py")]]=init_command(item, namespace, url_adder=qRedditURLAdder)
-        elif item[0] != "_": # second level
-            if item not in sub_namespaces:
-                sub_namespaces[item]=CustomNamespace()
-            for sub_item in sorted(listdir(join(COMMANDS_DIR, item))):
-                if isfile(join(join(COMMANDS_DIR, item), sub_item)):
-                    if sub_item[-len(".py"):] == ".py" and sub_item[0]!="_":
-                        log.info("Loading command in %a " % join(item, sub_item))
-                        commands[sub_item[:-len(".py")]]=init_command(sub_item, sub_namespaces[item], package=item, url_adder=qRedditURLAdder)
+    # load commands, up to two levels deep
+    commands = loader.load_commands(COMMANDS_DIR, user_func, role_messages, always_watch_messages, qRedditURLAdder)
     #register commands
     for cmd_name in commands:
         bot.register_command(commands[cmd_name], cmd_name)
 
     # load reactions, up to two levels deep
-    for item in sorted(listdir(REACTIONS_DIR)):
-        if isfile(join(REACTIONS_DIR, item)):
-            if item[-len(".py"):] == ".py" and item[0]!="_":
-                log.info("Loading reaction in %a " % item)
-                reactions[item[:-len(".py")]]=init_reaction(item, namespace, all_emojis_func=all_emojis_func, emoji_dir=emoji_dir)
-        elif item[0] != "_": # second level
-            if item not in sub_namespaces:
-                sub_namespaces[item]=CustomNamespace()
-            for sub_item in sorted(listdir(join(REACTIONS_DIR, item))):
-                if isfile(join(REACTIONS_DIR, item, sub_item)):
-                    if sub_item[-len(".py"):] == ".py" and sub_item[0]!="_":
-                        log.info("Loading reaction in %a " % join(item, sub_item))
-                        reactions[sub_item[:-len(".py")]]=init_reaction(sub_item, sub_namespaces[item], package=item, all_emojis_func=all_emojis_func, emoji_dir=emoji_dir)
+    reactions = loader.load_reactions(REACTIONS_DIR, user_func, role_messages, always_watch_messages, all_emojis_func)
+
     # register reactions
     for cmd_name in reactions:
         bot.register_reaction_command(reactions[cmd_name], cmd_name)

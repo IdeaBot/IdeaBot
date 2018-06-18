@@ -13,6 +13,7 @@ import asyncio
 
 from libs import dataloader, embed, command
 from libs import reaction as reactioncommand
+from collections import OrderedDict
 
 DEFAULT = 'DEFAULT'
 CHANNEL_LOC = 'channelsloc'
@@ -38,9 +39,9 @@ class Bot(discord.Client):
         # TODO(14flash): Plugin refactor, where we won't need a doCheck() func anymore
         self.checks = checks
         self.data = dict()
-        self.commands = dict() # maps names to commands
-        self.reactions = dict() # maps names to reaction commands
-        self.plugins = list()
+        self.commands = OrderedDict() # maps names to commands
+        self.reactions = OrderedDict() # maps names to reaction commands
+        self.plugins = list() # unused
         self.stop_queue=stop_queue
         self.always_watch_messages=always_watch_messages
 
@@ -101,7 +102,6 @@ class Bot(discord.Client):
     @asyncio.coroutine
     def on_reaction_add(self, reaction, user):
         for cmd in self.reactions:
-            print(cmd)
             if isinstance(self.reactions[cmd], reactioncommand.ReactionAddCommand) and self.reactions[cmd]._matches(reaction, user):
                 if isinstance(self.reactions[cmd], reactioncommand.AdminReactionCommand):
                     yield from self.reactions[cmd]._action(reaction, user, self)

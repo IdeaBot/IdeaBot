@@ -77,6 +77,7 @@ class datafile: # loads and parses files depending on file ending
             self.content = self.loadRawText(filename)
             self.type = None
             self.name = filename
+        self.filename = filename
 
     def save(self, save_as=None):
         '''() -> None
@@ -119,3 +120,4 @@ class newdatafile (datafile):
         else:
             self.type = ""
             self.name = filename
+        self.filename = filename
