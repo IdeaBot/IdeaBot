@@ -5,10 +5,10 @@ Created on Thu Jan 11 21:19:47 2018
 @author: 14flash
 """
 
-from commands import command
+from libs import command
 import re
 
-class PingCommand(command.DirectOnlyCommand, command.BenchmarkableCommand):
+class Command(command.DirectOnlyCommand, command.BenchmarkableCommand):
     '''PingCommand is a command that responds to the word "ping" as a quick way
     of checking that the bot is working correctly.'''
 

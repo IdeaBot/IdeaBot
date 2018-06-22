@@ -1,7 +1,15 @@
-from reactions import reactioncommand
+from libs import reaction as reactioncommand
 import asyncio
 
-class PinReaction(reactioncommand.AdminReactionAddCommand):
+PIN = '📌'
+
+class Reaction(reactioncommand.AdminReactionAddCommand):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.emoji = None
+    def matches(self, reaction, user):
+        return reaction.emoji == PIN
+
     @asyncio.coroutine
     def action(self, reaction, user, client):
         if reaction.message.channel.permissions_for(reaction.message.server.me).manage_messages:

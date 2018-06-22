@@ -1,10 +1,10 @@
-from commands import command
+from libs import command
 from libs import discordstats
 import re
 
 FILEPATH="msgdumptemp.csv"
 
-class GetStats(command.AdminCommand, command.DirectOnlyCommand):
+class Command(command.AdminCommand, command.DirectOnlyCommand):
     def matches(self, message):
         return re.search(r'stats|statistics', message.content, re.I)!=None
 

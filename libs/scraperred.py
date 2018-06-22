@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
-import dataloader, time, logging
+from libs import dataloader
+import time, logging
 import sys
 sys.path.append('./libs/scraperlibs')
 import pageRet

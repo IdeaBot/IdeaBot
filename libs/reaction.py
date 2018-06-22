@@ -1,5 +1,5 @@
 """
-Command is the definition of the reaction command class as well as extensible
+ReactionCommand is the definition of the reaction command class as well as extensible
 utility reaction command classes which can be used to make concrete reaction commands
 
 This is very similar to regular (message) commands, except for the input
@@ -7,18 +7,31 @@ is a reaction (reaction.message is equivalent to message in message command) and
 a user (the person who added/removed/updated the reaction)
 """
 
+from libs import dataloader
+
 class ReactionCommand():
     '''ReactionAddCommand represents a command that the bot can use to take action
-    based on reactions added to any discord messeage it listens to.'''
+    based on reactions added to any discord message it listens to.'''
 
-    def __init__(self, all_emojis_func=None, emoji=None, perms=None):
+    def __init__(self, all_emojis_func=None, emoji_loc=None, perms_loc=None, **kwargs):
         '''(ReactionCommand, func, str, dict) -> Command
         perms: str of users who have permission to use this command
         kwargs: included for sub-classing'''
         self.all_emojis_func = all_emojis_func
-        self.perms = perms
         self.emoji_action = set()
-        self.emoji = emoji
+        try:
+            self.emoji_file = dataloader.datafile(emoji_loc, load_as="json")
+            self.emoji = self.emoji_file.content
+        except FileNotFoundError:
+            self.emoji_file = dataloader.newdatafile(emoji_loc)
+            self.emoji = None
+
+        try:
+            self.perms_file = dataloader.datafile(perms_loc, load_as="json")
+            self.perms = self.perms_file.content
+        except FileNotFoundError:
+            self.perms_file = dataloader.newdatafile(perms_loc)
+            self.perms = None
 
     def _matches(self, reaction, user):
         '''(Command, discord.Reaction, discord.Member or discord.User) -> bool
@@ -26,12 +39,17 @@ class ReactionCommand():
         functionality. This calls matches()
 
         Returns True if the reaction should be interpreted by the command'''
-        return (self.perms == None or user.id in self.perms) and self.are_same_emoji(self.emoji, reaction.emoji) and self.matches(reaction, user)
+        if self.emoji != None and reaction.message.server.id in self.emoji:
+            emoji_match = self.are_same_emoji(self.emoji[reaction.message.server.id], reaction.emoji)
+        else:
+            emoji_match = (self.emoji == None)
+
+        return (self.perms == None or user.id in self.perms) and emoji_match and self.matches(reaction, user)
 
     def matches(self, reaction, user):
         '''(Command, discord.Reaction, discord.Member or discord.User) -> bool
         Returns True if the reaction should be interpreted by the command'''
-        return True
+        return self.emoji!=None # matches should always be overriden when self.emoji==None
 
     def _action(self, reaction, user):
         '''(Command, discord.Reaction, discord.Member or discord.User) -> None
@@ -45,6 +63,18 @@ class ReactionCommand():
         '''(Command, discord.Reaction, discord.Member or discord.User) -> None
         Reacts to a Reaction '''
         pass
+
+    def shutdown(self):
+        '''(ReactionCommand) -> None
+        This is called during bot shutdown
+        Use this to save any variables that need to be loaded again when the bot restarts'''
+        if self.emoji != None: # save emojis
+            self.emoji_file.content = self.emoji
+            self.emoji_file.save()
+
+        if self.perms != None: # save permissions
+            self.perms_file.content = self.perms
+            self.perms_file.save()
 
     #useful methods just in case
     def matchemoji(self, emoji_id):
@@ -119,3 +149,50 @@ class PrivateReactionCommand(ReactionCommand):
 
     def _matches(self, reaction, user):
         return reaction.message.server == None and super()._matches()
+
+class WatchReactionCommand(ReactionCommand):
+    '''Extending WatchCommand will make it possible for the command
+    to add discord.Messages for the bot to always keep track of
+
+    To add a message to the watchlist, use self.always_watch_messages.add(<discord.Message object>)
+    self.always_watch_messages is a set()'''
+
+    def __init__(self, always_watch_messages, **kwargs):
+        super().__init__(**kwargs)
+        self.always_watch_messages=always_watch_messages
+
+class RoleReaction(ReactionCommand):
+    '''Extending RoleReaction will make the command "catch" the role_messages variables'''
+    
+    def __init__(self, role_messages, **kwargs):
+        super().__init__(**kwargs)
+        self.role_messages=role_messages
+
+class Multi(ReactionCommand):
+    '''Extending Multi will make the reaction command "catch" the public_namespace associated with the folder's name'''
+
+    def __init__(self, namespace, **kwargs):
+        super().__init__(**kwargs)
+        self.public_namespace = namespace
+
+class Dummy(ReactionCommand):
+    '''Extending Dummy will make the command a dummy command (ie the command won't do anything)
+
+    Great for setting up the data structure of the public_namespace in Multi'''
+
+    def _matches(self, *args):
+        return False
+
+    def _action(self, *args):
+        pass
+
+class Config(ReactionCommand):
+    '''Extending Config will make the command "catch" the configuration file for the command in self.config
+    The usage of self.config is the same as any other dataloader.datafile class'''
+
+    def __init__(self, config=None, **kwargs):
+        super().__init__(**kwargs)
+        if config:
+            self.config = dataloader.datafile(config)
+        else:
+            self.config = None

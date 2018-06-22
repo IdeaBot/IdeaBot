@@ -1,6 +1,6 @@
-from commands import command
+from libs import command
 
-class RolesCommand(command.Command):
+class Command(command.Command):
     def matches(self, message):
         return "roles id" in message.content.lower() and message.server != None
 

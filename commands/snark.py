@@ -5,16 +5,16 @@ Created on Sat Jan 13 16:50:26 2018
 @author: 14flash
 """
 
-from commands import command
+from libs import command
 import re
 import random
 
-class SnarkCommand(command.DirectOnlyCommand):
+class Command(command.DirectOnlyCommand, command.Config):
     '''SnarkCommand replies with a snarky comment when someone wants one.'''
 
     def __init__(self, snark_data=None, **kwargs):
         super().__init__(**kwargs)
-        self.snark_data = snark_data.content
+        self.snark_data = self.config.content
 
     def matches(self, message):
         return re.search(r'\bsnark\b', message.content, re.IGNORECASE)

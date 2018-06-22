@@ -1,12 +1,14 @@
-from reactions import reactioncommand
+from libs import reaction as reactioncommand
 from libs import embed, dataloader
 import asyncio
 
-class SaveQuote(reactioncommand.ReactionAddCommand):
+SAVE_LOC = 'saveloc'
+
+class Reaction(reactioncommand.ReactionAddCommand, reactioncommand.Config):
     '''Saves messages when they get the right reaction'''
-    def __init__(self, saveloc="./", **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.saveloc = saveloc
+        self.saveloc = self.config.content["DEFAULT"][SAVE_LOC]
 
     @asyncio.coroutine
     def action(self, reaction, user):
@@ -22,11 +24,3 @@ class SaveQuote(reactioncommand.ReactionAddCommand):
                 "server":reaction.message.server.id,
                 "message":reaction.message.id}})]
         messageData.save()
-
-class DisplayQuote(reactioncommand.AdminReactionAddCommand):
-    def action(self, reaction, user, client):
-        em = embed.create_embed(author={"name":reaction.message.author.display_name, "url":None, "icon_url":None},
-            footer={"text": "#"+reaction.message.channel.name+" of "+reaction.message.server.name, "icon_url":None},
-            description=reaction.message.content,
-            colour=0xeeeeee)
-        yield from client.send_message(reaction.message.channel, embed=em)

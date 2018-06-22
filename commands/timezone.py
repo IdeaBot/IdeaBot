@@ -5,11 +5,11 @@ Created on Sat Jan 13 12:35:40 2018
 @author: 14flash
 """
 
-from commands import command
+from libs import command
 import re
 from libs import timezones
 
-class TimeZoneCommand(command.DirectOnlyCommand):
+class Command(command.DirectOnlyCommand):
     '''TimeZoneCommand converts a specified time to the deired timezone and
     responds with a message.'''
 

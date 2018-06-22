@@ -1,5 +1,4 @@
-from commands import command
-from libs import voting, embed
+from libs import command, voting, embed, dataloader
 
 import re, time
 
@@ -13,11 +12,11 @@ DEFAULT_NAME_GEN=time.time #function
 DEFAULT_OPTIONS=["Yes", "No"] #list
 DEFAULT_TRANSFERABLES=3 #int
 
-class StartVoteCommand(command.DirectOnlyCommand):
+class Command(command.DirectOnlyCommand, command.WatchCommand, command.Multi):
 
-    def __init__(self, vote_dict=None, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.vote_dict = vote_dict
+        self.vote_dict = self.public_namespace.vote_dict
 
     def matches(self, message):
         messagelowercase = message.content.lower()
@@ -70,6 +69,7 @@ class StartVoteCommand(command.DirectOnlyCommand):
             yield from send_func(message.author, reply) #send error msg (if any)
         embed_message = yield from send_func(message.channel, embed=embed.create_embed(title=temp_dict[NAME], description="Options: "+str(temp_dict[VOTES].options)+"\nMode: "+temp_dict[MODE], footer={"text":"Voting started", "icon_url":None}, colour=0x33ee33))
         self.vote_dict[embed_message.id]=dict(temp_dict)
+        self.always_watch_messages.add(embed_message) # never stop watching for reactions to embed_message
         return
 
 
@@ -86,64 +86,3 @@ class StartVoteCommand(command.DirectOnlyCommand):
 
         else:
             yield from send_func(message.channel, "Name conflict - please choose a different name")
-
-class EndVoteCommand(command.DirectOnlyCommand):
-
-    def __init__(self, vote_dict=None, **kwargs):
-        super().__init__(**kwargs)
-        self.vote_dict = vote_dict
-
-    def matches(self, message):
-        return re.search(r'\bend\s+["]([^"]+)["]+\s+\bvote', message.content, re.I) != None
-
-    def action(self, message, send_func):
-        args = re.search(r'\b(end)\s+["]([^"]+)["]+\s+\b(vote)', message.content, re.I)
-        #group(1) is end, group(2) is vote name, group(3) is vote
-        if args.group(2) in self.vote_dict:
-            yield from send_func(message.channel, embed=embed.create_embed(title=self.vote_dict[args.group(2)][NAME], description=self.format_results(self.vote_dict[args.group(2)][VOTES].tallyVotes()), footer={"text":"Voting ended", "icon_url":None}, colour=0xee3333))
-            del(self.vote_dict[args.group(2)])
-        else:
-            found=False
-            for poll in self.vote_dict:
-                if args.group(2) == self.vote_dict[poll][NAME]:
-                    found=True
-                    yield from send_func(message.channel, embed=embed.create_embed(title=self.vote_dict[poll][NAME], description=self.format_results(self.vote_dict[poll][VOTES].tallyVotes()), footer={"text":"Voting ended", "icon_url":None}, colour=0xee3333))
-                    del(self.vote_dict[poll])
-                    break
-            if not found:
-                yield from send_func(message.channel, "Invalid ID or name")
-
-    def format_results(self, results, start="Vote Results: \n"):
-        output = start[:]
-        if len(results) != 0:
-            for i in results:
-                output += str(i[0])+": "+str(i[1])+"\n"
-        else:
-            output += "No Votes Recorded"
-        return output
-
-class StartBallot(command.DirectOnlyCommand):
-    def __init__(self, vote_dict=dict(), ballots=dict(), **kwargs):
-        super().__init__(**kwargs)
-        self.vote_dict=vote_dict
-        self.ballots = ballots
-
-    def matches(self, message):
-        args = re.search(r'\bvote\s+in\s+["]([^"]+)["]', message.content, re.I)
-        if args == None:
-            return False
-        for i in self.vote_dict:
-            if self.vote_dict[i][NAME] == args.group(1) or i == args.group(1):
-                self.ballots[message.author.id]=i
-                return True
-        return False
-
-    def action(self, message, send_func):
-        reply = "Poll: **"+self.vote_dict[self.ballots[message.author.id]][NAME]+"**\n"
-        for i in range(len(self.vote_dict[self.ballots[message.author.id]][VOTES].options)):
-            reply += REACTIONS[i]+" : "+self.vote_dict[self.ballots[message.author.id]][VOTES].options[i]+"\n"
-        reply +="""
-Please place your vote by reacting with your choice(s).
-In the event that multiple choices are accepted, choices will be considered in chronological order (ie first reaction is first choice, second reaction is second choice, etc).
-**No take-backsies.**"""
-        yield from send_func(message.author, reply)

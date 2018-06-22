@@ -5,14 +5,14 @@ Created on Sun Jan 14 10:07:23 2018
 @author: 14flash
 """
 
-from commands import command
+from libs import command
 from libs import discordstats
 import re
 import sys
 
 evalDictOriginalNameThisIs = {}
 
-class ExecuteCommand(command.DirectOnlyCommand, command.AdminCommand, command.BenchmarkableCommand):
+class Command(command.DirectOnlyCommand, command.AdminCommand, command.BenchmarkableCommand):
     '''ExecuteCommand tries to execute a passed in piece of code and responds
     with the result of the execution.'''
 

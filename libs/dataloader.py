@@ -1,4 +1,4 @@
-import configparser
+import configparser, json
 class datafile: # loads and parses files depending on file ending
     def loadConfig(self, filename):
         '''() -> Config class
@@ -45,13 +45,30 @@ class datafile: # loads and parses files depending on file ending
         file.write(text)
         file.close()
 
-    def __init__(self, filename):
+    def loadJSON(self, filename):
+        '''(str) -> dict or list or other iterable (depending on input)
+        returns the filename interpreted as JSON'''
+        file = open(filename)
+        contents = json.loads(file.read())
+        file.close()
+        return contents
+    def saveJSON(self):
+        '''() -> None
+        saves file as JSON'''
+        file = open(self.name+".json", "w")
+        text = json.dumps(self.content)
+        file.write(text)
+        file.close()
+
+    def __init__(self, filename, load_as=None):
         if "." in filename:
             fileExt = filename[len(filename)-filename[::-1].index("."):].lower()
-            if fileExt == "config":
+            if fileExt == "config" or load_as == "config":
                 self.content = self.loadConfig(filename)
-            elif fileExt == "csv":
+            elif fileExt == "csv" or load_as == "csv":
                 self.content = self.loadCSV(filename)
+            elif fileExt == "json" or load_as == "json":
+                self.content = self.loadJSON(filename)
             else:
                 self.content = self.loadRawText(filename)
             self.type = fileExt
@@ -60,15 +77,19 @@ class datafile: # loads and parses files depending on file ending
             self.content = self.loadRawText(filename)
             self.type = None
             self.name = filename
+        self.filename = filename
 
-    def save(self):
+    def save(self, save_as=None):
         '''() -> None
         saves the file in the original format it was parsed from, including any chances'''
-        if self.type == "csv":
+        if self.type == "csv" or save_as == "csv":
             self.saveCSV()
-        elif self.type != "config":
+        elif self.type == "json" or save_as == "json":
+            self.saveJSON()
+        elif self.type != "config" and save_as!="config":
             self.saveRawText()
         # it's nasty saving Configs
+
     def contains(self, string):
         '''(str) -> bool
         searches for string in the content list strings
@@ -97,5 +118,6 @@ class newdatafile (datafile):
             self.type = filename[filename.rindex(".")+1:]
             self.name = filename[:filename.rindex(".")]
         else:
-            self.type = None
+            self.type = ""
             self.name = filename
+        self.filename = filename

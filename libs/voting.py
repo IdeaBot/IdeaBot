@@ -1,11 +1,11 @@
 class Poll():
     '''Base class for voting systems that everything below extends
     This class should never be used in a concrete implementation'''
-    def __init__(self, options = ["Y", "N"], allowed_voters = None):
+    def __init__(self, options = ["Y", "N"], allowed_voters = None, voted=list(), votes=dict()):
         self.options = options
         self.allowed_voters = allowed_voters
-        self.voted = set()
-        self.votes= dict()
+        self.voted = voted
+        self.votes = votes
 
     def addVote(self, voter, vote):
         '''(Poll, anything, str) -> bool
@@ -13,7 +13,7 @@ class Poll():
         Otherwise, this will return False'''
         if vote in self.options and (self.allowed_voters == None or voter in self.allowed_voters) and voter not in self.voted:
             self.votes[voter] = vote
-            self.voted.add(voter)
+            self.voted.append(voter)
             return True
         return False
 
@@ -31,9 +31,6 @@ class Poll():
 
 class FPTP(Poll):
     '''Implementation of First Past The Post voting system'''
-    def __init__(self, options = ["Y", "N"], allowed_voters = None, **kwargs):
-        '''(FPTP [, list, list, dict]) -> None '''
-        super().__init__(options=options, allowed_voters=allowed_voters)
 
     def tallyVotes(self):
         '''(FPTP) -> list
@@ -42,7 +39,7 @@ class FPTP(Poll):
         votes_by_option = dict(zip(self.options, [0]*len(self.options)))
         for voter in self.votes:
             votes_by_option[self.votes[voter]]+=1
-        results = [[self.votes_by_option[x],x] for x in self.votes_by_option] #turn into list of [votes, option]
+        results = [[votes_by_option[x],x] for x in votes_by_option] #turn into list of [votes, option]
         results.sort()
         results = results[::-1] #reverse order so highest number is first; not last
         return [[x[1],x[0]] for x in results] #swap option with votes
@@ -59,7 +56,7 @@ class STV(Poll):
         transferables is how many ranked votes one person can make
         ie transferables=2 means a voter can have a first choice and a second choice
         transferables=5 means a voter can have a first choice up to a fifth choice'''
-        super().__init__(options=options, allowed_voters=allowed_voters)
+        super().__init__(options=options, allowed_voters=allowed_voters, **kwargs)
         if transferables!=None:
             self.transferables = transferables
         else:
@@ -79,7 +76,7 @@ class STV(Poll):
                 if self.options.count(i)>1:
                     raise ValueError("Option "+i+" used more than once")
             self.votes[str(voter)]=list(vote)
-            self.voted.add(str(voter))
+            self.voted.append(str(voter))
         else:
             raise ValueError("Invalid vote or voter")
 
@@ -88,7 +85,7 @@ class STV(Poll):
         adds votes chronologically (1st addChoice is 1st choice, 2nd addChoice is 2nd choice, etc.)'''
         if voter not in self.votes and (self.allowed_voters == None or voter in self.allowed_voters):
             self.votes[str(voter)]=[None]*self.transferables
-            self.voted.add(str(voter))
+            self.voted.append(str(voter))
         if voter in self.votes and None in self.votes[voter] and vote in self.options and vote not in self.votes[voter]:
             self.votes[str(voter)][self.votes[str(voter)].index(None)] = str(vote)
             return True
