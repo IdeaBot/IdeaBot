@@ -107,3 +107,6 @@ ENV/
 **.csv
 **.txt
 **.json
+
+#so you don't commit your token
+data/credentials.config
