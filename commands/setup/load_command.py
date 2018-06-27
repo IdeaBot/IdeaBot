@@ -1,4 +1,4 @@
-from libs import command, loader
+from libs import command, reaction, loader, dataloader
 import requests, traceback, re
 from os.path import join
 
@@ -26,7 +26,6 @@ class Command(command.DirectOnlyCommand, command.AdminCommand, command.Multi, co
                 parameters["filename"] = args.group(2).strip("\\/").replace("/", ".").replace("\\", ".")
                 downloaded = False
             name = parameters["filename"].split(".")[-2]
-            print(parameters["filename"], name)
             if parameters["filename"]:
                 if args.group(3):
                     parameters["package"]=args.group(3)
@@ -35,6 +34,7 @@ class Command(command.DirectOnlyCommand, command.AdminCommand, command.Multi, co
                     else:
                         loader.sub_namespaces[parameters["package"]]=loader.CustomNamespace()
                         parameters["namespace"]=loader.sub_namespaces[parameters["package"]]
+
                 elif downloaded and len(parameters["filename"].split("."))>2: # if command is downloaded and is in subfolder (format [<folder>.]<command>.py)
                     filepath = parameters["filename"].split(".")
                     parameters["package"]=filepath[-3] # third last thing; should be first but I'm not going to assume
@@ -45,27 +45,52 @@ class Command(command.DirectOnlyCommand, command.AdminCommand, command.Multi, co
                         parameters["namespace"]=loader.sub_namespaces[parameters["package"]]
                 else:
                     parameters["namespace"]=loader.namespace
+                if "package" in parameters:
+                    try: # ensure the user is ok to import the command/reaction here
+                        if args.group(1)=="command":
+                            approved_users = dataloader.datafile(join(COMMANDS_DIR, parameters["package"], "approved_users.json")).content
+                        else:
+                            approved_users = dataloader.datafile(join(REACTIONS_DIR, parameters["package"], "approved_users.json")).content
+                    except FileNotFoundError:
+                        approved_users=None
+                    if approved_users != None and message.author.id not in approved_users:
+                        raise ImportError("User not approved for importing in this subfolder")
+
             else:
                 raise ImportError("No filename declared. Please provide one in `load command/reaction <filename> [from <folder name>]`")
 
             # finally actually load the command/reaction
             if args.group(1)=='command': # load command
-                if '-f' in message.content:
+                if '-f' in message.content and message.author.id in ADMINS:
                     bot.commands[name]=loader.init_command(**parameters, reload=True)
                 elif name in bot.commands:
-                    raise ImportError('Command by that name already exists. Use "-f" to force the import')
+                    raise ImportError('A Command by that name already exists. If you\'re an admin, use "-f" to force the import')
                 else:
-                    bot.commands[name]=loader.init_command(**parameters)
+                    new_command = loader.init_command(**parameters)
+                    if isinstance(new_command,command.AdminCommand):
+                        if message.author.id in ADMINS:
+                            bot.commands[name]=new_command
+                        else:
+                            raise ImportError('AdminCommands can only be added by admins. Please contact NGnius to add your command')
+                    else:
+                        bot.commands[name]=new_command
                 bot.commands.move_to_end(name, last=False)
             elif args.group(1)=='reaction': # load reaction
                 parameters['all_emojis_func']=bot.get_all_emojis
                 parameters['emoji_dir']=loader.emoji_dir
-                if '-f' in message.content:
+                if '-f' in message.content and message.author.id in ADMINS:
                     bot.reactions[name]=loader.init_reaction(**parameters, reload=True)
                 elif name in bot.reactions:
-                    raise ImportError('Reaction by that name already exists. Use "-f" to force the import')
+                    raise ImportError('A Reaction by that name already exists. If you\'re an admin, use "-f" to force the import')
                 else:
-                    bot.reactions[name]=loader.init_reaction(**parameters)
+                    new_reaction = loader.init_reaction(**parameters)
+                    if isinstance(new_reaction,reaction.AdminReactionCommand):
+                        if message.author.id in ADMINS:
+                            bot.reactions[name]=new_reaction
+                        else:
+                            raise ImportError('AdminReactionCommands can only be added by admins. Please contact NGnius to add your reaction')
+                    else:
+                        bot.reactions[name]=new_reaction
                 bot.reactions.move_to_end(name, last=False)
             yield from send_func(message.channel, "Successfully loaded %s" % parameters["filename"])
 

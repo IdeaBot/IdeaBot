@@ -15,24 +15,28 @@ evalDictOriginalNameThisIs = {}
 class Command(command.DirectOnlyCommand, command.AdminCommand, command.BenchmarkableCommand):
     '''ExecuteCommand tries to execute a passed in piece of code and responds
     with the result of the execution.'''
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.perms = None
 
     def matches(self, message):
         return self.collect_args(message)
 
     def action(self, message, send_func, client):
-        args_match = self.collect_args(message)
-        # TODO(14flash): Avoid magic number.
-        code = args_match.group(3)
-        try:
-            result = eval(code)
-            if result is None:
-                result = 'Execution completed successfully'
-            yield from send_func(message.channel, result)
-        except KeyboardInterrupt:
-            raise
-        except:
-            exception = sys.exc_info()
-            yield from send_func(message.channel, 'I\'m sure it\'s a feature that your code crashes, right? ' + self.exception_message(exception))
+        if message.author.id in client.ADMINS:
+            args_match = self.collect_args(message)
+            # TODO(14flash): Avoid magic number.
+            code = args_match.group(3)
+            try:
+                result = eval(code)
+                if result is None:
+                    result = 'Execution completed successfully'
+                yield from send_func(message.channel, result)
+            except KeyboardInterrupt:
+                raise
+            except:
+                exception = sys.exc_info()
+                yield from send_func(message.channel, 'I\'m sure it\'s a feature that your code crashes, right? ' + self.exception_message(exception))
 
     def collect_args(self, message):
         '''(discord.Message) -> re.MatchObject

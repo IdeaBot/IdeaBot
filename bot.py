@@ -20,6 +20,7 @@ CHANNEL_LOC = 'channelsloc'
 MSG_BACKUP_LOCATION='msgbackuploc'
 WATCH_MSG_LOCATION='alwayswatchmsgloc'
 LOADING_WARNING = "Things are loading"
+ADMINS = ["106537989684887552", "255041793417019393"]
 
 class Bot(discord.Client):
     '''A Discord client which has config data and a list of commands to try when
@@ -44,6 +45,7 @@ class Bot(discord.Client):
         self.plugins = list() # unused
         self.stop_queue=stop_queue
         self.always_watch_messages=always_watch_messages
+        self.ADMINS = ADMINS
 
     def add_data(self, name, content_from=DEFAULT):
         '''(str, str) -> None
