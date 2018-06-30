@@ -176,6 +176,7 @@ if __name__ == '__main__':
     user_func = lambda: bot.user
     all_emojis_func = bot.get_all_emojis #lambda: bot.get_all_emojis wasn't working predictably
     role_messages = savetome.load_role_messages(config.content[ROLE_MSG_LOCATION], all_emojis_func)
+    bot.role_messages = role_messages
 
     qForum = Queue()
     qTwitter = Queue()

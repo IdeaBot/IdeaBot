@@ -1,5 +1,6 @@
 from libs import reaction as reactioncommand
 import asyncio, re, discord
+from libs import savetome
 
 class Reaction(reactioncommand.AdminReactionAddCommand, reactioncommand.WatchReactionCommand, reactioncommand.RoleReaction):
     @asyncio.coroutine
@@ -12,6 +13,7 @@ class Reaction(reactioncommand.AdminReactionAddCommand, reactioncommand.WatchRea
             self.role_messages[reaction.message.id]=dict(emojiToRoleDict)
             for emoji in emojiToRoleDict: #make sure the bot doesn't get the roles as it reacts with the emojis
                 yield from bot.remove_roles(reaction.message.server.me, self.role_messages[reaction.message.id][emoji])
+            savetome.save_role_messages(bot.data_config[bot.ROLE_MSG_LOCATION], self.role_messages)
 
     def associateEmojiToRoles(self, content):
         result = dict() # {discord.Emoji:discord.Object(id=role id),...}

@@ -1,4 +1,4 @@
-from libs import command
+from libs import command, savetome
 import discord, asyncio, time
 
 dc = discord.Colour
@@ -10,6 +10,7 @@ dc.darker_grey():"darker_grey", dc(0x010101):"black", dc(0xffffff):"white", dc(0
 EMOJIS = ['🌎', '☘', '🎬', '🔵', '🐬', '🦄', '🔮', '💛', '🔶', '🔴', '🐞', '🌖', '🌘', '🌑','🌕', '🐖', '🍪']
 SPEED = 0
 RAINBOW_MESSAGE = "React with these emojis to get the corresponding colour: \n"
+ROLE_MSG_LOCATION='rolemessagesloc'
 n=0
 for i in RAINBOW:
     RAINBOW_MESSAGE+=RAINBOW[i]+" : "+EMOJIS[n]+"\n"
@@ -41,6 +42,7 @@ class Command(command.AdminCommand, command.DirectOnlyCommand, command.WatchComm
         self.role_messages[roleMessage.id]=colourRoleDict
         for emoji in colourRoleDict:
             yield from bot.remove_roles(message.server.me, colourRoleDict[emoji])
+        savetome.save_role_messages(bot.data_config[bot.ROLE_MSG_LOCATION], self.role_messages)
 
 def deleteColourRoles(server, bot, speed=SPEED):
     count = 0

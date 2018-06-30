@@ -11,7 +11,7 @@ Created on Wed Jan 10 20:05:03 2018
 import discord
 import asyncio
 
-from libs import dataloader, embed, command
+from libs import dataloader, embed, command, savetome
 from libs import reaction as reactioncommand
 from collections import OrderedDict
 
@@ -19,12 +19,18 @@ DEFAULT = 'DEFAULT'
 CHANNEL_LOC = 'channelsloc'
 MSG_BACKUP_LOCATION='msgbackuploc'
 WATCH_MSG_LOCATION='alwayswatchmsgloc'
+ROLE_MSG_LOCATION='rolemessagesloc'
 LOADING_WARNING = "Things are loading"
 ADMINS = ["106537989684887552", "255041793417019393"]
 
 class Bot(discord.Client):
     '''A Discord client which has config data and a list of commands to try when
     a message is received.'''
+
+    CHANNEL_LOC = 'channelsloc'
+    MSG_BACKUP_LOCATION='msgbackuploc'
+    WATCH_MSG_LOCATION='alwayswatchmsgloc'
+    ROLE_MSG_LOCATION='rolemessagesloc'
 
     def __init__(self, config, log, checks, stop_queue, always_watch_messages):
         '''(str, Logger, fun) -> Bot
@@ -46,6 +52,7 @@ class Bot(discord.Client):
         self.stop_queue=stop_queue
         self.always_watch_messages=always_watch_messages
         self.ADMINS = ADMINS
+        self.role_messages=dict()
 
     def add_data(self, name, content_from=DEFAULT):
         '''(str, str) -> None
@@ -230,7 +237,7 @@ class Bot(discord.Client):
             for msg in self.messages:
                 messagefile.content.append(msg.channel.id + ":" + msg.id)
             messagefile.save()
-            self.log.info("Saved %a messages" % len(messagefile.content))
+            # self.log.info("Saved %a messages" % len(messagefile.content))
         else:
             self.log.info("Messages are still being loaded, skipping save messages")
 
@@ -242,7 +249,7 @@ class Bot(discord.Client):
             for msg in self.always_watch_messages:
                 watchfile.content.append(msg.channel.id + ":" + msg.id)
             watchfile.save()
-            self.log.info("Saved %a watched messages" % len(watchfile.content))
+            # self.log.info("Saved %a watched messages" % len(watchfile.content))
         else:
             self.log.info("Messages are still being loaded, skipping save always watched messages")
 
