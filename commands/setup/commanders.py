@@ -7,6 +7,8 @@ class Command(command.Multi, command.AdminCommand, command.DirectOnlyCommand):
 
     def action(self, message, send_func, bot):
         commanders2 = dataloader.datafile(self.public_namespace.commandersfile.filename).content
+        if not isinstance(commanders2, dict):
+            commanders2 = dict()
 
         # ensure all commands are in commanders2
         for name in bot.commands:
@@ -35,7 +37,7 @@ class Command(command.Multi, command.AdminCommand, command.DirectOnlyCommand):
                     # so the owner will not be touched unless it is non-existent
                     if self.public_namespace.OWNER not in self.public_namespace.commanders[type][name]:
                         self.public_namespace.commanders[type][name][self.public_namespace.OWNER] = self.public_namespace.DEFAULT_OWNER_ID
-                    self.public_namespace.commanders[type][name][self.public_namespace.MAINTAINERS] = list(set(self.public_namespace.commanders[type][name][self.public_namespace.MAINTAINERS]) + set(commanders2[type][name][self.public_namespace.MAINTAINERS]))
+                    self.public_namespace.commanders[type][name][self.public_namespace.MAINTAINERS] = list(set(self.public_namespace.commanders[type][name][self.public_namespace.MAINTAINERS]) | set(commanders2[type][name][self.public_namespace.MAINTAINERS]))
 
         yield from send_func(message.channel, "Aye aye captain")
         # save file

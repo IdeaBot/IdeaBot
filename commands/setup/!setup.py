@@ -17,9 +17,9 @@ class Command(command.Multi, command.Dummy, command.Config):
         except FileNotFoundError:
             print("The %s file is either missing or corrupted; unable to load" %self.config.content[command.DEFAULT][COMMANDERS])
             self.public_namespace.commandersfile = dataloader.newdatafile(self.config.content[command.DEFAULT][COMMANDERS])
-            self.public_namespace.commandersfile.save() # create & save file
         if not isinstance(self.public_namespace.commandersfile.content, dict):
             self.public_namespace.commandersfile.content = {'reactions':dict(), 'commands':dict()}
+        self.public_namespace.commandersfile.save() # create & save file, in case it didn't exist before
         # commanders is a 3-dimensional dictionary; command_type -> command_name -> {'owner':user_id, 'maintainers':[list of user_ids]}
         self.public_namespace.commanders = self.public_namespace.commandersfile.content
         self.public_namespace.OWNER = OWNER
