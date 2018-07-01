@@ -10,7 +10,7 @@ class Command(command.Multi, command.AdminCommand, command.DirectOnlyCommand):
         return args!=None
 
     def action(self, message, send_func, bot):
-        args = re.search(r'(reaction|command|\s?)perms\s?->\s?(\S+)\s(\S+)', message.content, re.I)
+        args = re.search(r'(reaction|command|\s?)\s?perms\s?->\s?(\S+)\s(\S+)', message.content, re.I)
         if args.group(2) in bot.commands and args.group(2) in bot.reactions and len(args.group(1))<=1:
             yield from send_func(message.channel, "A reaction and command matching %s were found. Please re-run this command and specify which one right before the rest of the command." % args.group(2))
         elif (args.group(1)=="command" or len(args.group(1))<=1) and args.group(2) in bot.commands:

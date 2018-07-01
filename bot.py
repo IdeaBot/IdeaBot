@@ -15,13 +15,15 @@ from libs import dataloader, embed, command, savetome
 from libs import reaction as reactioncommand
 from collections import OrderedDict
 
+# constants
 DEFAULT = 'DEFAULT'
 CHANNEL_LOC = 'channelsloc'
 MSG_BACKUP_LOCATION='msgbackuploc'
 WATCH_MSG_LOCATION='alwayswatchmsgloc'
 ROLE_MSG_LOCATION='rolemessagesloc'
 LOADING_WARNING = "Things are loading"
-ADMINS = ["106537989684887552", "255041793417019393"]
+
+ADMINS = ["106537989684887552", "255041793417019393"] # important ppl get to be admins
 
 class Bot(discord.Client):
     '''A Discord client which has config data and a list of commands to try when

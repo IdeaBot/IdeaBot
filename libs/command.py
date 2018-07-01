@@ -14,6 +14,8 @@ import types
 
 from libs import dataloader
 
+DEFAULT = 'DEFAULT' # default config file section
+
 class Command():
     '''Command represents a command that the discord bot can use to take action
     based on messages posted in any discord channels it listens to.'''
