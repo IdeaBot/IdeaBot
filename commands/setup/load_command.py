@@ -50,6 +50,16 @@ class Command(command.DirectOnlyCommand, command.AdminCommand, command.Multi, co
             else:
                 raise ImportError("No filename declared. Please provide one in `load command/reaction <filename> [from <folder name>]`")
 
+            if "package" in parameters:
+                # if new package, create package import perms
+                if parameters["package"] not in self.public_namespace.commanders[self.public_namespace.PACKAGES]:
+                    self.public_namespace.commanders[self.public_namespace.PACKAGES][parameters["package"]] = dict()
+                    self.public_namespace.commanders[self.public_namespace.PACKAGES][parameters["package"]][self.public_namespace.OWNER] = message.author.id
+                    self.public_namespace.commanders[self.public_namespace.PACKAGES][parameters["package"]][self.public_namespace.MAINTAINERS] = list()
+                # ensure user is allowed to use sub-folder/package
+                elif not (message.author.id in ADMINS or self.public_namespace.commanders[self.public_namespace.PACKAGES][parameters["package"]][self.public_namespace.OWNER] == message.author.id or message.author.id in self.public_namespace.commanders[self.public_namespace.PACKAGES][parameters["package"]][self.public_namespace.MAINTAINERS]):
+                    raise ImportError('You are not the owner/maintainer of this folder. To gain access to this folder, please contact <@!%s>' % self.public_namespace.commanders[self.public_namespace.PACKAGES][parameters["package"]][self.public_namespace.OWNER])
+
             # finally actually load the command/reaction
             if args.group(1)=='command': # load command
                 has_perms = (message.author.id in ADMINS or message.author.id == self.public_namespace.commanders[self.public_namespace.COMMANDS][name][self.public_namespace.OWNER] or message.author.id in self.public_namespace.commanders[self.public_namespace.COMMANDS][name][self.public_namespace.MAINTAINERS])

@@ -1,5 +1,5 @@
 import re
-from libs import command, dataloader
+from libs import command, dataloader, loader
 
 class Command(command.Multi, command.AdminCommand, command.DirectOnlyCommand):
     def matches(self, message):
@@ -15,12 +15,18 @@ class Command(command.Multi, command.AdminCommand, command.DirectOnlyCommand):
             if name not in commanders2[self.public_namespace.COMMANDS]:
                 commanders2[self.public_namespace.COMMANDS][name] = "missing"
 
+        # ensure all reactions are in commanders2
         for name in bot.reactions:
             if name not in commanders2[self.public_namespace.REACTIONS]:
                 commanders2[self.public_namespace.REACTIONS][name] = "missing"
 
+        # ensure all packages are in commanders2
+        for package in loader.sub_namespaces:
+            if package not in commanders2[self.public_namespace.PACKAGES]:
+                commanders2[self.public_namespace.PACKAGES][package] = "missing"
+
         # merge commanders2 with current commanders, in case something changed
-        for type in commanders2: # type is reactions or commands, but this may expand to include plugins eventually
+        for type in commanders2: # type is packages, reactions or commands, but this may expand to include plugins eventually
             for name in commanders2[type]: # name is the command's name, determined by the command's filename
                 # some verification to make sure keys are declared properly
                 if not isinstance(commanders2[type][name], dict):

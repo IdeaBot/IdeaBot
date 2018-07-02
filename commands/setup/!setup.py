@@ -6,6 +6,7 @@ MAINTAINERS = "maintainers"
 DEFAULT_OWNER_ID = "106537989684887552" #NGnius's discord ID ~~pls don't hack me~~
 REACTIONS = 'reactions'
 COMMANDS = 'commands'
+PACKAGES = 'packages'
 
 class Command(command.Multi, command.Dummy, command.Config):
     def __init__(self, **kwargs):
@@ -18,7 +19,7 @@ class Command(command.Multi, command.Dummy, command.Config):
             print("The %s file is either missing or corrupted; unable to load" %self.config.content[command.DEFAULT][COMMANDERS])
             self.public_namespace.commandersfile = dataloader.newdatafile(self.config.content[command.DEFAULT][COMMANDERS])
         if not isinstance(self.public_namespace.commandersfile.content, dict):
-            self.public_namespace.commandersfile.content = {'reactions':dict(), 'commands':dict()}
+            self.public_namespace.commandersfile.content = {REACTIONS:dict(), COMMANDS:dict(), PACKAGES:dict()}
         self.public_namespace.commandersfile.save() # create & save file, in case it didn't exist before
         # commanders is a 3-dimensional dictionary; command_type -> command_name -> {'owner':user_id, 'maintainers':[list of user_ids]}
         self.public_namespace.commanders = self.public_namespace.commandersfile.content
@@ -27,6 +28,7 @@ class Command(command.Multi, command.Dummy, command.Config):
         self.public_namespace.DEFAULT_OWNER_ID = DEFAULT_OWNER_ID
         self.public_namespace.REACTIONS = REACTIONS
         self.public_namespace.COMMANDS = COMMANDS
+        self.public_namespace.PACKAGES = PACKAGES
 
     def shutdown(self):
         super().shutdown()
