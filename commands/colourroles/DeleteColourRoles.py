@@ -8,7 +8,7 @@ dc(0xFF00FF):"magenta", dc.gold():"gold", dc.orange():"orange",
 dc.red():"red", dc.dark_red():"dark_red", dc.lighter_grey():"lighter_grey",
 dc.darker_grey():"darker_grey", dc(0x010101):"black", dc(0xffffff):"white", dc(0xFFC0CB):"pink", dc(0x964B00):"brown"}
 EMOJIS = ['🌎', '☘', '🎬', '🔵', '🐬', '🦄', '🔮', '💛', '🔶', '🔴', '🐞', '🌖', '🌘', '🌑','🌕', '🐖', '🍪']
-SPEED = 0
+SPEED = 0.001
 RAINBOW_MESSAGE = "React with these emojis to get the corresponding colour: \n"
 n=0
 for i in RAINBOW:
@@ -23,16 +23,21 @@ class Command(command.AdminCommand, command.DirectOnlyCommand):
     @asyncio.coroutine
     def action(self, message, send_func, bot):
         count = yield from deleteColourRoles(message.server, bot)
-        yield from send_func(message.channel, "Deleted "+str(count)+" roles. Rerun this if I missed something - I'm sort of a pacifist.")
+        yield from send_func(message.channel, "Deleted "+str(count)+" rainbow roles")
 
+@asyncio.coroutine
 def deleteColourRoles(server, bot, speed=SPEED):
     count = 0
-    time.sleep(speed)
+    to_delete = list()
+    # create list of roles to delete
+    # NOTE: Deleting roles at the same time as iterating causes undesired results (lots of roles get skipped/missed)
     for role in server.roles:
         for colour in RAINBOW:
             if RAINBOW[colour].lower().strip() == role.name.lower().strip():
-                yield from bot.delete_role(server, role)
-                count += 1
+                to_delete.append([server, role])
                 break
-        time.sleep(speed)
+    # delete those roles
+    for arg in to_delete:
+        yield from bot.delete_role(*arg)
+        count+=1
     return count
