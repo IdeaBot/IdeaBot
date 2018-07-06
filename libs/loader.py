@@ -1,4 +1,4 @@
-from libs import dataloader
+from libs import dataloader, plugin
 import importlib, logging
 from os import listdir
 from os.path import isfile, join
@@ -53,6 +53,23 @@ def init_reaction(filename, namespace, user_func, role_messages, always_watch_me
         parameters['config']=None
     return temp_lib.Reaction(**parameters, **kwargs) # init reaction
 
+def init_plugin(filename, namespace, bot, package="", reload=False, **kwargs):
+    # generate parameters
+    events = {plugin.READY:bot.wait_until_ready, plugin.LOGIN:bot.wait_until_login, plugin.MESSAGE:bot.wait_for_message, plugin.REACTION:bot.wait_for_reaction}
+    parameters = {'events':events}
+    try:
+        parameters['config']=config.content[filename[:-len(".py")]+config_end]
+    except KeyError:
+        parameters['config']=None
+    # import plugin
+    if package!="":
+        package=package+"."
+    temp_lib = importlib.import_module("reactions."+package+filename[:-len(".py")]) # import reaction
+    if reload: # dumb way to do it, ik
+        temp_lib = importlib.reload(temp_lib)
+    # init plugin and return it
+    return temp_lib.Plugin(**parameters, **kwargs)
+
 def load_commands(folder, user_func, role_messages, always_watch_messages, url_adder):
     commands = OrderedDict()
     for item in sorted(listdir(folder)):
@@ -86,3 +103,20 @@ def load_reactions(folder, user_func, role_messages, always_watch_messages, all_
                         log.info("Loading reaction in %a " % join(item, sub_item))
                         reactions[sub_item[:-len(".py")]]=init_reaction(sub_item, sub_namespaces[item], user_func, role_messages, always_watch_messages, package=item, all_emojis_func=all_emojis_func, emoji_dir=emoji_dir)
     return reactions
+
+def load_plugins(folder, bot):
+    plugins = OrderedDict()
+    for item in sorted(listdir(folder)):
+        if isfile(join(folder, item)):
+            if item[-len(".py"):] == ".py" and item[0]!="_":
+                log.info("Loading plugin in %a " % item)
+                plugins[item[:-len(".py")]]=init_plugin(item, namespace, bot)
+        elif item[0] != "_": # second level
+            if item not in sub_namespaces:
+                sub_namespaces[item]=CustomNamespace()
+            for sub_item in sorted(listdir(join(folder, item))):
+                if isfile(join(folder, item, sub_item)):
+                    if sub_item[-len(".py"):] == ".py" and sub_item[0]!="_":
+                        log.info("Loading plugin in %a " % join(item, sub_item))
+                        plugins[sub_item[:-len(".py")]]=init_plugin(sub_item, sub_namespaces[item], bot)
+    return plugins

@@ -14,6 +14,7 @@ WATCH_MSG_LOCATION='alwayswatchmsgloc'
 ROLE_MSG_LOCATION='rolemessagesloc'
 COMMANDS_DIR = './commands'
 REACTIONS_DIR = './reactions'
+PLUGINS_DIR = './plugins'
 PERMS = 'perms'
 COMMAND = 'command'
 REACTION = 'reaction'
@@ -197,10 +198,15 @@ if __name__ == '__main__':
 
     # load reactions, up to two levels deep
     reactions = loader.load_reactions(REACTIONS_DIR, user_func, role_messages, always_watch_messages, all_emojis_func)
-
     # register reactions
     for cmd_name in reactions:
         bot.register_reaction_command(reactions[cmd_name], cmd_name)
+
+    # load plugins, up to two levels deep
+    plugins = loader.load_plugins(PLUGINS_DIR, bot)
+    # register plugins
+    for plugin_name in plugins:
+        bot.register_plugin(plugins[plugin_name], plugin_name)
 
     forumScraper = Process(target = scraperff.continuousScrape, args = (qForum, stop, ))
     forumScraper.start()

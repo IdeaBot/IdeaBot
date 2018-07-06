@@ -39,9 +39,9 @@ class Bot(discord.Client):
         # TODO(14flash): Plugin refactor, where we won't need a doCheck() func anymore
         self.checks = checks
         self.data = dict()
-        self.commands = OrderedDict() # maps names to commands
-        self.reactions = OrderedDict() # maps names to reaction commands
-        self.plugins = list() # unused
+        self.commands = OrderedDict() # maps names to commands classes
+        self.reactions = OrderedDict() # maps names to reaction commands classes
+        self.plugins = OrderedDict() # maps plugin names to plugin classes
         self.stop_queue=stop_queue
         self.always_watch_messages=always_watch_messages
 
@@ -68,11 +68,13 @@ class Bot(discord.Client):
             raise ValueError('Only commands may be registered in Bot::register_command')
         self.commands[name]=cmd
 
-    def register_plugin(self, plugin):
+    def register_plugin(self, plugin, name):
         '''(Plugin) -> None
         Registers a Plugin which executes in a separate process'''
-        # TODO(14flash): Plugin refactor.
-        pass
+        if not isinstance(cmd, plugin.Plugin):
+            raise ValueError('Only plugins may be registered in Bot::register_plugin')
+        self.plugins[name]=plugin
+        self.loop.create_task(plugin._action())
 
     def register_reaction_command(self, cmd, name):
         '''(discord.Client, reactions.Command) -> None
