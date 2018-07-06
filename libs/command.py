@@ -14,6 +14,8 @@ import types
 
 from libs import dataloader
 
+DEFAULT = 'DEFAULT' # default config file section
+
 class Command():
     '''Command represents a command that the discord bot can use to take action
     based on messages posted in any discord channels it listens to.'''
@@ -28,7 +30,7 @@ class Command():
             self.perms = self.perms_file.content
         except FileNotFoundError:
             self.perms_file = dataloader.newdatafile(perms_loc)
-            self.perms = None
+            self.perms = dict()
         self.breaks_on_match = False
 
     def _matches(self, message):
@@ -38,7 +40,7 @@ class Command():
         concrete instances (see DirectOnlyCommand as an example).
 
         Returns true if this command can interpret the message.'''
-        return (self.perms is None or message.author.id in self.perms) and self.matches(message)
+        return (self.perms is None or message.server is None or message.server.id not in self.perms or message.author.id in self.perms[message.server.id]) and self.matches(message)
 
     def matches(self, message):
         '''(discord.Message) -> bool

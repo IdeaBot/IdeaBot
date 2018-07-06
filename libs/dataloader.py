@@ -49,15 +49,14 @@ class datafile: # loads and parses files depending on file ending
         '''(str) -> dict or list or other iterable (depending on input)
         returns the filename interpreted as JSON'''
         file = open(filename)
-        contents = json.loads(file.read())
+        contents = json.load(file)
         file.close()
         return contents
     def saveJSON(self):
         '''() -> None
         saves file as JSON'''
         file = open(self.name+".json", "w")
-        text = json.dumps(self.content)
-        file.write(text)
+        json.dump(self.content, file, ensure_ascii=False, indent=4)
         file.close()
 
     def __init__(self, filename, load_as=None):

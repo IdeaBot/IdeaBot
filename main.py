@@ -177,6 +177,7 @@ if __name__ == '__main__':
     user_func = lambda: bot.user
     all_emojis_func = bot.get_all_emojis #lambda: bot.get_all_emojis wasn't working predictably
     role_messages = savetome.load_role_messages(config.content[ROLE_MSG_LOCATION], all_emojis_func)
+    bot.role_messages = role_messages
 
     qForum = Queue()
     qTwitter = Queue()
@@ -239,10 +240,10 @@ if __name__ == '__main__':
         karma_entity_sum += len(key)
     log.info("karma would take about %d bytes to save" % karma_entity_sum)'''
     # do command shutdown
-    for cmd_name in commands:
-        commands[cmd_name].shutdown()
-    for cmd_name in reactions:
-        reactions[cmd_name].shutdown()
+    for cmd_name in bot.commands:
+        bot.commands[cmd_name].shutdown()
+    for cmd_name in bot.reactions:
+        bot.reactions[cmd_name].shutdown()
 
     savetome.save_role_messages(config.content[ROLE_MSG_LOCATION], role_messages)
     twitterScraper.join()

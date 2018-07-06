@@ -1,6 +1,7 @@
 from libs import command, dataloader
 import requests, traceback, re
-from os.path import join
+from os.path import join, exists
+from os import makedirs
 
 COMMANDS_DIR = './commands'
 REACTIONS_DIR = './reactions'
@@ -20,6 +21,20 @@ class Command(command.DirectOnlyCommand, command.AdminCommand, command.Multi):
                 # NOTE: new_command_file should probably be a binary file (like open(filename, "wb") ), not a regular file
                 # TODO(NGnius): make new_command_file a binary file (wb)
                 if args.group(2):
+                    # make sure folder exists
+                    temp = args.group(2).replace("\\", "/").strip("/")
+                    if "/" in temp:
+                        folder = temp[:temp.rfind("/")]
+                    else:
+                        folder=temp
+                    if args.group(1)=="command":
+                        directory = join(COMMANDS_DIR, folder)
+                    else:
+                        directory = join(REACTIONS_DIR, folder)
+                    if not exists(directory):
+                        makedirs(directory)
+
+                    # save file to correct location
                     if args.group(2).strip("\\/")[-3:]==".py":
                         if args.group(1)=="command":
                             new_command_file = dataloader.newdatafile(join(COMMANDS_DIR, args.group(2)))

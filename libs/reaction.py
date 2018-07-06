@@ -31,7 +31,7 @@ class ReactionCommand():
             self.perms = self.perms_file.content
         except FileNotFoundError:
             self.perms_file = dataloader.newdatafile(perms_loc)
-            self.perms = None
+            self.perms = dict()
 
     def _matches(self, reaction, user):
         '''(Command, discord.Reaction, discord.Member or discord.User) -> bool
@@ -44,7 +44,7 @@ class ReactionCommand():
         else:
             emoji_match = (self.emoji == None)
 
-        return (self.perms == None or user.id in self.perms) and emoji_match and self.matches(reaction, user)
+        return (self.perms is None or reaction.message.server is None or reaction.message.server.id not in self.perms or user.id in self.perms[reaction.message.server.id]) and emoji_match and self.matches(reaction, user)
 
     def matches(self, reaction, user):
         '''(Command, discord.Reaction, discord.Member or discord.User) -> bool
@@ -163,7 +163,7 @@ class WatchReactionCommand(ReactionCommand):
 
 class RoleReaction(ReactionCommand):
     '''Extending RoleReaction will make the command "catch" the role_messages variables'''
-    
+
     def __init__(self, role_messages, **kwargs):
         super().__init__(**kwargs)
         self.role_messages=role_messages
