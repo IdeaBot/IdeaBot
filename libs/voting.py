@@ -50,8 +50,8 @@ class FPTP(Poll):
 
     def dumpVotes(self):
         '''(FPTP) -> list
-        returns a list of [option, total votes], unsorted'''
-        return [[self.votes[x],x] for x in self.votes] #turn self.votes dict into list of [votes, options]
+        returns a list of [option, voter], unsorted'''
+        return [[self.votes[x],x] for x in self.votes] #turn self.votes dict into list of [votes, voter]
 
 class STV(Poll):
     '''Implementation of Single Transferable Vote voting system'''
@@ -61,7 +61,7 @@ class STV(Poll):
         ie transferables=2 means a voter can have a first choice and a second choice
         transferables=5 means a voter can have a first choice up to a fifth choice'''
         super().__init__(options=options, allowed_voters=allowed_voters, **kwargs)
-        if transferables!=None:
+        if transferables is not None and isinstance(transferables, int):
             self.transferables = transferables
         else:
             self.transferables = len(self.options)
@@ -77,7 +77,7 @@ class STV(Poll):
             for i in vote:
                 if i not in self.options:
                     raise ValueError("Invalid option: "+i)
-                if self.options.count(i)>1:
+                if vote.count(i)>1:
                     raise ValueError("Option "+i+" used more than once")
             self.votes[str(voter)]=list(vote)
             self.voted.append(str(voter))
