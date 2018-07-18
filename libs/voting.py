@@ -1,7 +1,11 @@
 class Poll():
     '''Base class for voting systems that everything below extends
     This class should never be used in a concrete implementation'''
-    def __init__(self, options = ["Y", "N"], allowed_voters = None, voted=list(), votes=dict()):
+    def __init__(self, options = ["Y", "N"], allowed_voters = None, voted=None, votes=None):
+        if voted is None:
+            voted = list()
+        if votes is None:
+            votes = dict()
         self.options = options
         self.allowed_voters = allowed_voters
         self.voted = voted
