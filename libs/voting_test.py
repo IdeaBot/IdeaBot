@@ -204,7 +204,46 @@ class TestSTV(unittest.TestCase):
         # MBC('b') = 7 so 'b' should always be top of the list
         tally = poll.tallyVotes()
         self.assertEqual(['b', 2], tally[0])
-        self.assertEqual(['a', 3], tally[1])
+        self.assertEqual(['a', 2], tally[1])
+    
+    def test_tallyVotesFromTwoPolls(self):
+        #This is a test I'd like to do because I suspect options can get overwritten and then default options dies        
+        pass
+    
+    def test_bordaCountOptionNotIncluded(self):
+        poll = voting.STV()
+        self.assertEqual(0, poll._bordaCountFromSingleBallot(['a'], 'b'))
+    
+    def test_bordaCountLastOptionReturnsOne(self):
+        poll = voting.STV()
+        self.assertEqual(1, poll._bordaCountFromSingleBallot(['a', 'b', 'c'], 'c'))
+    
+    def test_bordaCountMiddleOptions(self):
+        poll = voting.STV()
+        self.assertEqual(2, poll._bordaCountFromSingleBallot(['a', 'b', 'c'], 'b'))
+    
+    def test_bordaCountFirstOptionReturnsMaxNumber(self):
+        poll = voting.STV()
+        self.assertEqual(3, poll._bordaCountFromSingleBallot(['a', 'b', 'c'], 'a'))
+    
+    def test_bordaCountDoesNotCountNones(self):
+        poll = voting.STV()
+        self.assertEqual(1, poll._bordaCountFromSingleBallot(['a', None, None, None], 'a'))
+    
+    def test_setMBC(self):
+        poll = voting.STV(options=['b', 'd', 'a', 'c'])
+        poll.addChoice('john', 'a')
+        poll.addChoice('hank', 'b')
+        poll.addChoice('hank', 'c')
+        poll.addChoice('hank', 'a')
+        poll.addChoice('mike', 'a')
+        poll.addChoice('mike', 'd')
+        poll.addVote('olly', ['b', 'd', 'a', 'c'])
+        poll.setModifiedBordaCounts()
+        self.assertEqual(6, poll.MBC['a'])
+        self.assertEqual(7, poll.MBC['b'])
+        self.assertEqual(3, poll.MBC['c'])
+        self.assertEqual(4, poll.MBC['d'])
     
 if __name__ == '__main__':
     unittest.main()
