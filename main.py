@@ -4,7 +4,7 @@ from multiprocessing import Process, Queue
 
 import bot as botlib
 
-from libs import configloader, scraperff, dataloader, scrapert, scraperred, embed, command, reaction, savetome, loader
+from libs import configloader,  dataloader, embed, command, reaction, savetome, loader
 
 EMOJIS_LOCATION = 'emojiloc'
 PERMISSIONS_LOCATION = 'permissionsloc'
@@ -28,7 +28,6 @@ DEV_PERM = 'devperm'
 STATISTICS_PERM = 'statsperm'
 MANAGE_ROLES_PERM = 'manageroleperm'
 
-FORUM_URL = r"http://ideahavers.freeforums.net/"
 TWITTER_URL = r"https://twitter.com/openideaproject"
 TWITTER_PROFILE_ICON = r"https://pbs.twimg.com/profile_images/913153081566691328/wDhS7B1w_400x400.jpg"
 TWITTER_LOGO = r"https://pbs.twimg.com/profile_images/875087697177567232/Qfy0kRIP_400x400.jpg"
@@ -114,6 +113,8 @@ class CustomNamespace:
 def doChecks(bot):
     '''(discord.Client) -> None
     checks to make sure no messages need to be sent about something special, like scraper updates'''
+    pass
+    '''
     threads = list()
     while not qForum.empty():
         threads.append(qForum.get())
@@ -143,7 +144,7 @@ def doChecks(bot):
         comments.append(qReddit.get())
     for comment in comments[::-1]:
         #comment = qReddit.get()
-        yield from bot.send_message(bot.redditchannel, embed=embed.create_embed(description="A comment has been posted here: " + comment[0] + " (direct link: "+comment[1]+" )", footer={"text":"Reddit", "icon_url":REDDIT_LOGO}))
+        yield from bot.send_message(bot.redditchannel, embed=embed.create_embed(description="A comment has been posted here: " + comment[0] + " (direct link: "+comment[1]+" )", footer={"text":"Reddit", "icon_url":REDDIT_LOGO}))'''
 
 if __name__ == '__main__':
     # main
@@ -167,6 +168,7 @@ if __name__ == '__main__':
     commands = dict()
     reactions = dict()
 
+    print("initializing bot...")
     bot = botlib.Bot("./data/config.config", log, doChecks, stop, always_watch_messages)
     bot.add_data(botlib.CHANNEL_LOC)
 
@@ -179,9 +181,10 @@ if __name__ == '__main__':
     role_messages = savetome.load_role_messages(config.content[ROLE_MSG_LOCATION], all_emojis_func)
     bot.role_messages = role_messages
 
+    '''
     qForum = Queue()
     qTwitter = Queue()
-    qReddit = Queue()
+    qReddit = Queue()'''
     global qRedditURLAdder
     qRedditURLAdder = Queue()
 
@@ -209,12 +212,13 @@ if __name__ == '__main__':
     for plugin_name in plugins:
         bot.register_plugin(plugins[plugin_name], plugin_name)
 
+    '''
     forumScraper = Process(target = scraperff.continuousScrape, args = (qForum, stop, ))
     forumScraper.start()
     twitterScraper = Process(target = scrapert.continuousScrape, args = (qTwitter, stop, ))
     twitterScraper.start()
     redditScraper = Process(target = scraperred.continuousScrape, args = (qReddit, stop, qRedditURLAdder, ))
-    redditScraper.start()
+    redditScraper.start()'''
 
     # bot.register_command(invalid.InvalidCommand(user=user_func, invalid_message=config.content["invalidmessagemessage"]))
     if "token" in credentials.content:
@@ -244,10 +248,13 @@ if __name__ == '__main__':
         bot.commands[cmd_name].shutdown()
     for cmd_name in bot.reactions:
         bot.reactions[cmd_name].shutdown()
+    for cmd_name in bot.plugins:
+        bot.plugins[cmd_name]._shutdown()
 
     savetome.save_role_messages(config.content[ROLE_MSG_LOCATION], role_messages)
+    '''
     twitterScraper.join()
     forumScraper.join()
-    redditScraper.join()
+    redditScraper.join()'''
 
     print("Ended")

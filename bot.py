@@ -11,19 +11,17 @@ Created on Wed Jan 10 20:05:03 2018
 import discord
 import asyncio
 
-from libs import dataloader, embed, command, savetome
+from libs import dataloader, embed, command, savetome, plugin
 from libs import reaction as reactioncommand
 from collections import OrderedDict
 
-# constants
 DEFAULT = 'DEFAULT'
 CHANNEL_LOC = 'channelsloc'
 MSG_BACKUP_LOCATION='msgbackuploc'
 WATCH_MSG_LOCATION='alwayswatchmsgloc'
 ROLE_MSG_LOCATION='rolemessagesloc'
 LOADING_WARNING = "Things are loading"
-
-ADMINS = ["106537989684887552", "255041793417019393"] # important ppl get to be admins
+ADMINS = ["106537989684887552", "255041793417019393"]
 
 class Bot(discord.Client):
     '''A Discord client which has config data and a list of commands to try when
@@ -48,9 +46,9 @@ class Bot(discord.Client):
         # TODO(14flash): Plugin refactor, where we won't need a doCheck() func anymore
         self.checks = checks
         self.data = dict()
-        self.commands = OrderedDict() # maps names to commands classes
-        self.reactions = OrderedDict() # maps names to reaction commands classes
-        self.plugins = OrderedDict() # maps plugin names to plugin classes
+        self.commands = OrderedDict() # maps names to commands
+        self.reactions = OrderedDict() # maps names to reaction commands
+        self.plugins = OrderedDict() # maps names to plugins
         self.stop_queue=stop_queue
         self.always_watch_messages=always_watch_messages
         self.ADMINS = ADMINS
@@ -79,13 +77,15 @@ class Bot(discord.Client):
             raise ValueError('Only commands may be registered in Bot::register_command')
         self.commands[name]=cmd
 
-    def register_plugin(self, plugin, name):
+    def register_plugin(self, plugin_object, name):
         '''(Plugin) -> None
         Registers a Plugin which executes in a separate process'''
-        if not isinstance(cmd, plugin.Plugin):
+        if not isinstance(plugin_object, plugin.Plugin):
             raise ValueError('Only plugins may be registered in Bot::register_plugin')
-        self.plugins[name]=plugin
-        self.loop.create_task(plugin._action())
+        if isinstance(plugin_object, plugin.AdminPlugin): # give AdminPlugins access to all this class's variables
+            plugin_object.add_client_variable(self)
+        self.plugins[name]=plugin_object
+        self.loop.create_task(plugin_object._action())
 
     def register_reaction_command(self, cmd, name):
         '''(discord.Client, reactions.Command) -> None
@@ -155,6 +155,7 @@ class Bot(discord.Client):
             if i.name == self.get_data(CHANNEL_LOC, 'reddit'):
                 self.redditchannel = i
                 self.log.info('reddit channel found')
+        print("Channels found")
 
     def load_messages(self):
         '''() -> None

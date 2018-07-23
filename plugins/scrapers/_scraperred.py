@@ -91,9 +91,9 @@ def continuousScrape(q, stop, newThread):
                         data.content.append(comments[0][0])
                         q.put([url[:-len(".rss?sort=new")], "https://reddit.com"+comments[0][0]])
                         data.save()
-                    redditLog.info("Finished scraping run in "+ str(time.time() - mostrecentrunstart))
                 except:
                     redditLog.warning("Scraping " + url + " failed. Either the page has changed or the page is unavailable...")
+            redditLog.info("Finished scraping run in "+ str(time.time() - mostrecentrunstart))
     redditLog.info("Stopped")
 
 

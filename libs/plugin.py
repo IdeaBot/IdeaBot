@@ -12,15 +12,27 @@ from multiprocessing import Process, Queue
 
 from libs import dataloader
 
+# general plugin constants
 PERIOD = 'period'
-THREADED_PERIOD = 'threadedperiod'
 DEFAULT = 'DEFAULT'
+
+# bot api methods accessible to a regular Plugin
+# if more functionality is required, consider using an AdminPlugin
+SEND_MESSAGE = 'send_message'
+EDIT_MESSAGE = 'edit_message'
+ADD_REACTION = 'add_reaction'
+REMOVE_REACTION = 'remove_reaction'
+SEND_TYPING = 'send_typing'
+SEND_FILE = 'send_file'
+
+# threaded constants
+THREADED_PERIOD = 'threadedperiod'
 END_PROCESS = 'endprocess'
 
-# process ending constants
+# threaded process ending constants
 JOIN = 'join'
 TERMINATE = 'terminate'
-KILL = 'kill'
+KILL = 'kill' # new in 3.7, do not use
 NONE = None
 CUSTOM = None
 
@@ -34,12 +46,23 @@ class Plugin():
     '''Plugin represents a plugin that the discord bot can work alongside
     to add custom functionality not present in the base bot'''
 
-    def __init__(self, config=None, **kwargs):
-        '''(Plugin, dict) -> Plugin
+    def __init__(self, api_methods=dict(), config=None, **kwargs):
+        '''(Plugin, dict, str, dict) -> Plugin
+        api_methods: a dict of api methods accessible to the Plugin, so that most plugins don't have to be AdminPlugins
         kwargs: included to simplify sub-classing'''
         self.shutting_down = False
-        self.config = dataloader.datafile(config).content[DEFAULT] # configuration file for the Plugin
+        try:
+            self.config = dataloader.datafile(config).content[DEFAULT] # configuration file for the Plugin
+        except FileNotFoundError:
+            self.config = None # NOTE: This is a bad state for a Plugin to be in, since it may cause unexpected errors
+            raise ImportError("No config file found")
         self.period = float(self.config[PERIOD]) # period for each repetition of action()
+        self.send_message = api_methods[SEND_MESSAGE]
+        self.edit_message = api_methods[EDIT_MESSAGE]
+        self.add_reaction = api_methods[ADD_REACTION]
+        self.remove_reaction = api_methods[REMOVE_REACTION]
+        self.send_typing = api_methods[SEND_TYPING]
+        self.send_file = api_methods[SEND_FILE]
 
     async def _action(self):
         '''(Plugin) -> None
@@ -47,12 +70,15 @@ class Plugin():
         in order to expand or modify it's functionality.
 
         the looping async method to call action()'''
-        while not shutting_down:
+        while not self.shutting_down:
             start_time = time.time()
-            self.action()
-            await asyncio.sleep(self.period - (time.time() - start_time)) # account for execution time of self.action() in asyncio.sleep()
+            await self.action()
+            sleep_time = self.period - (time.time() - start_time)
+            if sleep_time<0:
+                sleep_time=0
+            await asyncio.sleep(sleep_time) # account for execution time of self.action() in asyncio.sleep()
 
-    def action(self):
+    async def action(self):
         '''(Plugin) -> None
         the method to be run alongside the discord bot
         This will be looped externally'''
@@ -115,7 +141,10 @@ class ThreadedPlugin(Plugin):
         while not self.shutting_down:
             start_time = time.time()
             self.threaded_action(queue, **kwargs)
-            time.sleep(self.period - (time.time() - start_time)) # account for execution time of self.action() in asyncio.sleep()
+            sleep_time = self.threaded_period - (time.time() - start_time)
+            if sleep_time<0:
+                sleep_time=0
+            time.sleep(sleep_time) # account for execution time of self.action() in asyncio.sleep()
 
     def threaded_action(self, queue, **kwargs):
         '''(ThreadedPlugin, Queue, dict) -> None
@@ -123,34 +152,95 @@ class ThreadedPlugin(Plugin):
         This will be looped externally'''
         pass
 
+    async def action(self):
+        '''(ThreadedPlugin) -> None
+        A standard action method to interpret dictionaries in queue
+        This method uses the standard plugin constants (SEMD_MESSAGE, EDIT_MESSAGE, etc.)
+        to interpret dictionaries to use the discord API to do the appropriate actions.
+
+        Use a dictionary, with the appropriate keys, associated to the API action
+        to send parameters to the API function (send_message(**kwargs), edit_message(**kwargs), etc.).
+        The keys are the same as the API parameters.
+
+        this method overrides Plugin's action method'''
+
+        while not self.queue.empty():
+            action_dict = self.queue.get() # hopefully it's a dict object
+            if isinstance(action_dict, dict): # make sure it's a dict object
+                for key in action_dict:
+                    if key==SEND_MESSAGE:
+                        try:
+                            await self.send_message(**action_dict[key])
+                        except TypeError:
+                            # TypeError is raised when missing arguments
+                            # or when action_dict[key] is not mapping
+                            # (ie **action_dict[key] is not a valid operation)
+                            pass
+                    elif key==EDIT_MESSAGE:
+                        try:
+                            await self.edit_message(**action_dict[key])
+                        except TypeError:
+                            # TypeError is raised when missing arguments
+                            # or when action_dict[key] is not mapping
+                            # (ie **action_dict[key] is not a valid operation)
+                            pass
+                    elif key==ADD_REACTION:
+                        try:
+                            await self.add_reaction(**action_dict[key])
+                        except TypeError:
+                            # TypeError is raised when missing arguments
+                            # or when action_dict[key] is not mapping
+                            # (ie **action_dict[key] is not a valid operation)
+                            pass
+                    elif key==REMOVE_REACTION:
+                        try:
+                            await self.remove_reaction(**action_dict[key])
+                        except TypeError:
+                            # TypeError is raised when missing arguments
+                            # or when action_dict[key] is not mapping
+                            # (ie **action_dict[key] is not a valid operation)
+                            pass
+                    elif key==SEND_TYPING:
+                        try:
+                            await self.send_typing(**action_dict[key])
+                        except TypeError:
+                            # TypeError is raised when missing arguments
+                            # or when action_dict[key] is not mapping
+                            # (ie **action_dict[key] is not a valid operation)
+                            pass
+                    elif key==SEND_FILE:
+                        try:
+                            await self.send_file(**action_dict[key])
+                        except TypeError:
+                            # TypeError is raised when missing arguments
+                            # or when action_dict[key] is not mapping
+                            # (ie **action_dict[key] is not a valid operation)
+                            pass
+
+
 class EventPlugin(Plugin):
     '''Subclass for catching the events dict.
     This probably shouldn't be used on it's own, since it adds no (concrete) functionality.'''
     def __init__(self, events, **kwargs):
+        super().__init__(**kwargs)
         self.events = events
 
 class OnReadyPlugin(EventPlugin):
     async def _action(self):
         await self.events[READY]()
-        while not shutting_down:
-            start_time = time.time()
-            self.action()
-            await asyncio.sleep(self.period - (time.time() - start_time)) # account for execution time of self.action() in asyncio.sleep()
+        await super()._action()
 
 class OnLoginPlugin(EventPlugin):
     async def _action(self):
         await self.events[LOGIN]()
-        while not shutting_down:
-            start_time = time.time()
-            self.action()
-            await asyncio.sleep(self.period - (time.time() - start_time)) # account for execution time of self.action() in asyncio.sleep()
+        await super()._action()
 
 class OnMessagePlugin(EventPlugin):
     async def _action(self):
         while not shutting_down:
-            message = await self.events[MESSAGE]()
+            message = await self.events[MESSAGE]() # this is the difference
             start_time = time.time()
-            self.action(message)
+            await self.action(message)
             await asyncio.sleep(self.period - (time.time() - start_time)) # account for execution time of self.action() in asyncio.sleep()
 
     def action(self, message):
@@ -159,10 +249,16 @@ class OnMessagePlugin(EventPlugin):
 class OnReactionPlugin(EventPlugin):
     async def _action(self):
         while not shutting_down:
-            reaction, user = await self.events[REACTION]()
+            reaction, user = await self.events[REACTION]() # this is the difference
             start_time = time.time()
-            self.action(reaction, user)
+            await self.action(reaction, user)
             await asyncio.sleep(self.period - (time.time() - start_time)) # account for execution time of self.action() in asyncio.sleep()
 
     def action(self, reaction, user):
         pass
+
+class AdminPlugin(Plugin):
+    '''Similar to a regular Plugin, but has access to the client/bot's class.
+    This is a security risk, yay! Use wisely and sparingly '''
+    def add_client_variable(self, client_var):
+        self.client = self.bot = client_var
