@@ -104,7 +104,11 @@ class ThreadedPlugin(Plugin):
 
     This is quite useful for scrapers and other slow tasks that block the main thread and don't require access to bot variables'''
 
-    def __init__(self, **kwargs):
+    def spawn_process(self):
+        self.process = Process(target = self._threaded_action, args = (self.queue, ), kwargs = self.threaded_kwargs) # secondary thread
+        self.process.start()
+
+    def __init__(self, spawn_thread=True,**kwargs):
         '''(ThreadedPlugin, dict) -> ThreadedPlugin'''
         super().__init__(**kwargs)
         self.end_process = self.config[END_PROCESS] # method of ending process. Valid options are 'join', 'terminate' and 'kill'
@@ -114,8 +118,8 @@ class ThreadedPlugin(Plugin):
             self.threaded_kwargs
         except AttributeError:
             self.threaded_kwargs = dict()
-        self.process = Process(target = self._threaded_action, args = (self.queue, ), kwargs = self.threaded_kwargs) # secondary thread
-        self.process.start()
+        if spawn_thread:
+            self.spawn_process()
 
     def _shutdown(self):
         '''(ThreadedPlugin) -> None
