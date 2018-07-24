@@ -23,49 +23,6 @@ def forumLogging():
 
 forumLog = forumLogging()
 
-'''
-def continuousScrape(q, stop):'''
-'''(Queue object, Queue object) -> None
-    checks continuously for changes in the freeforums. A [url (str), affected users(str)] object is reported through q when anything changes
-    This should be run in a different thread since it is blocking (it's a fucking while loop ffs)
-    stop.put(anything) will stop the loop''' '''
-    forumLog.info("Thread started")
-    mostrecentrunstart = -100000
-    while stop.empty(): # run continuously unless there's something in stop
-        if time.time() - mostrecentrunstart >= int(config.content["period"]):
-            forumLog.info("Starting scraping run")
-            mostrecentrunstart = time.time()
-            try:
-                rss = BeautifulSoup(pageRet.pageRet(config.content["url"]).decode(), "html.parser") # landing page
-                items = rss.find_all("item")
-                threads = [[x.find("guid").get_text(), x.find("title").get_text()] for x in items] # list of [url, thread title]
-
-                if is_new_thread(threads[0][0]):
-                    newestint = get_trailing_int(get_most_recent())
-                    for i in threads:
-                        if get_trailing_int(i[0]) > newestint:
-                            forumLog.info("New thread found: " + i[0])
-                            #scrape stuff
-                            recentThread = BeautifulSoup(pageRet.pageRet(i[0]).decode(),"html.parser")
-                            authors = []
-                            for x in recentThread.find_all("div", class_="mini-profile"):
-                                try:
-                                    authors.append({"name" : x.find("a").get_text(),"url" : x.find("a").get("href"), "img" : x.find("div", class_="avatar").find("img").get("src")})
-                                except AttributeError: # if author is a guest, x.find("a") will return a NoneType, and None.get("href") will raise an AttributeError
-                                    pass
-                            #authors = [x.find("a").get("href") for x in recentThread.find_all("div", class_="mini-profile")]
-                            q.put([i[0], authors])
-                        else:
-                            break
-                    delete_entry("most recent thread:")
-                    data.content.append("most recent thread:" + threads[0][0])
-                    data.save()
-                    forumLog.info("Most recent thread is now: " + threads[0][0])
-                forumLog.info("Finished scraping run in "+ str(time.time() - mostrecentrunstart))
-            except:
-                forumLog.warning("Scraping run failed. Either the page has changed or the page is unavailable...")
-    forumLog.info("Stopped")'''
-
 class Plugin(plugin.ThreadedPlugin):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -79,11 +36,9 @@ class Plugin(plugin.ThreadedPlugin):
         for thread in threads[::-1]:
             await self.send_message(discord.Object(id=self.CHANNEL_ID), embed=embed.create_embed(description="In: "+thread[0], author={"name" : thread[1][-1]["name"], "url" : FORUM_URL+thread[1][-1]["url"], "icon_url" : None}, footer={"text":"Forum", "icon_url":None}))
             # NOTE: mentionChain has been removed, since it wasn't used much and it was more annoying than useful
-            # TODO: replace "forum channel" with appropriate ID
 
     def _threaded_action(self, queue, **kwargs):
         self.data = dataloader.datafile(self.config["datafilepath"])
-        print(len(self.data.content))
         super()._threaded_action(queue, **kwargs)
 
     def threaded_action(self, q, **kwargs):
@@ -117,7 +72,8 @@ class Plugin(plugin.ThreadedPlugin):
                 forumLog.info("Most recent thread is now: " + threads[0][0])
             forumLog.info("Finished scraping run in "+ str(time.time() - mostrecentrunstart))
         except:
-            traceback.print_exc()
+            # Prevent a failed run from crashing the whole thread
+            # traceback.print_exc()
             forumLog.warning("Scraping run failed. Either the page has changed or the page is unavailable...")
 
 

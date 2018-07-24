@@ -108,17 +108,17 @@ class ThreadedPlugin(Plugin):
         self.process = Process(target = self._threaded_action, args = (self.queue, ), kwargs = self.threaded_kwargs) # secondary thread
         self.process.start()
 
-    def __init__(self, spawn_thread=True,**kwargs):
+    def __init__(self, should_spawn_thread=True,**kwargs):
         '''(ThreadedPlugin, dict) -> ThreadedPlugin'''
         super().__init__(**kwargs)
-        self.end_process = self.config[END_PROCESS] # method of ending process. Valid options are 'join', 'terminate' and 'kill'
+        self.end_process = self.config[END_PROCESS] # method of ending process. Valid options are 'join', 'terminate' and 'kill' (Python3.7+ only for kill)
         self.threaded_period = float(self.config[THREADED_PERIOD]) # like self.period, except for for the threaded action
         self.queue = Queue() # queue object for sending information to and from the ThreadedPlugin's secondary thread
         try: # ensure threaded_kwargs exists, but don't overwrite
             self.threaded_kwargs
         except AttributeError:
             self.threaded_kwargs = dict()
-        if spawn_thread:
+        if should_spawn_thread:
             self.spawn_process()
 
     def _shutdown(self):

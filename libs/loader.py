@@ -65,7 +65,7 @@ def init_plugin(filename, namespace, bot, folder, package="", reload=False, **kw
         parameters['config']=join(folder, package, filename[:-len(".py")]+'.config')
     else:
         parameters['config']=None
-    print(join(folder, package, filename[:-len(".py")]+'.config'))
+    # print(join(folder, package, filename[:-len(".py")]+'.config')) # config filepath
     # import plugin
     if package!="":
         package=package+"."
