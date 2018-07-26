@@ -44,6 +44,6 @@ class Plugin(plugin.ThreadedPlugin, plugin.OnReadyPlugin):
 
             message = discord.Object(id=self.MESSAGE_ID)
             message.channel = discord.Object(id='471832405049606164')#self.CHANNEL_ID)
-            q.put({plugin.EDIT_MESSAGE:{plugin.ARGS:[message], plugin.KWARGS:{'embed':embed.create_embed(description=description)} } })
+            # q.put({plugin.EDIT_MESSAGE:{plugin.ARGS:[message], plugin.KWARGS:{'embed':embed.create_embed(description=description)} } })
         except:
             traceback.print_exc()
