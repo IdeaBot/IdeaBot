@@ -7,7 +7,7 @@ Plugin is designed to be similar to Command and Reaction interface classes while
 @author: NGnius
 """
 
-import asyncio, time
+import asyncio, time, traceback
 from multiprocessing import Process, Queue
 
 from libs import dataloader
@@ -35,6 +35,10 @@ TERMINATE = 'terminate'
 KILL = 'kill' # new in 3.7, do not use
 NONE = None
 CUSTOM = None
+
+# args constants
+ARGS = 'args'
+KWARGS = 'kwargs'
 
 # event constants
 READY = 'ready'
@@ -168,21 +172,28 @@ class ThreadedPlugin(Plugin):
 
         this method overrides Plugin's action method'''
 
+        print("Action task started")
         while not self.queue.empty():
             action_dict = self.queue.get() # hopefully it's a dict object
             if isinstance(action_dict, dict): # make sure it's a dict object
+                print("Hi")
                 for key in action_dict:
+                    if ARGS not in action_dict[key]:
+                        action_dict[key][ARGS]=[]
+                    if KWARGS not in action_dict[key]:
+                        action_dict[key][KWARGS]={}
+                    
                     if key==SEND_MESSAGE:
                         try:
-                            await self.send_message(**action_dict[key])
+                            await self.send_message(*action_dict[key][ARGS], **action_dict[key][KWARGS])
                         except TypeError:
                             # TypeError is raised when missing arguments
                             # or when action_dict[key] is not mapping
                             # (ie **action_dict[key] is not a valid operation)
-                            pass
+                            traceback.print_exc()
                     elif key==EDIT_MESSAGE:
                         try:
-                            await self.edit_message(**action_dict[key])
+                            await self.edit_message(*action_dict[key][ARGS], **action_dict[key][KWARGS])
                         except TypeError:
                             # TypeError is raised when missing arguments
                             # or when action_dict[key] is not mapping
@@ -190,7 +201,7 @@ class ThreadedPlugin(Plugin):
                             pass
                     elif key==ADD_REACTION:
                         try:
-                            await self.add_reaction(**action_dict[key])
+                            await self.add_reaction(*action_dict[key][ARGS], **action_dict[key][KWARGS])
                         except TypeError:
                             # TypeError is raised when missing arguments
                             # or when action_dict[key] is not mapping
@@ -198,7 +209,7 @@ class ThreadedPlugin(Plugin):
                             pass
                     elif key==REMOVE_REACTION:
                         try:
-                            await self.remove_reaction(**action_dict[key])
+                            await self.remove_reaction(*action_dict[key][ARGS], **action_dict[key][KWARGS])
                         except TypeError:
                             # TypeError is raised when missing arguments
                             # or when action_dict[key] is not mapping
@@ -206,7 +217,7 @@ class ThreadedPlugin(Plugin):
                             pass
                     elif key==SEND_TYPING:
                         try:
-                            await self.send_typing(**action_dict[key])
+                            await self.send_typing(*action_dict[key][ARGS], **action_dict[key][KWARGS])
                         except TypeError:
                             # TypeError is raised when missing arguments
                             # or when action_dict[key] is not mapping
@@ -214,7 +225,7 @@ class ThreadedPlugin(Plugin):
                             pass
                     elif key==SEND_FILE:
                         try:
-                            await self.send_file(**action_dict[key])
+                            await self.send_file(*action_dict[key][ARGS], **action_dict[key][KWARGS])
                         except TypeError:
                             # TypeError is raised when missing arguments
                             # or when action_dict[key] is not mapping
