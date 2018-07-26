@@ -30,20 +30,15 @@ class Plugin(plugin.ThreadedPlugin, plugin.OnReadyPlugin):
             uploads_info = json.loads(requests.get(self.UPLOADS_URL).text)
             #print(info)
             description = ""
-            print("Sub count", channel_info['items'][0]['statistics']['subscriberCount'])
-            description += "Subscribers: %s \n" % channel_info['items'][0]['statistics']['subscriberCount']
+            description += "Subscribers: %s \n" % channel_info['items'][0]['statistics']['subscriberCount'] # sub count
+            description += "Upload count: %s \n" % channel_info['items'][0]['statistics']['videoCount'] # video count
 
-            print("Video count", channel_info['items'][0]['statistics']['videoCount'])
-            description += "Upload count: %s \n" % channel_info['items'][0]['statistics']['videoCount']
-
-            print("Uploads", uploads_info['items'][0]['player']['embedHtml'])
-            upload_iframe = uploads_info['items'][0]['player']['embedHtml']
+            upload_iframe = uploads_info['items'][0]['player']['embedHtml'] # uploads playlist url
             upload_url = upload_iframe.split('src=')[1].split(' ')[0].strip("\'\"").replace('embed/videoseries', 'playlist')
-            print(upload_url)
             description += "Uploads: %s \n" % upload_url
 
-            message = discord.Object(id=self.MESSAGE_ID)
+            message = discord.Object(id=self.MESSAGE_ID) # this should be in __init__
             message.channel = discord.Object(id='471832405049606164')#self.CHANNEL_ID)
-            # q.put({plugin.EDIT_MESSAGE:{plugin.ARGS:[message], plugin.KWARGS:{'embed':embed.create_embed(description=description)} } })
+            # q.put({plugin.EDIT_MESSAGE:{plugin.ARGS:[message], plugin.KWARGS:{'embed':embed.create_embed(description=description)} } }) # edit message
         except:
             traceback.print_exc()

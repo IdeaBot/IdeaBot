@@ -76,7 +76,11 @@ class Plugin():
         the looping async method to call action()'''
         while not self.shutting_down:
             start_time = time.time()
-            await self.action()
+            try:
+                await self.action()
+            except: # catch any exception that could crash the task
+                # traceback.print_exc()
+                pass
             sleep_time = self.period - (time.time() - start_time)
             if sleep_time<0:
                 sleep_time=0
@@ -148,7 +152,11 @@ class ThreadedPlugin(Plugin):
 
         while not self.shutting_down:
             start_time = time.time()
-            self.threaded_action(queue, **kwargs)
+            try:
+                self.threaded_action(queue, **kwargs)
+            except: # catch anything that could crash the thread
+                # traceback.print_exc()
+                pass
             sleep_time = self.threaded_period - (time.time() - start_time)
             if sleep_time<0:
                 sleep_time=0
@@ -172,17 +180,15 @@ class ThreadedPlugin(Plugin):
 
         this method overrides Plugin's action method'''
 
-        print("Action task started")
         while not self.queue.empty():
             action_dict = self.queue.get() # hopefully it's a dict object
             if isinstance(action_dict, dict): # make sure it's a dict object
-                print("Hi")
                 for key in action_dict:
                     if ARGS not in action_dict[key]:
                         action_dict[key][ARGS]=[]
                     if KWARGS not in action_dict[key]:
                         action_dict[key][KWARGS]={}
-                    
+
                     if key==SEND_MESSAGE:
                         try:
                             await self.send_message(*action_dict[key][ARGS], **action_dict[key][KWARGS])
@@ -190,7 +196,7 @@ class ThreadedPlugin(Plugin):
                             # TypeError is raised when missing arguments
                             # or when action_dict[key] is not mapping
                             # (ie **action_dict[key] is not a valid operation)
-                            traceback.print_exc()
+                            pass
                     elif key==EDIT_MESSAGE:
                         try:
                             await self.edit_message(*action_dict[key][ARGS], **action_dict[key][KWARGS])
