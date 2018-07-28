@@ -58,7 +58,7 @@ def init_plugin(filename, namespace, bot, folder, package="", reload=False, **kw
     # generate parameters
     events = {plugin.READY:bot.wait_until_ready, plugin.LOGIN:bot.wait_until_login, plugin.MESSAGE:bot.wait_for_message, plugin.REACTION:bot.wait_for_reaction}
     api_methods = {plugin.SEND_MESSAGE:bot.send_message, plugin.EDIT_MESSAGE:bot.edit_message, plugin.ADD_REACTION:bot.add_reaction, plugin.REMOVE_REACTION:bot.remove_reaction, plugin.SEND_TYPING:bot.send_typing, plugin.SEND_FILE:bot.send_file}
-    parameters = {'events':events, 'api_methods':api_methods}
+    parameters = {'namespace':namespace, 'events':events, 'api_methods':api_methods}
     if filename[:-len(".py")]+config_end in config.content:
         parameters['config']=config.content[filename[:-len(".py")]+config_end]
     elif isfile(join(folder, package, filename[:-len(".py")]+'.config')):

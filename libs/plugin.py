@@ -266,3 +266,14 @@ class AdminPlugin(Plugin):
     This is a security risk, yay! Use wisely and sparingly '''
     def add_client_variable(self, client_var):
         self.client = self.bot = client_var
+
+class Multi(Plugin):
+    '''Similar to a regular plugin, but has access to a namespace which is also
+    accessible to commands and reactions in any folder of the same name'''
+
+    def __init__(self, namespace, **kwargs):
+        # please note that ThreadedPlugin will create a copy of all variables, unless they're compatible with multiple threads
+        
+        # the following two lines are flipped because of the 'snapshot' that is created when a process is spawned (which super().__init__) might do)
+        self.public_namespace = namespace
+        super().__init__(**kwargs)
