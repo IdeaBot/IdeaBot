@@ -29,9 +29,9 @@ redditLog = redditLogging()
 class Plugin(plugin.ThreadedPlugin):
     def __init__(self, **kwargs):
         super().__init__(should_spawn_thread=False, **kwargs)
-        self.data = dataloader.datafile(self.config["datafilepath"])
+        self.data = dataloader.loadfile_safe(self.config["datafilepath"])
         self.data.content = [x.strip("\n") for x in self.data.content]
-        self.urllist = dataloader.datafile(self.config["urlfilepath"])
+        self.urllist = dataloader.loadfile_safe(self.config["urlfilepath"])
         self.urllist.content = [x.strip("\n") for x in self.urllist.content]
         self.newThread = plugin.Queue()
         #self.newThread.put({"action":"add", "url":"https://old.reddit.com/r/Robocraft/comments/91jkpu/when_your_top_thrusters_get_shot_off_and_youre/"})

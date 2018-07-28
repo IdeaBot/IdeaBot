@@ -38,7 +38,7 @@ class Plugin(plugin.ThreadedPlugin):
             # NOTE: mentionChain has been removed, since it wasn't used much and it was more annoying than useful
 
     def _threaded_action(self, queue, **kwargs):
-        self.data = dataloader.datafile(self.config["datafilepath"])
+        self.data = dataloader.loadfile_safe(self.config["datafilepath"])
         super()._threaded_action(queue, **kwargs)
 
     def threaded_action(self, q, **kwargs):

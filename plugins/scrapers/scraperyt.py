@@ -16,7 +16,7 @@ UPLOADS_URL='uploads_url'
 class Plugin(plugin.ThreadedPlugin, plugin.OnReadyPlugin):
     def __init__(self, **kwargs):
         super().__init__(should_spawn_thread=False, **kwargs)
-        self.data = dataloader.datafile(self.config["datafilepath"])
+        self.data = dataloader.loadfile_safe(self.config["datafilepath"])
         self.CHANNEL_ID = self.config[CHANNEL]
         self.MESSAGE_ID = self.config[MESSAGE]
         self.CHANNEL_URL = self.config[CHANNEL_URL]

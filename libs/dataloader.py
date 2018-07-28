@@ -120,3 +120,9 @@ class newdatafile (datafile):
             self.type = ""
             self.name = filename
         self.filename = filename
+
+def loadfile_safe(filepath, **kwargs):
+    try:
+        return datafile(filepath, **kwargs)
+    except FileNotFoundError:
+        return newdatafile(filepath)

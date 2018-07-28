@@ -258,7 +258,7 @@ class OnLoginPlugin(EventPlugin):
 
 class OnMessagePlugin(EventPlugin):
     async def _action(self):
-        while not shutting_down:
+        while not self.shutting_down:
             message = await self.events[MESSAGE]() # this is the difference
             start_time = time.time()
             await self.action(message)
@@ -269,7 +269,7 @@ class OnMessagePlugin(EventPlugin):
 
 class OnReactionPlugin(EventPlugin):
     async def _action(self):
-        while not shutting_down:
+        while not self.shutting_down:
             reaction, user = await self.events[REACTION]() # this is the difference
             start_time = time.time()
             await self.action(reaction, user)
@@ -290,7 +290,7 @@ class Multi(Plugin):
 
     def __init__(self, namespace, **kwargs):
         # please note that ThreadedPlugin will create a copy of all variables, unless they're compatible with multiple threads
-        
+
         # the following two lines are flipped because of the 'snapshot' that is created when a process is spawned (which super().__init__) might do)
         self.public_namespace = namespace
         super().__init__(**kwargs)

@@ -23,7 +23,7 @@ twitLog = tweetLogging()
 class Plugin(plugin.ThreadedPlugin):
     def __init__(self, **kwargs):
         super().__init__(should_spawn_thread=False, **kwargs)
-        self.data = dataloader.datafile(self.config["datafilepath"])
+        self.data = dataloader.loadfile_safe(self.config["datafilepath"])
         self.author = self.get_author_from_url(self.config["url"])
         self.CHANNEL_ID = self.config[CHANNEL] # discord server channel ID for sending twitter updates to
         self.spawn_process()
