@@ -7,7 +7,7 @@ Plugin is designed to be similar to Command and Reaction interface classes while
 @author: NGnius
 """
 
-import asyncio, time
+import asyncio, time, traceback
 from multiprocessing import Process, Queue
 
 from libs import dataloader
@@ -35,6 +35,10 @@ TERMINATE = 'terminate'
 KILL = 'kill' # new in 3.7, do not use
 NONE = None
 CUSTOM = None
+
+# args constants
+ARGS = 'args'
+KWARGS = 'kwargs'
 
 # event constants
 READY = 'ready'
@@ -72,7 +76,11 @@ class Plugin():
         the looping async method to call action()'''
         while not self.shutting_down:
             start_time = time.time()
-            await self.action()
+            try:
+                await self.action()
+            except: # catch any exception that could crash the task
+                # traceback.print_exc()
+                pass
             sleep_time = self.period - (time.time() - start_time)
             if sleep_time<0:
                 sleep_time=0
@@ -144,7 +152,11 @@ class ThreadedPlugin(Plugin):
 
         while not self.shutting_down:
             start_time = time.time()
-            self.threaded_action(queue, **kwargs)
+            try:
+                self.threaded_action(queue, **kwargs)
+            except: # catch anything that could crash the thread
+                # traceback.print_exc()
+                pass
             sleep_time = self.threaded_period - (time.time() - start_time)
             if sleep_time<0:
                 sleep_time=0
@@ -172,9 +184,14 @@ class ThreadedPlugin(Plugin):
             action_dict = self.queue.get() # hopefully it's a dict object
             if isinstance(action_dict, dict): # make sure it's a dict object
                 for key in action_dict:
+                    if ARGS not in action_dict[key]:
+                        action_dict[key][ARGS]=[]
+                    if KWARGS not in action_dict[key]:
+                        action_dict[key][KWARGS]={}
+
                     if key==SEND_MESSAGE:
                         try:
-                            await self.send_message(**action_dict[key])
+                            await self.send_message(*action_dict[key][ARGS], **action_dict[key][KWARGS])
                         except TypeError:
                             # TypeError is raised when missing arguments
                             # or when action_dict[key] is not mapping
@@ -182,7 +199,7 @@ class ThreadedPlugin(Plugin):
                             pass
                     elif key==EDIT_MESSAGE:
                         try:
-                            await self.edit_message(**action_dict[key])
+                            await self.edit_message(*action_dict[key][ARGS], **action_dict[key][KWARGS])
                         except TypeError:
                             # TypeError is raised when missing arguments
                             # or when action_dict[key] is not mapping
@@ -190,7 +207,7 @@ class ThreadedPlugin(Plugin):
                             pass
                     elif key==ADD_REACTION:
                         try:
-                            await self.add_reaction(**action_dict[key])
+                            await self.add_reaction(*action_dict[key][ARGS], **action_dict[key][KWARGS])
                         except TypeError:
                             # TypeError is raised when missing arguments
                             # or when action_dict[key] is not mapping
@@ -198,7 +215,7 @@ class ThreadedPlugin(Plugin):
                             pass
                     elif key==REMOVE_REACTION:
                         try:
-                            await self.remove_reaction(**action_dict[key])
+                            await self.remove_reaction(*action_dict[key][ARGS], **action_dict[key][KWARGS])
                         except TypeError:
                             # TypeError is raised when missing arguments
                             # or when action_dict[key] is not mapping
@@ -206,7 +223,7 @@ class ThreadedPlugin(Plugin):
                             pass
                     elif key==SEND_TYPING:
                         try:
-                            await self.send_typing(**action_dict[key])
+                            await self.send_typing(*action_dict[key][ARGS], **action_dict[key][KWARGS])
                         except TypeError:
                             # TypeError is raised when missing arguments
                             # or when action_dict[key] is not mapping
@@ -214,7 +231,7 @@ class ThreadedPlugin(Plugin):
                             pass
                     elif key==SEND_FILE:
                         try:
-                            await self.send_file(**action_dict[key])
+                            await self.send_file(*action_dict[key][ARGS], **action_dict[key][KWARGS])
                         except TypeError:
                             # TypeError is raised when missing arguments
                             # or when action_dict[key] is not mapping
