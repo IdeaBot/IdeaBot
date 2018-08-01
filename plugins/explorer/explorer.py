@@ -2,6 +2,7 @@ from libs import plugin, dataloader, embed, savetome
 import discord, random
 
 DATAPATH='datafilepath'
+PATHDATAPATH = 'playerdatapath'
 
 class Plugin(plugin.Multi, plugin.OnMessagePlugin):
     # movement words
@@ -27,7 +28,7 @@ class Plugin(plugin.Multi, plugin.OnMessagePlugin):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.fuck_off=False
-        self.load_data(self.config[DATAPATH])
+        self.load_data(self.config[DATAPATH], self.config[PATHDATAPATH])
 
     async def action(self, message):
         if not self.fuck_off:
@@ -85,36 +86,37 @@ class Plugin(plugin.Multi, plugin.OnMessagePlugin):
             type = random.choice(list(self.locations))
         self.playerdata[player_id][self.LOCATION] = self.locations[type][random.choice(list(self.locations[type]))]
 
-    def load_data(self, filename):
-        self.datafile = dataloader.datafile(filename)
-
+    def load_data(self, datafilepath, playerdatafilepath):
         # load locations
+        self.datafile = dataloader.datafile(datafilepath)
         self.locations=dict()
-        for type in self.datafile.content[self.LOCATION]:
+        for type in self.datafile.content:
             self.locations[type]=dict()
-            for location in self.datafile.content[self.LOCATION][type]:
-                self.locations[type][location]=Location(**self.datafile.content[self.LOCATION][type][location])
+            for location in self.datafile.content[type]:
+                self.locations[type][location]=Location(**self.datafile.content[type][location])
 
         # load playerdata
+        self.playerdatafile = dataloader.loadfile_safe(playerdatafilepath)
         self.playerdata = dict()
-        for player_id in self.datafile.content[self.PLAYERDATA]:
+        for player_id in self.playerdatafile.content:
             self.playerdata[player_id] = dict()
-            self.playerdata[player_id][self.LOCATION] = Location(**self.datafile.content[self.PLAYERDATA][player_id][self.LOCATION])
+            self.playerdata[player_id][self.LOCATION] = Location(**self.playerdatafile.content[player_id][self.LOCATION])
 
 
     def save_data(self):
         # save locations
         for type in self.locations:
             for location in self.locations[type]:
-                self.datafile.content[self.LOCATION][type][location] = self.locations[type][location].__dict__
+                self.datafile.content[type][location] = self.locations[type][location].__dict__
 
         # save playerdata
         for player_id in self.playerdata:
-            self.datafile.content[self.PLAYERDATA][player_id] = dict()
-            self.datafile.content[self.PLAYERDATA][player_id][self.LOCATION] = self.playerdata[player_id][self.LOCATION].__dict__
+            self.playerdatafile.content[player_id] = dict()
+            self.playerdatafile.content[player_id][self.LOCATION] = self.playerdata[player_id][self.LOCATION].__dict__
 
         # save to file
         self.datafile.save()
+        self.playerdatafile.save()
 
 class Location():
     def __init__(self, name=None, description=None):
