@@ -97,6 +97,8 @@ class Plugin(plugin.Multi, plugin.OnMessagePlugin):
 
         # load playerdata
         self.playerdatafile = dataloader.loadfile_safe(playerdatafilepath)
+        if not isinstance(self.playerdatafile.content, dict):
+            self.playerdatafile.content = dict()
         self.playerdata = dict()
         for player_id in self.playerdatafile.content:
             self.playerdata[player_id] = dict()
