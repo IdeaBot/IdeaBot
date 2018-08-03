@@ -11,7 +11,9 @@ class datafile: # loads and parses files depending on file ending
         '''() -> list of str
         returns each file of the line as an element in the list'''
         file = open(filename, "r")
-        return file.readlines()
+        result = file.readlines()
+        result = [x.strip() for x in result] # remove page returns and other whitespace around lines
+        return result
     def saveRawText(self):
         '''() -> None
         save file as .txt or extensionless'''
@@ -22,7 +24,8 @@ class datafile: # loads and parses files depending on file ending
         text = ""
         #print(self.content, "is being saved")
         for i in self.content:
-            text+=i+"\n"
+            if i!="":
+                text+=i+"\n"
         file.write(text)
         file.close()
 
