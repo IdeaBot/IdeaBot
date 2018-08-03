@@ -32,45 +32,46 @@ class Plugin(plugin.Multi, plugin.OnMessagePlugin):
 
     async def action(self, message):
         if not self.fuck_off:
-            self.fuck_off=True
-            did_something = False
-            message_lower = message.content.lower()
-            if message_lower in self.UP:
-                if message.author.id in self.playerdata:
-                    self.move(message.author.id, type=self.UPLOC)
-                    # await self.send_message(message.channel, 'You move UP')
-                else:
-                    self.new_game(message.author.id, type=self.UPLOC)
-                    # await self.send_message(message.channel, 'new game')
-                did_something = True
-            elif message_lower in self.DOWN:
-                if message.author.id in self.playerdata:
-                    self.move(message.author.id, type=self.DOWNLOC)
-                    # await self.send_message(message.channel, 'You move DOWN')
-                else:
-                    self.new_game(message.author.id, type=self.DOWNLOC)
-                    # await self.send_message(message.channel, 'new game')
-                did_something = True
-            elif message_lower in self.LEFT:
-                if message.author.id in self.playerdata:
-                    self.move(message.author.id, type=self.LEFTLOC)
-                    # await self.send_message(message.channel, 'You move LEFT')
-                else:
-                    self.new_game(message.author.id, type=self.LEFTLOC)
-                    # await self.send_message(message.channel, 'new game')
-                did_something = True
-            elif message_lower in self.RIGHT:
-                if message.author.id in self.playerdata:
-                    self.move(message.author.id, type=self.RIGHTLOC)
-                    # await self.send_message(message.channel, 'You move RIGHT')
-                else:
-                    self.new_game(message.author.id, type=self.RIGHTLOC)
-                    # await self.send_message(message.channel, 'new game')
-                did_something = True
-            if did_something:
-                await self.send_message(message.channel, self.playerdata[message.author.id][self.LOCATION].description+self.MOVE_ENDING)
-                self.save_data()
-            self.fuck_off=False
+            if message.channel.id in self.public_namespace.exploring_channels:
+                self.fuck_off=True
+                did_something = False
+                message_lower = message.content.lower()
+                if message_lower in self.UP:
+                    if message.author.id in self.playerdata:
+                        self.move(message.author.id, type=self.UPLOC)
+                        # await self.send_message(message.channel, 'You move UP')
+                    else:
+                        self.new_game(message.author.id, type=self.UPLOC)
+                        # await self.send_message(message.channel, 'new game')
+                    did_something = True
+                elif message_lower in self.DOWN:
+                    if message.author.id in self.playerdata:
+                        self.move(message.author.id, type=self.DOWNLOC)
+                        # await self.send_message(message.channel, 'You move DOWN')
+                    else:
+                        self.new_game(message.author.id, type=self.DOWNLOC)
+                        # await self.send_message(message.channel, 'new game')
+                    did_something = True
+                elif message_lower in self.LEFT:
+                    if message.author.id in self.playerdata:
+                        self.move(message.author.id, type=self.LEFTLOC)
+                        # await self.send_message(message.channel, 'You move LEFT')
+                    else:
+                        self.new_game(message.author.id, type=self.LEFTLOC)
+                        # await self.send_message(message.channel, 'new game')
+                    did_something = True
+                elif message_lower in self.RIGHT:
+                    if message.author.id in self.playerdata:
+                        self.move(message.author.id, type=self.RIGHTLOC)
+                        # await self.send_message(message.channel, 'You move RIGHT')
+                    else:
+                        self.new_game(message.author.id, type=self.RIGHTLOC)
+                        # await self.send_message(message.channel, 'new game')
+                    did_something = True
+                if did_something:
+                    await self.send_message(message.channel, self.playerdata[message.author.id][self.LOCATION].description+self.MOVE_ENDING)
+                    self.save_data()
+                self.fuck_off=False
 
     def shutdown(self):
         self.save_data()
