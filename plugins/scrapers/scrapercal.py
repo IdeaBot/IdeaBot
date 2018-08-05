@@ -7,6 +7,7 @@ CHANNEL = 'channel'
 CALENDAR = 'calendarid'
 GOOGLE_LOGO = 'http://www.google.com/favicon.ico' # yes, I didn't know this existed either
 MAX_RESULTS = 4
+DATE_MODE = 'readable' # 'readable' or 'default'
 
 class Plugin(plugin.ThreadedPlugin):
 
@@ -15,6 +16,28 @@ class Plugin(plugin.ThreadedPlugin):
         self.CHANNEL = discord.Object(id=self.config[CHANNEL])
         self.data = dataloader.loadfile_safe(self.config["datafilepath"]) # should be a txt file
         self.spawn_process()
+
+    def process_date(self, date_str, mode=DATE_MODE):
+        if mode=='default':
+            return date_str.replace('T', ' ').strip('Z')
+        elif mode=='readable':
+            # NOTE: can be replaced by date_obj = datetime.datetime.fromisoformat(date_str) in Python3.7
+            split_date_str = date_str.strip('Z').split('T')
+            if len(split_date_str)==2:
+                date, time = split_date_str
+                year, month, day = date.split('-')
+                hour, minute, second = time.split(':')
+                date_obj = datetime.datetime( int(year), int(month), int(day), hour=int(hour), minute=int(minute) )
+                return date_obj.ctime()
+            elif len(split_date_str)==1:
+                date = split_date_str[0]
+                year, month, day = date.split('-')
+                date_obj = datetime.datetime( int(year), int(month), int(day) )
+                return date_obj.ctime()
+            else:
+                return date_str
+        else:
+            return date_str
 
     def threaded_action(self, q):
         try:
@@ -34,7 +57,7 @@ class Plugin(plugin.ThreadedPlugin):
                         datething = 'dateTime'
                     else:
                         datething = 'date'
-                    description+='\n' + item['start'][datething].replace('T', ' ').strip('Z') + ' to ' + item['end'][datething].replace('T', ' ').strip('Z') + ' UTC\n'
+                    description+='\n' + self.process_date(item['start'][datething]) + ' to ' + self.process_date(item['end'][datething]) + ' UTC\n'
                     cal_embed = embed.create_embed( description=description,
                     author={'name':'G-Cal', 'url':item['htmlLink'], 'icon_url':GOOGLE_LOGO},
                     footer={'text':item['organizer']['displayName'], 'icon_url':None} )
