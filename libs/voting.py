@@ -30,7 +30,8 @@ class Poll():
 
     def dumpVotes(self):
         '''(Poll) -> list
-        this should return an unsorted list of votes'''
+        this should return an unsorted list of votes, anonymised
+        in a list of [anonymous voter, their vote(s)]'''
         pass
 
 class FPTP(Poll):
@@ -48,10 +49,19 @@ class FPTP(Poll):
         results = results[::-1] #reverse order so highest number is first; not last
         return [[x[1],x[0]] for x in results] #swap option with votes
 
-    def dumpVotes(self):
+    def dumpVotes(self, anonymised=True):
         '''(FPTP) -> list
         returns a list of [option, voter], unsorted'''
-        return [[self.votes[x],x] for x in self.votes] #turn self.votes dict into list of [votes, voter]
+        if not anonymised:
+            return [[x, self.votes[x]] for x in self.votes] #turn self.votes dict into list of [voter, vote]
+        else:
+            result = list()
+            count=0
+            for voter in self.votes:
+                result.append([count, self.votes[voter]])
+                count += 1
+            return result
+
 
 class STV(Poll):
     '''Implementation of Single Transferable Vote voting system'''
@@ -113,21 +123,21 @@ class STV(Poll):
                 result.append([int(count), list(self.votes[x])])
                 count += 1
             return result
-    
+
     def setModifiedBordaCounts(self):
         self.MBC = dict()
         for option in self.options:
             self.MBC[option] = 0
             for voter in self.votes:
                 self.MBC[option] += self._bordaCountFromSingleBallot(self.votes[voter], option)
-    
+
     def _bordaCountFromSingleBallot(self, ballot, option):
         if option not in ballot:
             return 0
         if None in ballot:
             return ballot.index(None) - ballot.index(option)
         return len(ballot) - ballot.index(option)
-    
+
 #    Unused:
 #    def countFirsts(self, votes, options):
 #        optionsCount = dict(zip(options, [0]*len(options)))
