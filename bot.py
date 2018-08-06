@@ -11,19 +11,17 @@ Created on Wed Jan 10 20:05:03 2018
 import discord
 import asyncio
 
-from libs import dataloader, embed, command, savetome
+from libs import dataloader, embed, command, savetome, plugin
 from libs import reaction as reactioncommand
 from collections import OrderedDict
 
-# constants
 DEFAULT = 'DEFAULT'
 CHANNEL_LOC = 'channelsloc'
 MSG_BACKUP_LOCATION='msgbackuploc'
 WATCH_MSG_LOCATION='alwayswatchmsgloc'
 ROLE_MSG_LOCATION='rolemessagesloc'
 LOADING_WARNING = "Things are loading"
-
-ADMINS = ["106537989684887552", "255041793417019393"] # important ppl get to be admins
+ADMINS = ["106537989684887552", "255041793417019393"]
 
 class Bot(discord.Client):
     '''A Discord client which has config data and a list of commands to try when
@@ -34,7 +32,7 @@ class Bot(discord.Client):
     WATCH_MSG_LOCATION='alwayswatchmsgloc'
     ROLE_MSG_LOCATION='rolemessagesloc'
 
-    def __init__(self, config, log, checks, stop_queue, always_watch_messages):
+    def __init__(self, config, log, stop_queue, always_watch_messages):
         '''(str, Logger, fun) -> Bot
         config: a string which is the loaction of the base config file
         log: a Logger for dumping info
@@ -45,12 +43,10 @@ class Bot(discord.Client):
             pass
         self.data_config = dataloader.datafile(config).content[DEFAULT]
         self.log = log
-        # TODO(14flash): Plugin refactor, where we won't need a doCheck() func anymore
-        self.checks = checks
         self.data = dict()
         self.commands = OrderedDict() # maps names to commands
         self.reactions = OrderedDict() # maps names to reaction commands
-        self.plugins = list() # unused
+        self.plugins = OrderedDict() # maps names to plugins
         self.stop_queue=stop_queue
         self.always_watch_messages=always_watch_messages
         self.ADMINS = ADMINS
@@ -79,11 +75,15 @@ class Bot(discord.Client):
             raise ValueError('Only commands may be registered in Bot::register_command')
         self.commands[name]=cmd
 
-    def register_plugin(self, plugin):
+    def register_plugin(self, plugin_object, name):
         '''(Plugin) -> None
         Registers a Plugin which executes in a separate process'''
-        # TODO(14flash): Plugin refactor.
-        pass
+        if not isinstance(plugin_object, plugin.Plugin):
+            raise ValueError('Only plugins may be registered in Bot::register_plugin')
+        if isinstance(plugin_object, plugin.AdminPlugin): # give AdminPlugins access to all this class's variables
+            plugin_object.add_client_variable(self)
+        self.plugins[name]=plugin_object
+        self.loop.create_task(plugin_object._action())
 
     def register_reaction_command(self, cmd, name):
         '''(discord.Client, reactions.Command) -> None
@@ -93,7 +93,6 @@ class Bot(discord.Client):
         self.reactions[name]=cmd
     @asyncio.coroutine
     def on_message(self, message):
-        yield from self.checks(self)
         yield from self.message_stuff()
         for cmd in self.commands:
             try:
@@ -132,27 +131,13 @@ class Bot(discord.Client):
 
     @asyncio.coroutine
     def on_ready(self):
+        print("Bot online & running startup (this may take a while)")
         self.log.info('API connection created successfully')
         self.log.info('Username: ' + str(self.user.name))
         #self.log.info('Email: ' + str(self.email))
         self.log.info('Connected to %s servers' %len(self.servers))
-        self.setup_channels()
         yield from self.load_messages()
-        yield from self.checks(self)
-
-    def setup_channels(self):
-        '''() -> None
-        Convinience fuction for on_ready()'''
-        for i in self.get_all_channels(): # play the matchy-matchy game with server names
-            if i.name == self.get_data(CHANNEL_LOC, 'twitter'):
-                self.twitterchannel = i
-                self.log.info('twitter channel found')
-            if i.name == self.get_data(CHANNEL_LOC, 'forum'):
-                self.forumchannel = i
-                self.log.info('forum channel found')
-            if i.name == self.get_data(CHANNEL_LOC, 'reddit'):
-                self.redditchannel = i
-                self.log.info('reddit channel found')
+        print("All messages loaded. Full functionality enabled")
 
     def load_messages(self):
         '''() -> None

@@ -1,7 +1,11 @@
 class Poll():
     '''Base class for voting systems that everything below extends
     This class should never be used in a concrete implementation'''
-    def __init__(self, options = ["Y", "N"], allowed_voters = None, voted=list(), votes=dict()):
+    def __init__(self, options = ["Y", "N"], allowed_voters = None, voted=None, votes=None):
+        if voted is None:
+            voted = list()
+        if votes is None:
+            votes = dict()
         self.options = options
         self.allowed_voters = allowed_voters
         self.voted = voted
@@ -26,7 +30,8 @@ class Poll():
 
     def dumpVotes(self):
         '''(Poll) -> list
-        this should return an unsorted list of votes'''
+        this should return an unsorted list of votes, anonymised
+        in a list of [anonymous voter, their vote(s)]'''
         pass
 
 class FPTP(Poll):
@@ -44,10 +49,19 @@ class FPTP(Poll):
         results = results[::-1] #reverse order so highest number is first; not last
         return [[x[1],x[0]] for x in results] #swap option with votes
 
-    def dumpVotes(self):
+    def dumpVotes(self, anonymised=True):
         '''(FPTP) -> list
-        returns a list of [option, total votes], unsorted'''
-        return [[self.votes[x],x] for x in self.votes] #turn self.votes dict into list of [votes, options]
+        returns a list of [option, voter], unsorted'''
+        if not anonymised:
+            return [[x, self.votes[x]] for x in self.votes] #turn self.votes dict into list of [voter, vote]
+        else:
+            result = list()
+            count=0
+            for voter in self.votes:
+                result.append([count, self.votes[voter]])
+                count += 1
+            return result
+
 
 class STV(Poll):
     '''Implementation of Single Transferable Vote voting system'''
@@ -57,7 +71,7 @@ class STV(Poll):
         ie transferables=2 means a voter can have a first choice and a second choice
         transferables=5 means a voter can have a first choice up to a fifth choice'''
         super().__init__(options=options, allowed_voters=allowed_voters, **kwargs)
-        if transferables!=None:
+        if transferables is not None and isinstance(transferables, int):
             self.transferables = transferables
         else:
             self.transferables = len(self.options)
@@ -73,7 +87,7 @@ class STV(Poll):
             for i in vote:
                 if i not in self.options:
                     raise ValueError("Invalid option: "+i)
-                if self.options.count(i)>1:
+                if vote.count(i)>1:
                     raise ValueError("Option "+i+" used more than once")
             self.votes[str(voter)]=list(vote)
             self.voted.append(str(voter))
@@ -94,6 +108,7 @@ class STV(Poll):
     def tallyVotes(self):
         '''Recursion: kill me now...'''
         print(self.dumpVotes())
+        self.setModifiedBordaCounts()
         return self.recursiveTallySort(self.votes, self.options)
 
     def dumpVotes(self, anonymised=True):
@@ -109,14 +124,29 @@ class STV(Poll):
                 count += 1
             return result
 
-    def countFirsts(self, votes, options):
-        optionsCount = dict(zip(options, [0]*len(options)))
-        for voter in votes:
-            if votes[voter]!= []:
-                optionsCount[votes[voter][0]]+=1
-        output = [[optionsCount[x], x] for x in optionsCount]
-        output.sort()
-        return output
+    def setModifiedBordaCounts(self):
+        self.MBC = dict()
+        for option in self.options:
+            self.MBC[option] = 0
+            for voter in self.votes:
+                self.MBC[option] += self._bordaCountFromSingleBallot(self.votes[voter], option)
+
+    def _bordaCountFromSingleBallot(self, ballot, option):
+        if option not in ballot:
+            return 0
+        if None in ballot:
+            return ballot.index(None) - ballot.index(option)
+        return len(ballot) - ballot.index(option)
+
+#    Unused:
+#    def countFirsts(self, votes, options):
+#        optionsCount = dict(zip(options, [0]*len(options)))
+#        for voter in votes:
+#            if votes[voter]!= []:
+#                optionsCount[votes[voter][0]]+=1
+#        output = [[optionsCount[x], x] for x in optionsCount]
+#        output.sort()
+#        return output
 
     def countVotes(self, votes, options):
         counts = list() # [[0]*self.transferables]*len(options) but copies, not pointers
@@ -148,7 +178,14 @@ class STV(Poll):
         self.deleteNones(votes)
         voteCount = self.countVotes(votes, options)
         if len(options)>1:
-            lowest_voted = voteCount[0] # lowest_voted is list in form [votes, option]
+            possible_ties = [[self.MBC[voteCount[0][1]], voteCount[0]]]
+            for i in range(1, len(options)):
+                if (voteCount[i][0][0] == voteCount[0][0][0]):
+                    possible_ties.append([self.MBC[voteCount[i][1]], voteCount[i]])
+                else:
+                    break
+            possible_ties.sort() # lowest MBC first
+            lowest_voted = possible_ties[0][1] # lowest_voted is list in form [votes, option]
             for voter in votes:
                 if lowest_voted[1] in votes[voter]:
                     del(votes[voter][votes[voter].index(lowest_voted[1])])
