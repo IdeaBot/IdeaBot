@@ -157,8 +157,8 @@ class Bot(discord.Client):
                 msg = yield from self.get_message_properly(channel_id, msg_id)
                 if msg.server: # PATCH: private messages can't be loaded properly, this prevents them from being used
                     self.messages.append(msg)
-            except discord.NotFound:
-                self.log.warning("Unable to find %a message" % msg_id)
+            except (discord.NotFound, discord.Forbidden, discord.InvalidArgument):
+                self.log.warning("Unable to load %a message" % msg_id)
         self.log.info("Finished loading messages")
 
         #load always_watch_messages from file
@@ -177,8 +177,9 @@ class Bot(discord.Client):
                     if msg not in self.messages:
                         self.messages.append(msg)
                     self.always_watch_messages.add(msg)
-            except discord.NotFound:
-                self.log.warning("Unable to find %a message" % msg_id)
+            except (discord.NotFound, discord.Forbidden, discord.InvalidArgument):
+                # prevents the following, respectively: msg deleted/not-accessible, bot permissions changed, malformed save file
+                self.log.warning("Unable to load %a message" % msg_id)
         self.always_watch_messages.remove(LOADING_WARNING)
         self.log.info("Finished loading watched messages")
 
