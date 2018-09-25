@@ -7,9 +7,9 @@ is a reaction (reaction.message is equivalent to message in message command) and
 a user (the person who added/removed/updated the reaction)
 """
 
-from libs import dataloader
+from libs import dataloader, addon
 
-class ReactionCommand():
+class ReactionCommand(addon.AddOn):
     '''ReactionAddCommand represents a command that the bot can use to take action
     based on reactions added to any discord message it listens to.'''
 

@@ -7,6 +7,7 @@ DEFAULT_OWNER_ID = "106537989684887552" #NGnius's discord ID ~~pls don't hack me
 REACTIONS = 'reactions'
 COMMANDS = 'commands'
 PACKAGES = 'packages'
+PLUGINS = 'plugins'
 
 class Command(command.Multi, command.Dummy, command.Config):
     def __init__(self, **kwargs):
@@ -29,6 +30,7 @@ class Command(command.Multi, command.Dummy, command.Config):
         self.public_namespace.REACTIONS = REACTIONS
         self.public_namespace.COMMANDS = COMMANDS
         self.public_namespace.PACKAGES = PACKAGES
+        self.public_namespace.PLUGINS = PLUGINS
 
     def shutdown(self):
         super().shutdown()

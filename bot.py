@@ -10,6 +10,7 @@ Created on Wed Jan 10 20:05:03 2018
 
 import discord
 import asyncio
+import traceback
 
 from libs import dataloader, embed, command, savetome, plugin
 from libs import reaction as reactioncommand
@@ -107,6 +108,7 @@ class Bot(discord.Client):
                 # Catch all problems that happen in matching/executing a command.
                 # This means that if there's a bug that would cause execution to
                 # break, other commands can still be tried.
+                traceback.print_exc()
                 self.log.warning('command %s raised an exception during its execution: %s', cmd, e)
 
     @asyncio.coroutine
@@ -193,7 +195,8 @@ class Bot(discord.Client):
         # get_message returns a discord.Message which is lacking a certain variables, including .server and .channel
         # match private channel to msg
         for channel in self.private_channels: # NOTE: private_channels is not loaded at startup, so it will contain nothing initially
-            print(channel.id==channel_id)
+            # NOTE: private_channels is loaded when you send a message, though, to make things weirder
+            # print(channel.id==channel_id)
             if channel.id == channel_id:
                 msg.server = None
                 msg.channel = channel

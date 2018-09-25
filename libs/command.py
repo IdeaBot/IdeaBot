@@ -12,11 +12,11 @@ import time
 import re
 import types
 
-from libs import dataloader
+from libs import dataloader, addon
 
 DEFAULT = 'DEFAULT' # default config file section
 
-class Command():
+class Command(addon.AddOn):
     '''Command represents a command that the discord bot can use to take action
     based on messages posted in any discord channels it listens to.'''
 

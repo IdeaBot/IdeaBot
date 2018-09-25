@@ -6,7 +6,7 @@ COMMANDS_DIR = './commands'
 REACTIONS_DIR = './reactions'
 
 class Command(command.DirectOnlyCommand, command.AdminCommand, command.Multi, command.WatchCommand, command.RoleCommand):
-    '''load_command downloads an attached python file and tries to add it as a command
+    '''load_command loads a python file from the server and tries to add it as a command
 
     It will spit back any error trying to download or save the file causes'''
 

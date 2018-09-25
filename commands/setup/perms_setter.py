@@ -3,7 +3,7 @@ import re
 
 class Command(command.Multi, command.AdminCommand, command.DirectOnlyCommand):
     def _matches(self, message): #ik it's bad form
-        return ( message.server.owner == message.author  and self.matches(message) ) or super()._matches(message)
+        return ( message.server!=None and ( message.server.owner == message.author  and self.matches(message) ) ) or super()._matches(message)
 
     def matches(self, message):
         args = re.search(r'(reaction|command|\s?)\s?perms\s?->\s?(\S+)\s(\S+)', message.content, re.I)

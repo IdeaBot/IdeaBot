@@ -10,7 +10,7 @@ Plugin is designed to be similar to Command and Reaction interface classes while
 import asyncio, time, traceback
 from multiprocessing import Process, Queue
 
-from libs import dataloader
+from libs import dataloader, addon
 
 # general plugin constants
 PERIOD = 'period'
@@ -46,7 +46,7 @@ LOGIN = 'login'
 MESSAGE = 'message'
 REACTION = 'reaction'
 
-class Plugin():
+class Plugin(addon.AddOn):
     '''Plugin represents a plugin that the discord bot can work alongside
     to add custom functionality not present in the base bot'''
 
