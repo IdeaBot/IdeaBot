@@ -33,7 +33,7 @@ class Bot(discord.Client):
     WATCH_MSG_LOCATION='alwayswatchmsgloc'
     ROLE_MSG_LOCATION='rolemessagesloc'
 
-    def __init__(self, config, log, stop_queue, always_watch_messages):
+    def __init__(self, config, log, always_watch_messages):
         '''(str, Logger, fun) -> Bot
         config: a string which is the loaction of the base config file
         log: a Logger for dumping info
@@ -48,7 +48,6 @@ class Bot(discord.Client):
         self.commands = OrderedDict() # maps names to commands
         self.reactions = OrderedDict() # maps names to reaction commands
         self.plugins = OrderedDict() # maps names to plugins
-        self.stop_queue=stop_queue
         self.always_watch_messages=always_watch_messages
         self.ADMINS = ADMINS
         self.role_messages=dict()
@@ -99,9 +98,9 @@ class Bot(discord.Client):
             try:
                 if self.commands[cmd]._matches(message):
                     if isinstance(self.commands[cmd], command.AdminCommand):
-                        yield from self.commands[cmd]._action(message, self.send_message, self)
+                        yield from self.commands[cmd]._action(message, self)
                     else:
-                        yield from self.commands[cmd]._action(message, self.send_message)
+                        yield from self.commands[cmd]._action(message)
                     if self.commands[cmd].breaks_on_match:
                         break
             except Exception as e:

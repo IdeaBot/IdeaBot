@@ -14,4 +14,4 @@ class Reaction(reaction.Multi, reaction.AdminReactionAddCommand):
             bot.reactions[self.public_namespace.active_emoji_messages[reaction.message.id]].emoji[reaction.message.server.id]=emoji_id
         else:
             bot.reactions[self.public_namespace.active_emoji_messages[reaction.message.id]].emoji={reaction.message.server.id:emoji_id}
-        yield from bot.send_message(reaction.message.channel, "Success!")
+        yield from self.send_message(reaction.message.channel, "Success!")

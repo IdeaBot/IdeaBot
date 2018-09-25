@@ -22,7 +22,8 @@ class Command(command.DirectOnlyCommand, command.WatchCommand, command.Multi):
         messagelowercase = message.content.lower()
         return re.search(r'start\s+vote\s*', message.content, re.I) != None
 
-    def action(self, message, send_func):
+    def action(self, message):
+        send_func = self.send_message
         reply = ""
         temp_dict = dict()
         mode = re.compile(r'\bmode[:=]?\s*([^\s]+)\s*', re.I).search(message.content)

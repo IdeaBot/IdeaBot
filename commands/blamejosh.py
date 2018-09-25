@@ -15,5 +15,5 @@ class Command(command.Command):
     def matches(self, message):
         return re.search(r'\bblame josh\b', message.content, re.IGNORECASE)
 
-    def action(self, message, send_func):
-        yield from send_func(message.channel, 'https://cdn.discordapp.com/attachments/382856950079291395/392398975686279168/unknown.png')
+    def action(self, message):
+        yield from self.send_message(message.channel, 'https://cdn.discordapp.com/attachments/382856950079291395/392398975686279168/unknown.png')

@@ -16,7 +16,8 @@ class Command(command.AdminCommand, command.DirectOnlyCommand, command.Multi):
     def matches(self, message):
         return self.collect_args(message)!=None
 
-    def action(self, message, send_func, client):
+    def action(self, message, client):
+        send_func = self.send_message
         args = self.collect_args(message)
         response_channel = message.author if '-p' not in message.content else message.channel
 

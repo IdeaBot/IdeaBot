@@ -14,5 +14,5 @@ class Command(command.DirectOnlyCommand):
     def matches(self, message):
         return re.search(r'\bwhat(\'s\s*)?(my)?\s+id\b', message.content, re.I)
 
-    def action(self, message, send_func):
-        yield from send_func(message.channel, message.author.id)
+    def action(self, message):
+        yield from self.send_message(message.channel, message.author.id)

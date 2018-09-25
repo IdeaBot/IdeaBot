@@ -7,7 +7,8 @@ class Command(command.DirectOnlyCommand):
     def matches(self, message):
         return self._get_args(message) != None
 
-    def action(self, message, send_func):
+    def action(self, message):
+        send_func = self.send_message
         args = self._get_args(message)
         if args.group(1) is None or args.group(2) is None:
             return

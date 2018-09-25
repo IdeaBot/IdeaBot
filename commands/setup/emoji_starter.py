@@ -6,7 +6,8 @@ class Command(command.DirectOnlyCommand, command.AdminCommand, command.Multi):
         args = re.search(r'emoji\s?->\s?(\S+)', message.content, re.I)
         return args!=None
 
-    def action(self, message, send_func, bot):
+    def action(self, message, bot):
+        send_func = self.send_message
         args = re.search(r'emoji\s?->\s?(\S+)', message.content, re.I)
         if args.group(1) in bot.reactions:
             reply = yield from send_func(message.channel, "React with the emoji you want to set")

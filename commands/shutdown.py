@@ -18,7 +18,7 @@ class Command(command.DirectOnlyCommand, command.AdminCommand):
     def matches(self, message):
         return re.search(r'shutdown protocol', message.content, re.IGNORECASE)
 
-    def action(self, message, send_func, client):
+    def action(self, message, client):
         if message.author.id in client.ADMINS:
             client.stop_queue.put("Stopping time!")
             if re.search(r'shutdown protocol 1', message.content, re.IGNORECASE): # basic shutdown with stats

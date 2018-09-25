@@ -11,7 +11,8 @@ class Command(command.DirectOnlyCommand, command.Multi):
     def matches(self, message):
         return self.collect_args(message)
 
-    def action(self, message, send_func):
+    def action(self, message):
+        send_func = self.send_message
         send_wrapper = lambda text: send_func(message.channel, text)
         args_match = self.collect_args(message)
         if args_match.group(1) == 'count':

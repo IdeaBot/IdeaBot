@@ -16,5 +16,5 @@ class Command(command.DirectOnlyCommand, command.BenchmarkableCommand):
         # match objects have a boolean value, so we can just return
         return re.search(r'\bping\b', message.content, re.IGNORECASE)
 
-    def action(self, message, send_func):
-        yield from send_func(message.channel, "PONG.")
+    def action(self, message):
+        yield from self.send_message(message.channel, "PONG.")

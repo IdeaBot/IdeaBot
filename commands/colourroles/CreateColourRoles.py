@@ -24,7 +24,8 @@ class Command(command.AdminCommand, command.DirectOnlyCommand, command.WatchComm
         return "create colour role message" in message.content.lower()
 
     @asyncio.coroutine
-    def action(self, message, send_func, bot, speed=SPEED):
+    def action(self, message, bot, speed=SPEED):
+        send_func = self.send_message
         yield from deleteColourRoles(message.server, bot)
         n=1 #len(EMOJIS)
         colourRoleDict = dict()

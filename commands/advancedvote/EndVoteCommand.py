@@ -21,11 +21,11 @@ class Command(command.DirectOnlyCommand, command.Multi):
     def matches(self, message):
         return re.search(r'\bend\s+["]([^"]+)["]+\s+\bvote', message.content, re.I) != None
 
-    def action(self, message, send_func):
+    def action(self, message):
         args = re.search(r'\b(end)\s+["]([^"]+)["]+\s+\b(vote)', message.content, re.I)
         #group(1) is end, group(2) is vote name, group(3) is vote
         try:
-            yield from self.close_poll(message, send_func, args.group(2))
+            yield from self.close_poll(message, self.send_message, args.group(2))
         except:
             traceback.print_exc()
         '''

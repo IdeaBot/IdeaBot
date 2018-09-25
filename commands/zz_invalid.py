@@ -19,5 +19,5 @@ class Command(command.DirectOnlyCommand):
     def matches(self, message):
         return True
 
-    def action(self, message, send_func):
-        yield from send_func(message.channel, self.invalid_message)
+    def action(self, message):
+        yield from self.send_message(message.channel, self.invalid_message)

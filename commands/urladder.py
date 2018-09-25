@@ -11,20 +11,23 @@ import re
 
 class Command(command.DirectOnlyCommand):
     '''UrlAdderCommand adds a url to the reddit watch list. URLs in the watch
-    list will have updates posted in the discord.'''
+    list will have updates posted in the discord.
 
-    def __init__(self, url_adder, **kwargs):
+    Currently not implemented!'''
+    #TODO: Re-implement
+
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.url_adder = url_adder
+        self.url_adder = None
 
     def matches(self, message):
-        return self.collect_args(message) != None
+        return False#self.collect_args(message) != None
 
-    def action(self, message, send_func):
+    def action(self, message):
         args_match = self.collect_args(message)
         url = args_match.group(1)
         self.url_adder.put({'action': 'add', 'url': url})
-        yield from send_func(message.channel, 'Ok, I\'ll try!')
+        yield from self.send_message(message.channel, 'Ok, I\'ll try!')
 
     def collect_args(self, message):
         return re.search(r'\badd\s+`(.+?)`', message.content, re.I)

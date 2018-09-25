@@ -15,10 +15,10 @@ class Command(command.Multi, command.Dummy, command.Config):
         self.public_namespace.active_emoji_messages = dict() # dict associating messages to their reaction name, for assigning emojis
         self.public_namespace.active_perm_messages = dict() # dict associating users to their command/reaction name, for assigning perms
         try:
-            self.public_namespace.commandersfile = dataloader.datafile(self.config.content[command.DEFAULT][COMMANDERS])
+            self.public_namespace.commandersfile = dataloader.datafile(self.config[COMMANDERS])
         except FileNotFoundError:
-            print("The %s file is either missing or corrupted; unable to load" %self.config.content[command.DEFAULT][COMMANDERS])
-            self.public_namespace.commandersfile = dataloader.newdatafile(self.config.content[command.DEFAULT][COMMANDERS])
+            print("The %s file is either missing or corrupted; unable to load" %self.config[COMMANDERS])
+            self.public_namespace.commandersfile = dataloader.newdatafile(self.config[COMMANDERS])
         if not isinstance(self.public_namespace.commandersfile.content, dict):
             self.public_namespace.commandersfile.content = {REACTIONS:dict(), COMMANDS:dict(), PACKAGES:dict()}
         self.public_namespace.commandersfile.save() # create & save file, in case it didn't exist before

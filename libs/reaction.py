@@ -9,14 +9,24 @@ a user (the person who added/removed/updated the reaction)
 
 from libs import dataloader, addon
 
+DEFAULT = addon.DEFAULT
+
 class ReactionCommand(addon.AddOn):
     '''ReactionAddCommand represents a command that the bot can use to take action
     based on reactions added to any discord message it listens to.'''
 
-    def __init__(self, all_emojis_func=None, emoji_loc=None, perms_loc=None, **kwargs):
+    def __init__(self, api_methods=dict(), all_emojis_func=None, emoji_loc=None, perms_loc=None, **kwargs):
         '''(ReactionCommand, func, str, dict) -> Command
         perms: str of users who have permission to use this command
         kwargs: included for sub-classing'''
+        # associate API methods
+        self.send_message = api_methods[self.SEND_MESSAGE]
+        self.edit_message = api_methods[self.EDIT_MESSAGE]
+        self.add_reaction = api_methods[self.ADD_REACTION]
+        self.remove_reaction = api_methods[self.REMOVE_REACTION]
+        self.send_typing = api_methods[self.SEND_TYPING]
+        self.send_file = api_methods[self.SEND_FILE]
+
         self.all_emojis_func = all_emojis_func
         self.emoji_action = set()
         try:
@@ -34,7 +44,7 @@ class ReactionCommand(addon.AddOn):
             self.perms = dict()
 
     def _matches(self, reaction, user):
-        '''(Command, discord.Reaction, discord.Member or discord.User) -> bool
+        '''(ReactionCommand, discord.Reaction, discord.Member or discord.User) -> bool
         This should only be overriden by non-concrete sub-classes to modify
         functionality. This calls matches()
 
@@ -47,12 +57,12 @@ class ReactionCommand(addon.AddOn):
         return (self.perms is None or reaction.message.server is None or reaction.message.server.id not in self.perms or user.id in self.perms[reaction.message.server.id]) and emoji_match and self.matches(reaction, user)
 
     def matches(self, reaction, user):
-        '''(Command, discord.Reaction, discord.Member or discord.User) -> bool
+        '''(ReactionCommand, discord.Reaction, discord.Member or discord.User) -> bool
         Returns True if the reaction should be interpreted by the command'''
         return self.emoji!=None # matches should always be overriden when self.emoji==None
 
     def _action(self, reaction, user):
-        '''(Command, discord.Reaction, discord.Member or discord.User) -> None
+        '''(ReactionCommand, discord.Reaction, discord.Member or discord.User) -> None
         This should only be overriden by non-concrete sub-classes to modify
         functionality. This calls action()
 
@@ -60,9 +70,17 @@ class ReactionCommand(addon.AddOn):
         yield from self.action(reaction, user)
 
     def action(self, reaction, user):
-        '''(Command, discord.Reaction, discord.Member or discord.User) -> None
+        '''(ReactionCommand, discord.Reaction, discord.Member or discord.User) -> None
         Reacts to a Reaction '''
         pass
+
+    def _shutdown(self):
+        '''(ReactionCommand) -> None
+        Concrete implementations should NOT override this function. Only sub-classes should override this,
+        in order to expand or modify it's functionality.
+
+        the method to call shutdown()'''
+        return self.shutdown()
 
     def shutdown(self):
         '''(ReactionCommand) -> None
@@ -193,6 +211,12 @@ class Config(ReactionCommand):
     def __init__(self, config=None, **kwargs):
         super().__init__(**kwargs)
         if config:
-            self.config = dataloader.datafile(config)
+            try:
+                self.config = dataloader.datafile(config) # configuration file for the Reaction
+                if self.config.type=='config':
+                    self.config=self.config.content[self.DEFAULT]
+            except FileNotFoundError:
+                self.config = None # NOTE: This is a bad state for a Config Reaction to be in, since it will cause unexpected errors
+                raise ImportError("No config file found")
         else:
-            self.config = None
+            raise ImportError("Config file cannot be None")

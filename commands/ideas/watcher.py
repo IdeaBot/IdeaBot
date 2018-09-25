@@ -12,7 +12,8 @@ class Command(command.Multi):
         return (message.channel.id in self.public_namespace.last_messages_time) or (self.collect_args(message.content) != None)
 
     @asyncio.coroutine
-    def action(self, message, send_func):
+    def action(self, message):
+        send_func = self.send_message
         args = self.collect_args(message.content)
         if args != None:
             if args.group(1) == 'enable':

@@ -16,10 +16,10 @@ class Command(command.DirectOnlyCommand):
     def matches(self, message):
         return re.search(r'\bwhat\'?s?\s+(.*)\s+in\s+([A-Z]{3})', message.content, re.IGNORECASE)
 
-    def action(self, message, send_func):
+    def action(self, message):
         try:
             time, timezoneTarget = timezones.getConversionParameters(message.content)
-            yield from send_func(message.channel, time.convertTo(timezoneTarget))
+            yield from self.send_message(message.channel, time.convertTo(timezoneTarget))
         except TypeError:
             if "-v" in message.content.lower():
-                yield from send_func(message.channel, "You're missing something; `Missing argument error`")
+                yield from self.send_message(message.channel, "You're missing something; `Missing argument error`")

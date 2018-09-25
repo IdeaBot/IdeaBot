@@ -5,7 +5,8 @@ class Command(command.Multi, command.AdminCommand, command.DirectOnlyCommand):
     def matches(self, message):
         return re.search(r'(?:re)?generate\s+(commanders|command\s+maintainers|import\s+perm(?:ission)?s?)', message.content, re.I) != None
 
-    def action(self, message, send_func, bot):
+    def action(self, message, bot):
+        send_func = self.send_message
         commanders2 = dataloader.datafile(self.public_namespace.commandersfile.filename).content
         if not isinstance(commanders2, dict):
             commanders2 = dict()

@@ -14,16 +14,7 @@ from libs import dataloader, addon
 
 # general plugin constants
 PERIOD = 'period'
-DEFAULT = 'DEFAULT'
-
-# bot api methods accessible to a regular Plugin
-# if more functionality is required, consider using an AdminPlugin
-SEND_MESSAGE = 'send_message'
-EDIT_MESSAGE = 'edit_message'
-ADD_REACTION = 'add_reaction'
-REMOVE_REACTION = 'remove_reaction'
-SEND_TYPING = 'send_typing'
-SEND_FILE = 'send_file'
+DEFAULT = addon.DEFAULT
 
 # threaded constants
 THREADED_PERIOD = 'threadedperiod'
@@ -55,18 +46,23 @@ class Plugin(addon.AddOn):
         api_methods: a dict of api methods accessible to the Plugin, so that most plugins don't have to be AdminPlugins
         kwargs: included to simplify sub-classing'''
         self.shutting_down = False
-        try:
-            self.config = dataloader.datafile(config).content[DEFAULT] # configuration file for the Plugin
-        except FileNotFoundError:
-            self.config = None # NOTE: This is a bad state for a Plugin to be in, since it may cause unexpected errors
-            raise ImportError("No config file found")
+        if config:
+            try:
+                self.config = dataloader.datafile(config) # configuration file for the Plugin
+                if self.config.type=='config':
+                    self.config=self.config.content[self.DEFAULT]
+            except FileNotFoundError:
+                self.config = None # NOTE: This is a bad state for a Plugin to be in, since it may cause unexpected errors
+                raise ImportError("No config file found")
+        else:
+            raise ImportError("Config file cannot be None")
         self.period = float(self.config[PERIOD]) # period for each repetition of action()
-        self.send_message = api_methods[SEND_MESSAGE]
-        self.edit_message = api_methods[EDIT_MESSAGE]
-        self.add_reaction = api_methods[ADD_REACTION]
-        self.remove_reaction = api_methods[REMOVE_REACTION]
-        self.send_typing = api_methods[SEND_TYPING]
-        self.send_file = api_methods[SEND_FILE]
+        self.send_message = api_methods[self.SEND_MESSAGE]
+        self.edit_message = api_methods[self.EDIT_MESSAGE]
+        self.add_reaction = api_methods[self.ADD_REACTION]
+        self.remove_reaction = api_methods[self.REMOVE_REACTION]
+        self.send_typing = api_methods[self.SEND_TYPING]
+        self.send_file = api_methods[self.SEND_FILE]
 
     async def _action(self):
         '''(Plugin) -> None

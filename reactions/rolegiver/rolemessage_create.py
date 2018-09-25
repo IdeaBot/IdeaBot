@@ -8,7 +8,7 @@ class Reaction(reactioncommand.AdminReactionAddCommand, reactioncommand.WatchRea
         emojiToRoleDict = self.associateEmojiToRoles(reaction.message.content)
         if emojiToRoleDict!=None:
             for emoji in emojiToRoleDict: #add all the emojis so people don't have to search through the list
-                yield from bot.add_reaction(reaction.message, emoji)
+                yield from self.add_reaction(reaction.message, emoji)
             self.always_watch_messages.add(reaction.message)
             self.role_messages[reaction.message.id]=dict(emojiToRoleDict)
             for emoji in emojiToRoleDict: #make sure the bot doesn't get the roles as it reacts with the emojis

@@ -22,7 +22,8 @@ class Command(command.DirectOnlyCommand, command.AdminCommand, command.Benchmark
     def matches(self, message):
         return self.collect_args(message)
 
-    def action(self, message, send_func, client):
+    def action(self, message, client):
+        send_func = self.send_message
         if message.author.id in client.ADMINS:
             args_match = self.collect_args(message)
             # TODO(14flash): Avoid magic number.

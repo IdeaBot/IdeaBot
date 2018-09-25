@@ -8,7 +8,7 @@ class Reaction(reactioncommand.ReactionAddCommand, reactioncommand.Config):
     '''Saves messages when they get the right reaction'''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.saveloc = self.config.content["DEFAULT"][SAVE_LOC]
+        self.saveloc = self.config[SAVE_LOC]
 
     @asyncio.coroutine
     def action(self, reaction, user):

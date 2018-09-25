@@ -28,7 +28,7 @@ class Command(command.DirectOnlyCommand, command.Multi):
                 return True
         return False
 
-    def action(self, message, send_func):
+    def action(self, message):
         reply = "Poll: **"+self.vote_dict[self.ballots[message.author.id]][NAME]+"**\n"
         for i in range(len(self.vote_dict[self.ballots[message.author.id]][VOTES].options)):
             reply += REACTIONS[i]+" : "+self.vote_dict[self.ballots[message.author.id]][VOTES].options[i]+"\n"
@@ -36,5 +36,5 @@ class Command(command.DirectOnlyCommand, command.Multi):
 Please place your vote by reacting with your choice(s).
 In the event that multiple choices are accepted, choices will be considered in chronological order (ie first reaction is first choice, second reaction is second choice, etc).
 **No take-backsies.**"""
-        msg = yield from send_func(message.author, reply)
+        msg = yield from self.send_message(message.author, reply)
         self.always_watch_messages.add(msg)

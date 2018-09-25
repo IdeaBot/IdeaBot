@@ -14,7 +14,8 @@ class Command(command.DirectOnlyCommand, command.AdminCommand, command.Multi):
     def matches(self, message):
         return re.search(r'download\s*(command|reaction)\s*(?:to\s*)?(\S+)?', message.content, re.I)!=None and len(message.attachments)>0
 
-    def action(self, message, send_func, bot):
+    def action(self, message, bot):
+        send_func = self.send_message
         args=re.search(r'download\s*(command|reaction)\s*(?:to\s*)?(\S+)?', message.content, re.I)
         try:
             for attachment in message.attachments:

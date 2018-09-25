@@ -13,7 +13,8 @@ class Command(command.DirectOnlyCommand, command.AdminCommand, command.Multi, co
     def matches(self, message):
         return re.search(r'load\s*(command|reaction)\s+(\S+)?\s*(?:from\s*)?(\S+)?', message.content, re.I)!=None
 
-    def action(self, message, send_func, bot):
+    def action(self, message, bot):
+        send_func = self.send_message
         args = re.search(r'load\s*(command|reaction)\s+(\S+)?\s*(?:from\s*)?(\S+)?', message.content, re.I)
         parameters = {"user_func":self.user, "role_messages":self.role_messages, "always_watch_messages":self.always_watch_messages}# by the end , it'll look something like this: {filename, namespace, user_func, role_messages, always_watch_messages, package=""}
         ADMINS = bot.ADMINS

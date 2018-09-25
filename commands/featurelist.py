@@ -27,8 +27,8 @@ class Command(command.DirectOnlyCommand):
     def matches(self, message):
         return re.search(r'feature\s?(list|request)', message.content, re.I)
 
-    def action(self, message, send_func):
+    def action(self, message):
         if "-v" in message.content.lower():
-            yield from send_func(message.channel, FeatureListCommand.MESSAGE_V)
+            yield from self.send_message(message.channel, FeatureListCommand.MESSAGE_V)
         else:
-            yield from send_func(message.channel, FeatureListCommand.MESSAGE)
+            yield from self.send_message(message.channel, FeatureListCommand.MESSAGE)
