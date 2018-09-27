@@ -5,7 +5,11 @@ import asyncio
 SAVE_LOC = 'saveloc'
 
 class Reaction(reactioncommand.ReactionAddCommand, reactioncommand.Config):
-    '''Saves messages when they get the right reaction'''
+    '''Saves messages when they get the right reaction
+
+    **Usage:**
+    React to the message you want to be saved with the save emoji
+    (The emoji is server-defined; ask your fellow server members for the correct emoji)'''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.saveloc = self.config[SAVE_LOC]

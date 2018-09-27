@@ -2,7 +2,13 @@ from libs import command
 import random, re
 
 class Command(command.DirectOnlyCommand):
-    '''dice roll Command is a command that responds to messages asking for a random number'''
+    '''Dice Roll command is a command that responds to messages asking for a random number
+
+    **Usage:**
+
+    ```@Idea roll <number of dice> <sides of all dice> dice```
+
+    ```@Idea flip <number of coins> coins``` '''
 
     def matches(self, message):
         return self._get_args(message) != None

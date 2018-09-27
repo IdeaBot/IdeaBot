@@ -9,7 +9,12 @@ from libs import command
 import re
 
 class Command(command.DirectOnlyCommand):
-    '''IdCommand responds with the id of the user who called this command.'''
+    '''IdCommand responds with the id of the user who called this command.
+
+    **Usage:**
+    ```@Idea what's my id```
+
+    **NOTE:** This is a debug command, so it may be removed or deprecated without notice in the future'''
 
     def matches(self, message):
         return re.search(r'\bwhat(\'s\s*)?(my)?\s+id\b', message.content, re.I)

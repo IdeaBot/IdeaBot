@@ -8,7 +8,12 @@ REACTIONS_DIR = './reactions'
 class Command(command.DirectOnlyCommand, command.AdminCommand, command.Multi, command.WatchCommand, command.RoleCommand):
     '''load_command loads a python file from the server and tries to add it as a command
 
-    It will spit back any error trying to download or save the file causes'''
+    It will spit back any error trying to download or save the file causes
+
+    **Usage:**
+    ```@Idea load (command OR reaction) <filename> from <bot folder>```
+
+    The Load command is probably restricted to certain users'''
 
     def matches(self, message):
         return re.search(r'load\s*(command|reaction)\s+(\S+)?\s*(?:from\s*)?(\S+)?', message.content, re.I)!=None

@@ -2,6 +2,11 @@ from libs import command
 import re
 
 class Command(command.DirectOnlyCommand, command.AdminCommand, command.Multi):
+    '''A command for setting emojis for reaction commands
+    This works alongside the `emoji_setter` reaction command
+
+    **Usage:**
+    ```@Idea emoji -> <reaction command>``` '''
     def matches(self, message):
         args = re.search(r'emoji\s?->\s?(\S+)', message.content, re.I)
         return args!=None

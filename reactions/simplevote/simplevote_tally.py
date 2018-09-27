@@ -2,6 +2,11 @@ from libs import reaction as reactioncommand
 import asyncio
 
 class Reaction(reactioncommand.ReactionAddCommand, reactioncommand.Multi):
+    '''A Reaction command for tallying votes on messages
+
+    **Usage:**
+    React to the message you want to tally with the tally emoji
+    (The emoji is server-defined; ask your fellow server members for the correct emoji)'''
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

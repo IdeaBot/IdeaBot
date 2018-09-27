@@ -14,7 +14,12 @@ evalDictOriginalNameThisIs = {}
 
 class Command(command.DirectOnlyCommand, command.AdminCommand, command.BenchmarkableCommand):
     '''ExecuteCommand tries to execute a passed in piece of code and responds
-    with the result of the execution.'''
+    with the result of the execution.
+
+    **Usage:**
+    ```@Idea execute `<code>` ```
+
+    You probably don't have permissions to run this command '''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.perms = None

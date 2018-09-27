@@ -2,6 +2,10 @@ from libs import command
 import re
 
 class Command(command.DirectOnlyCommand, command.AdminCommand):
+    '''Get to z _hoppah!
+
+    **Usage:**
+    ```@Idea list <iterable>``` '''
     def matches(self, message):
         return re.search(r'list\s*([^\s\(\)]+)', message.content, re.I) != None
 

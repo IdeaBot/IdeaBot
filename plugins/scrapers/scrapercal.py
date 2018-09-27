@@ -10,6 +10,11 @@ MAX_RESULTS = 4
 DATE_MODE = 'readable' # 'readable' or 'default'
 
 class Plugin(plugin.ThreadedPlugin):
+    '''Multithreaded plugin for retrieving Google Calendar info
+
+    Currently, cal only scrapes info from the Idea Project public calendar 
+
+    This uses Google API calls'''
 
     def __init__(self, **kwargs):
         super().__init__(should_spawn_thread=False, **kwargs)

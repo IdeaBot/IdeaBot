@@ -5,6 +5,7 @@ CHANNEL = 'channel'
 MESSAGE = 'message'
 
 class Plugin(plugin.OnReadyPlugin, plugin.AdminPlugin):
+    ''''Displays pretty messages about the bot's status on the Idea Development Server'''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.CHANNEL_ID = self.config[CHANNEL]

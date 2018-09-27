@@ -5,6 +5,11 @@ import re, os
 SAVE_LOC = 'saveloc'
 
 class Command(command.Config):
+    '''Retrieves saved quotes
+
+    **Usage:**
+    To display message with ID <message id>
+    ```<message id>``` '''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.saveloc = self.config[SAVE_LOC]

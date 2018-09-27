@@ -10,7 +10,11 @@ from libs import command
 import re
 
 class Command(command.Command):
-    '''BlameJoshCommand blames josh when anyone says to blame josh.'''
+    '''BlameJoshCommand blames josh when anyone says to blame josh.
+    Josh should always be blamed.
+
+    **Usage:**
+    ```blame josh```'''
 
     def matches(self, message):
         return re.search(r'\bblame josh\b', message.content, re.IGNORECASE)

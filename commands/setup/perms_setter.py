@@ -2,6 +2,13 @@ from libs import command
 import re
 
 class Command(command.Multi, command.AdminCommand, command.DirectOnlyCommand):
+    '''A command for setting which user can use which commands in your server
+
+    **Usage:**
+    ```@Idea (reaction OR command) perms -> <reaction/command name> <user mention>```
+
+    The Permission Setter command is probably restricted to certain users
+    **NOTE:** Set the permissions of this command to ensure no unauthorized user can change permissions for other commands '''
     def _matches(self, message): #ik it's bad form
         return ( message.server!=None and ( message.server.owner == message.author  and self.matches(message) ) ) or super()._matches(message)
 

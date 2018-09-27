@@ -5,6 +5,10 @@ import re
 FILEPATH="msgdumptemp.csv"
 
 class Command(command.DirectOnlyCommand):
+    '''A command for generating and uploading CSV files of sent messages
+
+    **Usage:**
+    ```@Idea statistics``` '''
     def matches(self, message):
         return re.search(r'stats|statistics', message.content, re.I)!=None
 

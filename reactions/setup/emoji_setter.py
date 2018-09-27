@@ -1,6 +1,11 @@
 from libs import reaction
 
 class Reaction(reaction.Multi, reaction.AdminReactionAddCommand):
+    '''A Reaction command for setting emojis to commands in servers
+    This works alongside `emoji_starter`
+
+    **Usage:**
+    React with an emoji to the message sent in response to `emoji_starter` to use that emoji'''
     def matches(self, reaction, user):
         #print(self.public_namespace.active_emoji_messages)
         return reaction.message.id in self.public_namespace.active_emoji_messages

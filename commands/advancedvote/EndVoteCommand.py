@@ -13,6 +13,12 @@ DEFAULT_OPTIONS=["Yes", "No"] #list
 DEFAULT_TRANSFERABLES=3 #int
 
 class Command(command.DirectOnlyCommand, command.Multi):
+    '''Command for closing already opened polls
+
+    **Usage:**
+    ```@Idea end "<poll name>" vote```
+
+    The End Vote command is probably restricted to certain users'''
 
     def __init__(self, vote_dict=None, **kwargs):
         super().__init__(**kwargs)

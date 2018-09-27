@@ -10,8 +10,11 @@ import re
 from libs import timezones
 
 class Command(command.DirectOnlyCommand):
-    '''TimeZoneCommand converts a specified time to the deired timezone and
-    responds with a message.'''
+    '''Time Zone command converts a specified time to the desired timezone and
+    responds with a message.
+
+    **Usage:**
+    ```@Idea what's <time> <timezone> in <new timezone>?``` '''
 
     def matches(self, message):
         return re.search(r'\bwhat\'?s?\s+(.*)\s+in\s+([A-Z]{3})', message.content, re.IGNORECASE)

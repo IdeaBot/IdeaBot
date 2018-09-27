@@ -3,7 +3,9 @@ import re
 
 class Command(command.Multi, command.Dummy, command.Config):
     '''This initializes the dictionary of entity karma, and utils for editting it
-    easily.'''
+    easily.
+
+    Dummy command; please ignore'''
     # karma is static, so this basically works like a singleton
     karma = dict()
 

@@ -1,6 +1,13 @@
 from libs import command
 
 class Command(command.Command):
+    '''Display roles and their IDs
+
+    **Usage:**
+    To get roles info in the current server
+    ```roles id```
+
+    **NOTE:** This is a debug command, so it may be removed or deprecated without notice in the future '''
     def matches(self, message):
         return "roles id" in message.content.lower() and message.server != None
 

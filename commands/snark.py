@@ -10,7 +10,13 @@ import re
 import random
 
 class Command(command.DirectOnlyCommand, command.Config):
-    '''SnarkCommand replies with a snarky comment when someone wants one.'''
+    '''SnarkCommand replies with a snarky comment when someone wants one.
+
+    **Usage:**
+    Figure it out yourself
+
+    Oh, you weren't expecting snark here as well?
+    Well, you're the one who asked for help with snark; I'm just delivering on what you asked for '''
 
     def __init__(self, snark_data=None, **kwargs):
         super().__init__(**kwargs)

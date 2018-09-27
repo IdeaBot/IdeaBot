@@ -2,7 +2,14 @@ from libs import command
 import re
 
 class Command(command.DirectOnlyCommand, command.Multi):
-    '''KarmaCountCommand responds to direct queries about an entity's karma.'''
+    '''KarmaCountCommand responds to direct queries about an entity's karma.
+
+    **Usage:**
+    To get the karma of <word>
+    ```karma count <word>```
+
+    To get the top or bottom <number> words
+    ```karma (top/bottom) <number>``` '''
 
     TOP_MIN = 1
     TOP_MAX = 10

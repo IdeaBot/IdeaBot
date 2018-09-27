@@ -24,6 +24,9 @@ def forumLogging():
 forumLog = forumLogging()
 
 class Plugin(plugin.ThreadedPlugin):
+    '''Multithreaded plugin for scraping Proboards (freeforums)
+
+    This currently only works with a single forum - the Idea Project forum '''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.CHANNEL_ID = self.config[CHANNEL] # discord server channel ID for sending forum updates to

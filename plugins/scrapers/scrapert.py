@@ -21,6 +21,9 @@ def tweetLogging():
 twitLog = tweetLogging()
 
 class Plugin(plugin.ThreadedPlugin):
+    '''Multithreaded plugin for scraping Twitter through RSS
+
+    Currently only watches @OpenIdeaProject '''
     def __init__(self, **kwargs):
         super().__init__(should_spawn_thread=False, **kwargs)
         self.data = dataloader.loadfile_safe(self.config["datafilepath"])

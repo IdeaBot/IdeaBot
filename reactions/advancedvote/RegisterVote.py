@@ -7,6 +7,10 @@ VOTES = "votes"
 NAME = "name"
 
 class Reaction(reactioncommand.ReactionAddCommand, reactioncommand.Multi):
+    '''A Reaction command for voting
+
+    **Usage:**
+    React to the ballot message I sent you with the appropriate regional indicator(s) '''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.vote_dict=self.public_namespace.vote_dict

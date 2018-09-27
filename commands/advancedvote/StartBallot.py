@@ -13,6 +13,13 @@ DEFAULT_OPTIONS=["Yes", "No"] #list
 DEFAULT_TRANSFERABLES=3 #int
 
 class Command(command.DirectOnlyCommand, command.Multi):
+    '''Command for allowing individuals to case their ballot
+
+    **Usage:**
+    ```@Idea vote in "<poll name>"```
+
+    Alternately, react to the poll message with the ballot/vote emoji
+    (The emoji is server-defined; ask your fellow server members for the correct emoji)'''
     def __init__(self, vote_dict=dict(), ballots=dict(), **kwargs):
         super().__init__(**kwargs)
         self.vote_dict = self.public_namespace.vote_dict

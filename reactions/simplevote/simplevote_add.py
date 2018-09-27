@@ -5,6 +5,11 @@ YES_EMOJI = "✔️"
 NO_EMOJI = "✖️"
 
 class Reaction(reactioncommand.ReactionAddCommand, reactioncommand.Multi):
+    '''A Reaction command for simple voting on messages
+
+    **Usage:**
+    React to the message you want to vote on with the upvote or downvote emoji
+    (The emojis are server-defined; ask your fellow server members for the correct emojis)'''
     def __init__(self, **kwargs):
         '''(RetryCommand, func, str, str, str, dict) -> None '''
         super().__init__(**kwargs)

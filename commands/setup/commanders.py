@@ -2,6 +2,13 @@ import re
 from libs import command, dataloader, loader
 
 class Command(command.Multi, command.AdminCommand, command.DirectOnlyCommand):
+    '''A command to generate/update the commanders file and information
+    Commanders are the maintainers of an add-on, including the owner of the plugin
+
+    **Usage:**
+    ```@Idea generate commanders```
+
+    Commanders is probably restricted to certain users'''
     def matches(self, message):
         return re.search(r'(?:re)?generate\s+(commanders|command\s+maintainers|import\s+perm(?:ission)?s?)', message.content, re.I) != None
 

@@ -4,6 +4,11 @@ import re, asyncio
 FILENAME = 'commands/explorer/channels.csv'
 
 class Command(command.Multi, command.DirectOnlyCommand):
+    '''Helper command for exploring
+
+    **Usage:**
+    To explore current channel:
+    ```@Idea explore this channel``` '''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # load channels that explorer Plugin will respond to

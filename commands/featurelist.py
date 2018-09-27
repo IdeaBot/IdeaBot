@@ -9,6 +9,12 @@ from libs import command
 import re
 
 class Command(command.DirectOnlyCommand):
+    '''Gives information about my features
+
+    **Usage:**
+    ```@Idea featurelist [-v]```
+
+    If you're interested in helping to improve Idea, check out what happens when you include `-v`'''
 
     MESSAGE = (
         'You can see the requested features or add more here: '

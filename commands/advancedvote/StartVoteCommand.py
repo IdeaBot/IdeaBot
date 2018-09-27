@@ -13,6 +13,12 @@ DEFAULT_OPTIONS=["Yes", "No"] #list
 DEFAULT_TRANSFERABLES=3 #int
 
 class Command(command.DirectOnlyCommand, command.WatchCommand, command.Multi):
+    '''Command for starting polls
+
+    **Usage:**
+    ```@Idea start vote [name "<name>"] [options "<option1>" "<option2>" (...)] [mode (FPTP or STV)] [-v]```
+
+    The Start Vote command is probably restricted to certain users'''
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

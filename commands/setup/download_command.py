@@ -9,7 +9,12 @@ REACTIONS_DIR = './reactions'
 class Command(command.DirectOnlyCommand, command.AdminCommand, command.Multi):
     '''download_command downloads an attached python file (well, hopefully it's a Python file)
 
-    This command will respond with any error caused by trying to download or save the file'''
+    This command will respond with any error caused by trying to download or save the file
+
+    **Usage:**
+    ```@Idea download (command OR reaction) to <bot folder>```
+
+    The Download command is probably restricted to certain users'''
 
     def matches(self, message):
         return re.search(r'download\s*(command|reaction)\s*(?:to\s*)?(\S+)?', message.content, re.I)!=None and len(message.attachments)>0
