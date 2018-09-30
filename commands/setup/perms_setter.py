@@ -25,10 +25,12 @@ class Command(command.Multi, command.AdminCommand, command.DirectOnlyCommand):
                 for reaction_name in bot.reactions:
                     if isinstance(bot.reactions[reaction_name].perms, list):
                         bot.reactions[reaction_name].perms.append(user_id)
+                yield from send_func(message.channel, "Permissions set for all reactions")
             elif args.group(1)=="command":
                 for command_name in bot.commands:
                     if isinstance(bot.reactions[command_name].perms, list):
                         bot.reactions[command_name].perms.append(user_id)
+                yield from send_func(message.channel, "Permissions set for all commands")
             else:
                 yield from send_func(message.channel, "You need to specify reaction or command to use this")
         elif args.group(2) in bot.commands and args.group(2) in bot.reactions and len(args.group(1))<=1:

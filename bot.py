@@ -107,28 +107,36 @@ class Bot(discord.Client):
                 # Catch all problems that happen in matching/executing a command.
                 # This means that if there's a bug that would cause execution to
                 # break, other commands can still be tried.
-                traceback.print_exc()
+                #traceback.print_exc()
                 self.log.warning('command %s raised an exception during its execution: %s', cmd, e)
 
     @asyncio.coroutine
     def on_reaction_add(self, reaction, user):
         for cmd in self.reactions:
             if isinstance(self.reactions[cmd], reactioncommand.ReactionAddCommand) and self.reactions[cmd]._matches(reaction, user):
-                if isinstance(self.reactions[cmd], reactioncommand.AdminReactionCommand):
-                    yield from self.reactions[cmd]._action(reaction, user, self)
-                else:
-                    yield from self.reactions[cmd]._action(reaction, user)
-                break
+                try:
+                    if isinstance(self.reactions[cmd], reactioncommand.AdminReactionCommand):
+                        yield from self.reactions[cmd]._action(reaction, user, self)
+                    else:
+                        yield from self.reactions[cmd]._action(reaction, user)
+                    break
+                except Exception as e:
+                    #traceback.print_exc()
+                    self.log.warning('Reaction %s raised an exception during its execution: %s', cmd, e)
 
     @asyncio.coroutine
     def on_reaction_remove(self, reaction, user):
         for cmd in self.reactions:
             if isinstance(self.reactions[cmd], reactioncommand.ReactionRemoveCommand) and self.reactions[cmd]._matches(reaction, user):
-                if isinstance(self.reactions[cmd], reactioncommand.AdminReactionCommand):
-                    yield from self.reactions[cmd]._action(reaction, user, self)
-                else:
-                    yield from self.reactions[cmd]._action(reaction, user)
-                break
+                try:
+                    if isinstance(self.reactions[cmd], reactioncommand.AdminReactionCommand):
+                        yield from self.reactions[cmd]._action(reaction, user, self)
+                    else:
+                        yield from self.reactions[cmd]._action(reaction, user)
+                    break
+                except Exception as e:
+                    #traceback.print_exc()
+                    self.log.warning('Reaction %s raised an exception during its execution: %s', cmd, e)
 
     @asyncio.coroutine
     def on_ready(self):

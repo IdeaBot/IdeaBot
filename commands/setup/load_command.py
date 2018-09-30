@@ -21,7 +21,7 @@ class Command(command.DirectOnlyCommand, command.AdminCommand, command.Multi, co
     def action(self, message, bot):
         send_func = self.send_message
         args = re.search(r'load\s*(command|reaction)\s+(\S+)?\s*(?:from\s*)?(\S+)?', message.content, re.I)
-        parameters = {"user_func":self.user, "role_messages":self.role_messages, "always_watch_messages":self.always_watch_messages}# by the end , it'll look something like this: {filename, namespace, user_func, role_messages, always_watch_messages, package=""}
+        parameters = {"user_func":self.user, "role_messages":self.role_messages, "always_watch_messages":self.always_watch_messages, 'folder':args.group(1).lower()+'s', 'bot':bot}# by the end , it'll look something like this: {filename, namespace, user_func, role_messages, always_watch_messages, package=""}
         ADMINS = bot.ADMINS
         try:
             # determine the appropriate filename, name and namespace to init the command/reaction with
@@ -34,7 +34,7 @@ class Command(command.DirectOnlyCommand, command.AdminCommand, command.Multi, co
                 downloaded = False
             name = parameters["filename"].split(".")[-2]
             if parameters["filename"]:
-                if args.group(3):
+                if args.group(3) and args.group(3)[0] not in '-_':
                     parameters["package"]=args.group(3)
                     if parameters["package"] in loader.sub_namespaces:
                         parameters["namespace"]=loader.sub_namespaces[parameters["package"]]
