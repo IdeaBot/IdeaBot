@@ -86,15 +86,15 @@ if __name__ == '__main__':
     for plugin_name in plugins:
         bot.register_plugin(plugins[plugin_name], plugin_name)
 
-    if "token" in credentials.content:
-        loop.run_until_complete(bot.login(credentials.content["token"]))
-    else:
-        loop.run_until_complete(bot.login(credentials.content["username"], credentials.content["password"]))
-
     #run until logged out
     stop = False
     while not stop:
         try:
+            # log in
+            if "token" in credentials.content:
+                loop.run_until_complete(bot.login(credentials.content["token"]))
+            else:
+                loop.run_until_complete(bot.login(credentials.content["username"], credentials.content["password"]))
             loop.run_until_complete(bot.connect())
         except KeyboardInterrupt:
             stop = True

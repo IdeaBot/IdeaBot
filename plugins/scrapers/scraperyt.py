@@ -130,7 +130,7 @@ class Plugin(plugin.ThreadedPlugin, plugin.OnReadyPlugin):
             videoCount = channel_info['items'][0]['statistics']['videoCount']
             if self.new_upload(videoCount):
                 message = "IdeaProject has uploaded a new video! Go check it out here: %s" % upload_url
-                q.put({plugin.SEND_MESSAGE:{plugin.ARGS:[self.CHANNEL], plugin.KWARGS:{'embed': self.get_new_upload() }}})
+                q.put({self.SEND_MESSAGE:{plugin.ARGS:[self.CHANNEL], plugin.KWARGS:{'embed': self.get_new_upload() }}})
 
         except:
             traceback.print_exc()

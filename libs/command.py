@@ -76,15 +76,16 @@ class Command(addon.AddOn):
         in order to expand or modify it's functionality.
 
         the method to call shutdown()'''
+        if self.perms != None: # save permissions
+            self.perms_file.content = self.perms
+            self.perms_file.save()
         return self.shutdown()
 
     def shutdown(self):
         '''(Command) -> None
         This is called during bot shutdown
         Use this to save any variables that need to be loaded again when the bot restarts'''
-        if self.perms != None: # save permissions
-            self.perms_file.content = self.perms
-            self.perms_file.save()
+        pass
 
 
 class BenchmarkableCommand(Command):

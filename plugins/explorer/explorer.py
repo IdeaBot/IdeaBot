@@ -24,6 +24,7 @@ class Plugin(plugin.Multi, plugin.OnMessagePlugin):
     TYPE = 'type'
     PLAYERDATA = 'playerdata'
     LOCATION = 'location'
+    INVENTORY = 'inventory'
 
     # recognized types
     UPLOC = 'up'
@@ -94,6 +95,7 @@ class Plugin(plugin.Multi, plugin.OnMessagePlugin):
         if type == None:
             type = random.choice(list(self.locations))
         self.playerdata[player_id][self.LOCATION] = self.locations[type][random.choice(list(self.locations[type]))]
+        self.playerdata[player_id][self.INVENTORY] = Inventory(user=player_id)
 
     def load_data(self, datafilepath, playerdatafilepath):
         # load locations
@@ -111,7 +113,15 @@ class Plugin(plugin.Multi, plugin.OnMessagePlugin):
         self.playerdata = dict()
         for player_id in self.playerdatafile.content:
             self.playerdata[player_id] = dict()
-            self.playerdata[player_id][self.LOCATION] = Location(**self.playerdatafile.content[player_id][self.LOCATION])
+            if self.LOCATION in self.playerdatafile.content[player_id]:
+                self.playerdata[player_id][self.LOCATION] = Location(**self.playerdatafile.content[player_id][self.LOCATION])
+            else:
+                self.playerdata[player_id][self.LOCATION] = Location()
+
+            if self.INVENTORY in self.playerdatafile.content[player_id]:
+                self.playerdata[player_id][self.INVENTORY] = Inventory(**self.playerdatafile.content[player_id][self.INVENTORY])
+            else:
+                self.playerdata[player_id][self.INVENTORY] = Inventory()
 
 
     def save_data(self):
@@ -124,19 +134,38 @@ class Plugin(plugin.Multi, plugin.OnMessagePlugin):
         for player_id in self.playerdata:
             self.playerdatafile.content[player_id] = dict()
             self.playerdatafile.content[player_id][self.LOCATION] = self.playerdata[player_id][self.LOCATION].__dict__
+            self.playerdatafile.content[player_id][self.INVENTORY] = self.playerdata[player_id][self.INVENTORY].__dict__
 
         # save to file
         self.datafile.save()
         self.playerdatafile.save()
 
 class Location():
-    def __init__(self, name=None, description=None):
+    def __init__(self, name=None, description=None, item=None):
         '''(Location, str, str) -> Location'''
 
         if description==None:
             self.description = "You enter into a room with the default description"
         else:
             self.description=description
+        
         if name == None:
             self.name = plugin.DEFAULT
-        self.name = name
+        else:
+            self.name = name
+
+        if item == None or item == "":
+            self.item=None
+        else:
+            self.item=item
+
+class Inventory():
+    def __init__(self, items=list(), user=None):
+        '''(Inventory, list, str) -> Inventory '''
+
+        if user!=None:
+            self.items=list(items)
+            self.user = user
+        else:
+            user = '0'*18
+            self.items=list()

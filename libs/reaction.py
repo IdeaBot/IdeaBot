@@ -80,12 +80,6 @@ class ReactionCommand(addon.AddOn):
         in order to expand or modify it's functionality.
 
         the method to call shutdown()'''
-        return self.shutdown()
-
-    def shutdown(self):
-        '''(ReactionCommand) -> None
-        This is called during bot shutdown
-        Use this to save any variables that need to be loaded again when the bot restarts'''
         if self.emoji != None: # save emojis
             self.emoji_file.content = self.emoji
             self.emoji_file.save()
@@ -93,6 +87,13 @@ class ReactionCommand(addon.AddOn):
         if self.perms != None: # save permissions
             self.perms_file.content = self.perms
             self.perms_file.save()
+        return self.shutdown()
+
+    def shutdown(self):
+        '''(ReactionCommand) -> None
+        This is called during bot shutdown
+        Use this to save any variables that need to be loaded again when the bot restarts'''
+        pass
 
     #useful methods just in case
     def matchemoji(self, emoji_id):

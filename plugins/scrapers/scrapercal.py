@@ -12,7 +12,7 @@ DATE_MODE = 'readable' # 'readable' or 'default'
 class Plugin(plugin.ThreadedPlugin):
     '''Multithreaded plugin for retrieving Google Calendar info
 
-    Currently, cal only scrapes info from the Idea Project public calendar 
+    Currently, cal only scrapes info from the Idea Project public calendar
 
     This uses Google API calls'''
 
@@ -66,7 +66,7 @@ class Plugin(plugin.ThreadedPlugin):
                     cal_embed = embed.create_embed( description=description,
                     author={'name':'G-Cal', 'url':item['htmlLink'], 'icon_url':GOOGLE_LOGO},
                     footer={'text':item['organizer']['displayName'], 'icon_url':None} )
-                    q.put({plugin.SEND_MESSAGE:{plugin.ARGS:[self.CHANNEL], plugin.KWARGS:{'embed':cal_embed}}})
+                    q.put({self.SEND_MESSAGE:{plugin.ARGS:[self.CHANNEL], plugin.KWARGS:{'embed':cal_embed}}})
             self.data.save()
         except:
             traceback.print_exc()

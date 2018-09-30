@@ -30,7 +30,7 @@ def init_command(filename, namespace, bot, role_messages, always_watch_messages,
     temp_lib = importlib.import_module("commands."+package+filename[:-len(".py")]) # import command
     if reload: # dumb way to do it, ik
         temp_lib = importlib.reload(temp_lib)
-    parameters['perms_loc']=perms_dir+package+filename[:-len(".py")]+".json"
+    parameters['perms_loc']=perms_dir+'c.'+package+filename[:-len(".py")]+".json"
     # find config file
     if filename[:-len(".py")]+config_end in config.content:
         parameters['config']=config.content[filename[:-len(".py")]+config_end]
@@ -50,7 +50,7 @@ def init_reaction(filename, namespace, bot, role_messages, always_watch_messages
     if reload: # dumb way to do it, ik
         temp_lib = importlib.reload(temp_lib)
     # add reaction-specific parameters
-    parameters['perms_loc']=perms_dir+package+filename[:-len(".py")]+".json"
+    parameters['perms_loc']=perms_dir+'r.'+package+filename[:-len(".py")]+".json"
     parameters['emoji_loc']=emoji_dir+package+filename[:-len(".py")]+".json"
     # find config file
     if filename[:-len(".py")]+config_end in config.content:

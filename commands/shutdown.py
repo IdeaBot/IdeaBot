@@ -23,9 +23,10 @@ class Command(command.DirectOnlyCommand, command.AdminCommand):
 
     def action(self, message, client):
         if message.author.id in client.ADMINS:
-            client.stop_queue.put("Stopping time!")
+            # client.stop_queue.put("Stopping time!")
             if re.search(r'shutdown protocol 1', message.content, re.IGNORECASE): # basic shutdown with stats
                 discordstats.dumpMessages(client, filename="./data/msgdump"+str(time.time())+".csv")
             elif re.search(r'shutdown protocol 0', message.content, re.IGNORECASE): # basic shutdown
                 pass
             yield from client.logout()
+            raise KeyboardInterrupt
