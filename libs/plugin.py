@@ -151,7 +151,7 @@ class ThreadedPlugin(Plugin):
             try:
                 self.threaded_action(queue, **kwargs)
             except: # catch anything that could crash the thread
-                # traceback.print_exc()
+                traceback.print_exc()
                 pass
             sleep_time = self.threaded_period - (time.time() - start_time)
             if sleep_time<0:
@@ -185,7 +185,7 @@ class ThreadedPlugin(Plugin):
                     if KWARGS not in action_dict[key]:
                         action_dict[key][KWARGS]={}
 
-                    if key==SEND_MESSAGE:
+                    if key==self.SEND_MESSAGE:
                         try:
                             await self.send_message(*action_dict[key][ARGS], **action_dict[key][KWARGS])
                         except TypeError:
@@ -193,7 +193,8 @@ class ThreadedPlugin(Plugin):
                             # or when action_dict[key] is not mapping
                             # (ie **action_dict[key] is not a valid operation)
                             pass
-                    elif key==EDIT_MESSAGE:
+                            print('Failed to send messsage')
+                    elif key==self.EDIT_MESSAGE:
                         try:
                             await self.edit_message(*action_dict[key][ARGS], **action_dict[key][KWARGS])
                         except TypeError:
@@ -201,7 +202,7 @@ class ThreadedPlugin(Plugin):
                             # or when action_dict[key] is not mapping
                             # (ie **action_dict[key] is not a valid operation)
                             pass
-                    elif key==ADD_REACTION:
+                    elif key==self.ADD_REACTION:
                         try:
                             await self.add_reaction(*action_dict[key][ARGS], **action_dict[key][KWARGS])
                         except TypeError:
@@ -209,7 +210,7 @@ class ThreadedPlugin(Plugin):
                             # or when action_dict[key] is not mapping
                             # (ie **action_dict[key] is not a valid operation)
                             pass
-                    elif key==REMOVE_REACTION:
+                    elif key==self.REMOVE_REACTION:
                         try:
                             await self.remove_reaction(*action_dict[key][ARGS], **action_dict[key][KWARGS])
                         except TypeError:
@@ -217,7 +218,7 @@ class ThreadedPlugin(Plugin):
                             # or when action_dict[key] is not mapping
                             # (ie **action_dict[key] is not a valid operation)
                             pass
-                    elif key==SEND_TYPING:
+                    elif key==self.SEND_TYPING:
                         try:
                             await self.send_typing(*action_dict[key][ARGS], **action_dict[key][KWARGS])
                         except TypeError:
@@ -225,7 +226,7 @@ class ThreadedPlugin(Plugin):
                             # or when action_dict[key] is not mapping
                             # (ie **action_dict[key] is not a valid operation)
                             pass
-                    elif key==SEND_FILE:
+                    elif key==self.SEND_FILE:
                         try:
                             await self.send_file(*action_dict[key][ARGS], **action_dict[key][KWARGS])
                         except TypeError:

@@ -9,7 +9,11 @@ GOOGLE_LOGO = 'http://www.google.com/favicon.ico' # yes, I didn't know this exis
 MAX_RESULTS = 4
 DATE_MODE = 'readable' # 'readable' or 'default'
 
-class Plugin(plugin.ThreadedPlugin):
+SEEN = 'seen'
+CHANNELS = 'channels'
+CHANNEL = 'channel'
+
+class Plugin(plugin.ThreadedPlugin, plugin.Multi):
     '''Multithreaded plugin for retrieving Google Calendar info
 
     Currently, cal only scrapes info from the Idea Project public calendar
@@ -18,8 +22,13 @@ class Plugin(plugin.ThreadedPlugin):
 
     def __init__(self, **kwargs):
         super().__init__(should_spawn_thread=False, **kwargs)
-        self.CHANNEL = discord.Object(id=self.config[CHANNEL])
-        self.data = dataloader.loadfile_safe(self.config["datafilepath"]) # should be a txt file
+        self.CHANNEL = CHANNEL
+        self.data = dataloader.loadfile_safe(self.config["datafilepath"]) # should be a json file
+        if not isinstance(self.data.content, dict):
+            self.data.content = dict()
+        self.SEEN = SEEN
+        self.CHANNELS = CHANNELS
+        self.threaded_kwargs = {"newGCal":self.public_namespace.newGCal}
         self.spawn_process()
 
     def process_date(self, date_str, mode=DATE_MODE):
@@ -44,29 +53,44 @@ class Plugin(plugin.ThreadedPlugin):
         else:
             return date_str
 
-    def threaded_action(self, q):
-        try:
-            calendar_id = 'igf697fg6c7kq902onikg35gi0@group.calendar.google.com' # Idea Project calendar id
-            # calendar = requests.get(self.config[URL]+calendar_id+'?key='+self.config[TOKEN]) # doesn't work (Login required)
-            events = requests.get(self.config[URL]+self.config[CALENDAR]+r'/events'+'?key='+self.config[TOKEN]+
-            '&timeMin='+datetime.datetime.utcnow().isoformat()+'Z'+
-            '&maxResults=%s' % MAX_RESULTS +
-            '&singleEvents=True&orderBy=startTime')
-            events = json.loads(events.text)
-            items = events['items']
-            for item in items:
-                if item['id'] not in self.data.content:
-                    self.data.content.append(item['id'])
-                    description = '__**%s**__' % item['summary']
-                    if 'dateTime' in item['start']:
-                        datething = 'dateTime'
-                    else:
-                        datething = 'date'
-                    description+='\n' + self.process_date(item['start'][datething]) + ' to ' + self.process_date(item['end'][datething]) + ' UTC\n'
-                    cal_embed = embed.create_embed( description=description,
-                    author={'name':'G-Cal', 'url':item['htmlLink'], 'icon_url':GOOGLE_LOGO},
-                    footer={'text':item['organizer']['displayName'], 'icon_url':None} )
-                    q.put({self.SEND_MESSAGE:{plugin.ARGS:[self.CHANNEL], plugin.KWARGS:{'embed':cal_embed}}})
-            self.data.save()
-        except:
-            traceback.print_exc()
+    def threaded_action(self, q, newGCal=plugin.Queue()):
+        # handle new items from url_adder
+        while not newGCal.empty():
+            item = newGCal.get()
+            if item["action"] == "remove" or item["action"] == "delete":
+                try:
+                    del(self.data.content[item["url"]][self.CHANNELS][self.data.content[item["url"]][self.CHANNELS].index(item[self.CHANNEL])])
+                except (TypeError, KeyError, ValueError, NameError):
+                    # traceback.print_exc()
+                    pass
+            elif item["action"]=="add":
+                if item["url"] not in self.data.content:
+                    self.data.content[item["url"]]={self.CHANNELS:list(), self.SEEN:list()} # dict
+                self.data.content[item["url"]][self.CHANNELS].append(item[self.CHANNEL])
+        # do scrape things
+        for calendar_id in self.data.content:
+            try:
+                events = requests.get(self.config[URL]+calendar_id+r'/events'+'?key='+self.config[TOKEN]+
+                '&timeMin='+datetime.datetime.utcnow().isoformat()+'Z'+
+                '&maxResults=%s' % MAX_RESULTS +
+                '&singleEvents=True&orderBy=startTime')
+                events = json.loads(events.text)
+                items = events['items']
+                for item in items:
+                    if item['id'] not in self.data.content[calendar_id][self.SEEN]:
+                        self.data.content[calendar_id][self.SEEN].append(item['id'])
+                        description = '__**%s**__' % item['summary']
+                        if 'dateTime' in item['start']:
+                            datething = 'dateTime'
+                        else:
+                            datething = 'date'
+                        description+='\n' + self.process_date(item['start'][datething]) + ' to ' + self.process_date(item['end'][datething]) + ' UTC\n'
+                        cal_embed = embed.create_embed( description=description,
+                        author={'name':'G-Cal', 'url':item['htmlLink'], 'icon_url':GOOGLE_LOGO},
+                        footer={'text':item['organizer']['displayName'], 'icon_url':None} )
+                        for discord_channel in self.data.content[calendar_id][self.CHANNELS]:
+                            q.put({self.SEND_MESSAGE:{plugin.ARGS:[discord.Object(id=discord_channel)], plugin.KWARGS:{'embed':cal_embed}}})
+            except:
+                print('Failed on %s' %calendar_id)
+                # traceback.print_exc()
+        self.data.save()
