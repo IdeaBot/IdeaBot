@@ -87,7 +87,7 @@ class Plugin(plugin.ThreadedPlugin, plugin.Multi):
                             twitLog.debug("New tweet found: " + i[0])
                             tweet_author = self.get_author(i[2])
                             tweet = {"url":i[0], "content":i[1], "author":tweet_author, "retweet":False}
-                            if author != tweet_author:
+                            if author.lower() != tweet_author.lower():
                                 tweet["retweet"] = True
                             for discord_channel in self.data.content[twitAccount][self.CHANNELS]:
                                 if not tweet["retweet"]:
