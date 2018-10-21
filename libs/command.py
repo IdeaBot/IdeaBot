@@ -100,7 +100,7 @@ class BenchmarkableCommand(Command):
         # report on benchmark if requested
         if re.search(r'\bbenchmark\b', message.content, re.IGNORECASE):
             end_time = time.time()
-            yield from send_func(message.channel, 'Executed in ' + str(end_time-start_time) + ' seconds')
+            yield from self.send_message(message.channel, 'Executed in ' + str(end_time-start_time) + ' seconds')
 
 
 class DirectOnlyCommand(Command):

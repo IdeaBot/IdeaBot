@@ -90,12 +90,12 @@ class Plugin(plugin.Multi, plugin.OnMessagePlugin):
         if type == None:
             type = random.choice(list(self.locations))
         self.playerdata[player_id][self.LOCATION] = self.locations[type][random.choice(list(self.locations[type]))]
+        self.playerdata[player_id][self.INVENTORY] = Inventory(user=player_id)
 
     def move(self, player_id, type=None):
         if type == None:
             type = random.choice(list(self.locations))
         self.playerdata[player_id][self.LOCATION] = self.locations[type][random.choice(list(self.locations[type]))]
-        self.playerdata[player_id][self.INVENTORY] = Inventory(user=player_id)
 
     def load_data(self, datafilepath, playerdatafilepath):
         # load locations
@@ -121,7 +121,7 @@ class Plugin(plugin.Multi, plugin.OnMessagePlugin):
             if self.INVENTORY in self.playerdatafile.content[player_id]:
                 self.playerdata[player_id][self.INVENTORY] = Inventory(**self.playerdatafile.content[player_id][self.INVENTORY])
             else:
-                self.playerdata[player_id][self.INVENTORY] = Inventory()
+                self.playerdata[player_id][self.INVENTORY] = Inventory(player_id)
 
 
     def save_data(self):
@@ -148,7 +148,7 @@ class Location():
             self.description = "You enter into a room with the default description"
         else:
             self.description=description
-        
+
         if name == None:
             self.name = plugin.DEFAULT
         else:
