@@ -12,7 +12,7 @@ import discord
 import asyncio
 import traceback
 
-from libs import dataloader, embed, command, savetome, plugin
+from libs import dataloader, embed, command, savetome, plugin, loader
 from libs import reaction as reactioncommand
 from collections import OrderedDict
 
@@ -69,32 +69,115 @@ class Bot(discord.Client):
         return self.data[name]
 
     def register_command(self, cmd, name):
-        '''(Command) -> None
+        '''(Command, str) -> None
         Registers a Command for execution when a message is received.'''
         if not isinstance(cmd, command.Command):
             raise ValueError('Only commands may be registered in Bot::register_command')
-        self.commands[name]=cmd
+        if name in self.commands:
+            self.commands[name]=cmd
+        else:
+            self.commands[name]=cmd
+            for key in list(self.commands.keys()):
+                if name==key:
+                    break
+                elif sorted([name, key])[0]==name:
+                    self.commands.move_to_end(key)
 
     def register_plugin(self, plugin_object, name):
-        '''(Plugin) -> None
+        '''(Plugin, str) -> None
         Registers a Plugin which executes in a separate process'''
         if not isinstance(plugin_object, plugin.Plugin):
             raise ValueError('Only plugins may be registered in Bot::register_plugin')
         if isinstance(plugin_object, plugin.AdminPlugin): # give AdminPlugins access to all this class's variables
             plugin_object.add_client_variable(self)
-        self.plugins[name]=plugin_object
+        if name in self.plugins:
+            self.plugins[name]=plugin_object
+        else:
+            self.plugins[name]=plugin_object
+            for key in list(self.plugins.keys()):
+                if name==key:
+                    break
+                elif sorted([name, key])[0]==name:
+                    self.plugins.move_to_end(key)
         self.loop.create_task(plugin_object._action())
 
     def register_reaction_command(self, cmd, name):
-        '''(discord.Client, reactions.Command) -> None
+        '''(reaction.Command, str) -> None
         Registers a reaction command for execution when a message is reacted to'''
         if not (isinstance(cmd, reactioncommand.ReactionAddCommand) or isinstance(cmd, reactioncommand.ReactionRemoveCommand) or isinstance(cmd, reactioncommand.Dummy)):
             raise ValueError("%s is not a reaction command. Only reaction add/remove commands may be registered in Bot::register_reaction_command" % name)
-        self.reactions[name]=cmd
+        if name in self.commands:
+            self.reactions[name]=cmd
+        else:
+            self.reactions[name]=cmd
+            for key in list(self.reactions.keys()):
+                if name==key:
+                    break
+                elif sorted([name, key])[0]==name:
+                    self.reactions.move_to_end(key)
+
+    def load_command(self, filename, name, package=None, reload=False):
+        '''(str, str[, str]) -> command.Command
+        initilizes a command and then registers it with the bot'''
+        # set up params for init_command
+        if package:
+            if package not in loader.sub_namespaces:
+                loader.sub_namespaces[package]=loader.CustomNamespace()
+            namespace = loader.sub_namespaces[package]
+        else:
+            namespace = loader.namespace
+        if package==None:
+            package_loader = ""
+        else:
+            package_loader = package
+        # init command
+        cmd = loader.init_command(filename, namespace, self, self.role_messages, self.always_watch_messages, 'commands', package_loader, reload)
+        # register command to bot
+        self.register_command(cmd, name)
+        return self.commands[name]
+    def load_reaction(self, filename, name, package=None, reload=False):
+        '''(str, str[, str]) -> reaction.Reaction
+        initilizes a reaction command and then registers it with the bot'''
+        # set up params for init_reaction
+        if package:
+            if package not in loader.sub_namespaces:
+                loader.sub_namespaces[package]=loader.CustomNamespace()
+            namespace = loader.sub_namespaces[package]
+        else:
+            namespace = loader.namespace
+        if package==None:
+            package_loader = ""
+        else:
+            package_loader = package
+        # init command
+        cmd = loader.init_reaction(filename, namespace, self, self.role_messages, self.always_watch_messages, 'reactions', package_loader, loader.emoji_dir, reload)
+        #register reaction to bot
+        self.register_reaction_command(cmd, name)
+        return self.reactions[name]
+    def load_plugin(self, filename, name, package=None, reload=False):
+        '''(str, str[, str]) -> plugin.Plugin
+        initilizes a plugin and then registers it with the bot'''
+        # set up params for init_command
+        if package:
+            if package not in loader.sub_namespaces:
+                loader.sub_namespaces[package]=loader.CustomNamespace()
+            namespace = loader.sub_namespaces[package]
+        else:
+            namespace = loader.namespace
+        if package==None:
+            package_loader = ""
+        else:
+            package_loader = package
+        # init command
+        cmd = loader.init_plugin(filename, namespace, self, 'plugins', package_loader, reload)
+        # register plugin to bot
+        self.register_plugin(cmd, name)
+        return self.plugins[name]
+
     @asyncio.coroutine
     def on_message(self, message):
         yield from self.message_stuff()
-        for cmd in self.commands:
+        for cmd in list(self.commands.keys()): # list(self.commands.keys()) prevents RuntimeErrors from mutation when loading new command
             try:
                 if self.commands[cmd]._matches(message):
                     if isinstance(self.commands[cmd], command.AdminCommand):

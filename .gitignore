@@ -110,3 +110,7 @@ ENV/
 
 #so you don't commit your token
 data/credentials.config
+
+#temp add-on files
+data/temp*.py
+**/test.*

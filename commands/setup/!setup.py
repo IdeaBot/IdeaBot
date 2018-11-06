@@ -31,8 +31,12 @@ class Command(command.Multi, command.Dummy, command.Config):
         self.public_namespace.COMMANDS = COMMANDS
         self.public_namespace.PACKAGES = PACKAGES
         self.public_namespace.PLUGINS = PLUGINS
+        self.public_namespace.is_commander = self.is_commander
 
     def shutdown(self):
         super().shutdown()
         self.public_namespace.commandersfile.content = self.public_namespace.commanders
         self.public_namespace.commandersfile.save()
+
+    def is_commander(self, id, name, type):
+            return (id == self.public_namespace.commanders[type][name][self.public_namespace.OWNER] or id in self.public_namespace.commanders[type][name][self.public_namespace.MAINTAINERS])

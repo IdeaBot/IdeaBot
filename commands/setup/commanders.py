@@ -9,11 +9,24 @@ class Command(command.Multi, command.AdminCommand, command.DirectOnlyCommand):
     ```@Idea generate commanders```
 
     Commanders is probably restricted to certain users'''
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.public_namespace.generate_commanders=self.generate_commanders
+        self.public_namespace.merge_commanders=self.merge_commanders
+
     def matches(self, message):
         return re.search(r'(?:re)?generate\s+(commanders|command\s+maintainers|import\s+perm(?:ission)?s?)', message.content, re.I) != None
 
     def action(self, message, bot):
         send_func = self.send_message
+        commanders2 = self.generate_commanders(self, bot)
+        self.merge_commanders(commanders2)
+        yield from send_func(message.channel, "Aye aye captain")
+        # save file
+        self.public_namespace.commandersfile.content = self.public_namespace.commanders
+        self.public_namespace.commandersfile.save()
+
+    def generate_commanders(self, bot):
         commanders2 = dataloader.datafile(self.public_namespace.commandersfile.filename).content
         if not isinstance(commanders2, dict):
             commanders2 = dict()
@@ -50,7 +63,10 @@ class Command(command.Multi, command.AdminCommand, command.DirectOnlyCommand):
             if package not in commanders2[self.public_namespace.PACKAGES]:
                 commanders2[self.public_namespace.PACKAGES][package] = "missing"
 
-        # merge commanders2 with current commanders, in case something changed
+        return commanders2
+
+    def merge_commanders(self, commanders2):
+        '''Merges commanders2 with self.public_namespace.commanders'''
         for type in commanders2: # type is packages, reactions, commands or plugins
             for name in commanders2[type]: # name is the command's name, determined by the command's filename
                 # some verification to make sure keys are declared properly
@@ -69,13 +85,5 @@ class Command(command.Multi, command.AdminCommand, command.DirectOnlyCommand):
                     # self.public_namespace.commanders is assumed to have the most up to date information
                     # so the owner will not be touched unless it is non-existent
                     if self.public_namespace.OWNER not in self.public_namespace.commanders[type][name]:
-                        if type == self.public_namespace.PLUGINS:
-                            print(name)
-                            print(commanders2[type][name])
                         self.public_namespace.commanders[type][name][self.public_namespace.OWNER] = self.public_namespace.DEFAULT_OWNER_ID
                     self.public_namespace.commanders[type][name][self.public_namespace.MAINTAINERS] = list(set(self.public_namespace.commanders[type][name][self.public_namespace.MAINTAINERS]) | set(commanders2[type][name][self.public_namespace.MAINTAINERS]))
-
-        yield from send_func(message.channel, "Aye aye captain")
-        # save file
-        self.public_namespace.commandersfile.content = self.public_namespace.commanders
-        self.public_namespace.commandersfile.save()
