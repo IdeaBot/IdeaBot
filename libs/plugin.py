@@ -31,17 +31,11 @@ CUSTOM = None
 ARGS = 'args'
 KWARGS = 'kwargs'
 
-# event constants
-READY = 'ready'
-LOGIN = 'login'
-MESSAGE = 'message'
-REACTION = 'reaction'
-
 class Plugin(addon.AddOn):
     '''Plugin represents a plugin that the discord bot can work alongside
     to add custom functionality not present in the base bot'''
 
-    def __init__(self, api_methods=dict(), config=None, **kwargs):
+    def __init__(self, api_methods=dict(), config=None, events=dict(), namespace=None, **kwargs):
         '''(Plugin, dict, str, dict) -> Plugin
         api_methods: a dict of api methods accessible to the Plugin, so that most plugins don't have to be AdminPlugins
         kwargs: included to simplify sub-classing'''
@@ -63,6 +57,9 @@ class Plugin(addon.AddOn):
         self.remove_reaction = api_methods[self.REMOVE_REACTION]
         self.send_typing = api_methods[self.SEND_TYPING]
         self.send_file = api_methods[self.SEND_FILE]
+
+        self.events = events
+        self.public_namespace = namespace
 
     async def _action(self):
         '''(Plugin) -> None
@@ -122,6 +119,8 @@ class ThreadedPlugin(Plugin):
             self.threaded_kwargs
         except AttributeError:
             self.threaded_kwargs = dict()
+        # please note that ThreadedPlugin will create a copy of all variables
+        # for the new thread, unless they're compatible with multiple threads
         if should_spawn_thread:
             self.spawn_process()
 
@@ -235,28 +234,20 @@ class ThreadedPlugin(Plugin):
                             # (ie **action_dict[key] is not a valid operation)
                             pass
 
-
-class EventPlugin(Plugin):
-    '''Subclass for catching the events dict.
-    This probably shouldn't be used on it's own, since it adds no (concrete) functionality.'''
-    def __init__(self, events, **kwargs):
-        super().__init__(**kwargs)
-        self.events = events
-
-class OnReadyPlugin(EventPlugin):
+class OnReadyPlugin(Plugin):
     async def _action(self):
-        await self.events[READY]()
+        await self.events[self.READY]()
         await super()._action()
 
-class OnLoginPlugin(EventPlugin):
+class OnLoginPlugin(Plugin):
     async def _action(self):
-        await self.events[LOGIN]()
+        await self.events[self.LOGIN]()
         await super()._action()
 
-class OnMessagePlugin(EventPlugin):
+class OnMessagePlugin(Plugin):
     async def _action(self):
         while not self.shutting_down:
-            message = await self.events[MESSAGE]() # this is the difference
+            message = await self.events[self.MESSAGE]() # this is the difference
             start_time = time.time()
             await self.action(message)
             await asyncio.sleep(self.period - (time.time() - start_time)) # account for execution time of self.action() in asyncio.sleep()
@@ -264,10 +255,10 @@ class OnMessagePlugin(EventPlugin):
     def action(self, message):
         pass
 
-class OnReactionPlugin(EventPlugin):
+class OnReactionPlugin(Plugin):
     async def _action(self):
         while not self.shutting_down:
-            reaction, user = await self.events[REACTION]() # this is the difference
+            reaction, user = await self.events[self.REACTION]() # this is the difference
             start_time = time.time()
             await self.action(reaction, user)
             await asyncio.sleep(self.period - (time.time() - start_time)) # account for execution time of self.action() in asyncio.sleep()
@@ -280,14 +271,3 @@ class AdminPlugin(Plugin):
     This is a security risk, yay! Use wisely and sparingly '''
     def add_client_variable(self, client_var):
         self.client = self.bot = client_var
-
-class Multi(Plugin):
-    '''Similar to a regular plugin, but has access to a namespace which is also
-    accessible to commands and reactions in any folder of the same name'''
-
-    def __init__(self, namespace, **kwargs):
-        # please note that ThreadedPlugin will create a copy of all variables, unless they're compatible with multiple threads
-
-        # the following two lines are flipped because of the 'snapshot' that is created when a process is spawned (which super().__init__) might do)
-        self.public_namespace = namespace
-        super().__init__(**kwargs)

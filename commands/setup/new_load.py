@@ -7,7 +7,7 @@ COMMAND = 'commands'
 REACTION = 'reactions'
 PLUGIN = 'plugins'
 
-class Command(command.AdminCommand, command.Multi, command.DirectOnlyCommand):
+class Command(command.AdminCommand, command.DirectOnlyCommand):
     '''load command loads a python file from the server and tries to add it as an add-on
 
     This replaces the now deprecated load_command and download_command commands

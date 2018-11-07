@@ -20,8 +20,8 @@ class Command(addon.AddOn):
     '''Command represents a command that the discord bot can use to take action
     based on messages posted in any discord channels it listens to.'''
 
-    def __init__(self, perms_loc=None, api_methods=dict(), **kwargs):
-        '''(str, dict) -> Command
+    def __init__(self, perms_loc=None, api_methods=dict(), always_watch_messages=set(), role_messages=dict(), namespace=None, events=dict(), **kwargs):
+        '''(str, dict, set, dict, CustomNamespace) -> Command
         perms: string of users who have permission to use this command
         kwargs: included for sub-classing.'''
 
@@ -32,6 +32,11 @@ class Command(addon.AddOn):
         self.remove_reaction = api_methods[self.REMOVE_REACTION]
         self.send_typing = api_methods[self.SEND_TYPING]
         self.send_file = api_methods[self.SEND_FILE]
+
+        self.always_watch_messages=always_watch_messages
+        self.role_messages=role_messages
+        self.public_namespace = namespace
+        self.events = events
 
         # TODO: more verification on the structure of perms
         try:
@@ -94,12 +99,12 @@ class BenchmarkableCommand(Command):
 
     def _action(self, message):
         # start the benchmark
-        start_time = time.time()
+        start_time = time.perf_counter()
         # do whatever the class's action is
         yield from super()._action(message)
         # report on benchmark if requested
         if re.search(r'\bbenchmark\b', message.content, re.IGNORECASE):
-            end_time = time.time()
+            end_time = time.perf_counter()
             yield from self.send_message(message.channel, 'Executed in ' + str(end_time-start_time) + ' seconds')
 
 
@@ -140,32 +145,6 @@ class AdminCommand(Command):
         '''(AdminCommand, discord.Message, func, discord.Client) -> None
         Responds to the message with access to discord.Client '''
         pass
-
-class WatchCommand(Command):
-    '''Extending WatchCommand will make it possible for the command
-    to add discord.Messages for the bot to always keep track of
-
-    To add a message to the watchlist, use self.always_watch_messages.add(<discord.Message object>)
-    self.always_watch_messages is a set()'''
-
-    def __init__(self, always_watch_messages, **kwargs):
-        super().__init__(**kwargs)
-        self.always_watch_messages=always_watch_messages
-
-class RoleCommand(Command):
-    '''Extending RoleCommand will make the command "catch" the role_messages variables'''
-
-    def __init__(self, role_messages, **kwargs):
-        super().__init__(**kwargs)
-        self.role_messages=role_messages
-
-class Multi(Command):
-    '''Extending Multi will make it possible for the command to access the namespace (ie variables) of
-    other commands contained in the same folder or within the same folder name (not necessarily the same folder path)'''
-
-    def __init__(self, namespace, **kwargs):
-        super().__init__(**kwargs)
-        self.public_namespace = namespace
 
 class Dummy(Command):
     '''Extending Dummy will make the command a dummy command (ie the command won't do anything)

@@ -4,7 +4,7 @@ import asyncio
 YES_EMOJI = "✔️"
 NO_EMOJI = "✖️"
 
-class Reaction(reactioncommand.ReactionAddCommand, reactioncommand.Multi):
+class Reaction(reactioncommand.ReactionAddCommand):
     '''A Reaction command for simple voting on messages
 
     **Usage:**

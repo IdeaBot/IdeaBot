@@ -16,7 +16,7 @@ for i in RAINBOW:
     RAINBOW_MESSAGE+=RAINBOW[i]+" : "+EMOJIS[n]+"\n"
     n+=1
 
-class Command(command.AdminCommand, command.DirectOnlyCommand, command.WatchCommand):
+class Command(command.AdminCommand, command.DirectOnlyCommand):
     '''Generates the colour roles and a message for assigning the roles to yourself
 
     **Usage:**

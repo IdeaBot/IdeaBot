@@ -4,7 +4,7 @@ import discord, random
 DATAPATH='datafilepath'
 PATHDATAPATH = 'playerdatapath'
 
-class Plugin(plugin.Multi, plugin.OnMessagePlugin):
+class Plugin(plugin.OnMessagePlugin):
     '''The explorer plugin is a simple demo application of the potential of plugins.
 
     This is like an old text-based adventure, where you move from room to room by

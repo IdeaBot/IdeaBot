@@ -1,7 +1,7 @@
 import re
 from libs import command, dataloader, loader
 
-class Command(command.Multi, command.AdminCommand, command.DirectOnlyCommand):
+class Command(command.AdminCommand, command.DirectOnlyCommand):
     '''A command to generate/update the commanders file and information
     Commanders are the maintainers of an add-on, including the owner of the plugin
 

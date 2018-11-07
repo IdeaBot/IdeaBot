@@ -1,6 +1,6 @@
 from libs import reaction as reactioncommand
 
-class Reaction(reactioncommand.AdminReactionRemoveCommand, reactioncommand.RoleReaction):
+class Reaction(reactioncommand.AdminReactionRemoveCommand):
     '''A Reaction Command to remove the appropriate role when you react with the right emoji
 
     **Usage:**

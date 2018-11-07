@@ -19,7 +19,7 @@ UPLOAD_COUNT = 'uploads'
 YOUTUBE_LOGO = 'https://s.ytimg.com/yts/img/favicon_144-vfliLAfaB.png'
 
 
-class Plugin(plugin.ThreadedPlugin, plugin.OnReadyPlugin, plugin.Multi):
+class Plugin(plugin.ThreadedPlugin, plugin.OnReadyPlugin):
     '''Multithreaded plugin for YouTube channel information gathering
 
     Currently, yt only scrapes the Idea Project YouTube channel

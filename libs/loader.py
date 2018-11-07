@@ -23,8 +23,9 @@ emoji_dir=config.content[EMOJIS_LOCATION]
 
 def init_command(filename, namespace, bot, role_messages, always_watch_messages, folder, package="", reload=False, **kwargs):
     config_end=config.content[CONFIGEND]
+    events = {addon.READY:bot.wait_until_ready, addon.LOGIN:bot.wait_until_login, addon.MESSAGE:bot.wait_for_message, addon.REACTION:bot.wait_for_reaction}
     api_methods = {addon.SEND_MESSAGE:bot.send_message, addon.EDIT_MESSAGE:bot.edit_message, addon.ADD_REACTION:bot.add_reaction, addon.REMOVE_REACTION:bot.remove_reaction, addon.SEND_TYPING:bot.send_typing, addon.SEND_FILE:bot.send_file}
-    parameters = {'user':lambda: bot.user, 'namespace':namespace, 'always_watch_messages':always_watch_messages, 'role_messages':role_messages, 'api_methods':api_methods}
+    parameters = {'user':lambda: bot.user, 'namespace':namespace, 'always_watch_messages':always_watch_messages, 'role_messages':role_messages, 'api_methods':api_methods, 'events':events}
     if package:
         package=package+"."
     temp_lib = importlib.import_module("commands."+package+filename[:-len(".py")]) # import command
@@ -42,8 +43,9 @@ def init_command(filename, namespace, bot, role_messages, always_watch_messages,
 
 def init_reaction(filename, namespace, bot, role_messages, always_watch_messages, folder, package="", emoji_dir="/", reload=False, **kwargs):
     config_end=config.content[CONFIGEND]
+    events = {addon.READY:bot.wait_until_ready, addon.LOGIN:bot.wait_until_login, addon.MESSAGE:bot.wait_for_message, addon.REACTION:bot.wait_for_reaction}
     api_methods = {addon.SEND_MESSAGE:bot.send_message, addon.EDIT_MESSAGE:bot.edit_message, addon.ADD_REACTION:bot.add_reaction, addon.REMOVE_REACTION:bot.remove_reaction, addon.SEND_TYPING:bot.send_typing, addon.SEND_FILE:bot.send_file}
-    parameters = {'user':lambda: bot.user, 'namespace':namespace, 'always_watch_messages':always_watch_messages, 'role_messages':role_messages, 'api_methods':api_methods}
+    parameters = {'user':lambda: bot.user, 'namespace':namespace, 'always_watch_messages':always_watch_messages, 'role_messages':role_messages, 'api_methods':api_methods, 'events':events}
     if package!="":
         package=package+"."
     temp_lib = importlib.import_module("reactions."+package+filename[:-len(".py")]) # import reaction
@@ -64,7 +66,7 @@ def init_reaction(filename, namespace, bot, role_messages, always_watch_messages
 def init_plugin(filename, namespace, bot, folder, package="", reload=False, **kwargs):
     config_end=config.content[CONFIGEND]
     # generate parameters
-    events = {plugin.READY:bot.wait_until_ready, plugin.LOGIN:bot.wait_until_login, plugin.MESSAGE:bot.wait_for_message, plugin.REACTION:bot.wait_for_reaction}
+    events = {addon.READY:bot.wait_until_ready, addon.LOGIN:bot.wait_until_login, addon.MESSAGE:bot.wait_for_message, addon.REACTION:bot.wait_for_reaction}
     api_methods = {addon.SEND_MESSAGE:bot.send_message, addon.EDIT_MESSAGE:bot.edit_message, addon.ADD_REACTION:bot.add_reaction, addon.REMOVE_REACTION:bot.remove_reaction, addon.SEND_TYPING:bot.send_typing, addon.SEND_FILE:bot.send_file}
     parameters = {'user':lambda: bot.user, 'namespace':namespace, 'events':events, 'api_methods':api_methods}
 

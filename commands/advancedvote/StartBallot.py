@@ -12,7 +12,7 @@ DEFAULT_NAME_GEN=time.time #function
 DEFAULT_OPTIONS=["Yes", "No"] #list
 DEFAULT_TRANSFERABLES=3 #int
 
-class Command(command.DirectOnlyCommand, command.Multi):
+class Command(command.DirectOnlyCommand):
     '''Command for allowing individuals to case their ballot
 
     **Usage:**

@@ -13,7 +13,7 @@ SEEN = 'seen'
 CHANNELS = 'channels'
 CHANNEL = 'channel'
 
-class Plugin(plugin.ThreadedPlugin, plugin.Multi):
+class Plugin(plugin.ThreadedPlugin):
     '''Multithreaded plugin for retrieving Google Calendar info
 
     Currently, cal only scrapes info from the Idea Project public calendar

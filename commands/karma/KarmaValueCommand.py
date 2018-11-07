@@ -1,7 +1,7 @@
 from libs import command
 import re
 
-class Command(command.DirectOnlyCommand, command.Multi):
+class Command(command.DirectOnlyCommand):
     '''KarmaCountCommand responds to direct queries about an entity's karma.
 
     **Usage:**

@@ -1,7 +1,7 @@
 from libs import reaction as reactioncommand
 import asyncio
 
-class Reaction(reactioncommand.ReactionAddCommand, reactioncommand.Multi):
+class Reaction(reactioncommand.ReactionAddCommand):
     '''A Reaction command for tallying votes on messages
 
     **Usage:**

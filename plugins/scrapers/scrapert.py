@@ -25,7 +25,7 @@ def tweetLogging():
 
 twitLog = tweetLogging()
 
-class Plugin(plugin.ThreadedPlugin, plugin.Multi):
+class Plugin(plugin.ThreadedPlugin):
     '''Multithreaded plugin for scraping Twitter through RSS
 
     Currently only watches @OpenIdeaProject '''

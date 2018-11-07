@@ -6,7 +6,7 @@ MODE = "mode"
 VOTES = "votes"
 NAME = "name"
 
-class Reaction(reactioncommand.ReactionAddCommand, reactioncommand.WatchReactionCommand, reactioncommand.Multi):
+class Reaction(reactioncommand.ReactionAddCommand):
     '''A Reaction command for casting your vote
 
     **Usage:**

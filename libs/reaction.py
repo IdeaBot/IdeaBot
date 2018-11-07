@@ -15,7 +15,7 @@ class ReactionCommand(addon.AddOn):
     '''ReactionAddCommand represents a command that the bot can use to take action
     based on reactions added to any discord message it listens to.'''
 
-    def __init__(self, api_methods=dict(), all_emojis_func=None, emoji_loc=None, perms_loc=None, **kwargs):
+    def __init__(self, api_methods=dict(), all_emojis_func=None, emoji_loc=None, perms_loc=None, always_watch_messages=set(), role_messages=dict(), namespace=None, events=dict(), **kwargs):
         '''(ReactionCommand, func, str, dict) -> Command
         perms: str of users who have permission to use this command
         kwargs: included for sub-classing'''
@@ -26,6 +26,11 @@ class ReactionCommand(addon.AddOn):
         self.remove_reaction = api_methods[self.REMOVE_REACTION]
         self.send_typing = api_methods[self.SEND_TYPING]
         self.send_file = api_methods[self.SEND_FILE]
+
+        self.always_watch_messages=always_watch_messages
+        self.role_messages=role_messages
+        self.public_namespace = namespace
+        self.events = events
 
         self.all_emojis_func = all_emojis_func
         self.emoji_action = set()
@@ -176,23 +181,7 @@ class WatchReactionCommand(ReactionCommand):
     To add a message to the watchlist, use self.always_watch_messages.add(<discord.Message object>)
     self.always_watch_messages is a set()'''
 
-    def __init__(self, always_watch_messages, **kwargs):
-        super().__init__(**kwargs)
-        self.always_watch_messages=always_watch_messages
-
-class RoleReaction(ReactionCommand):
-    '''Extending RoleReaction will make the command "catch" the role_messages variables'''
-
-    def __init__(self, role_messages, **kwargs):
-        super().__init__(**kwargs)
-        self.role_messages=role_messages
-
-class Multi(ReactionCommand):
-    '''Extending Multi will make the reaction command "catch" the public_namespace associated with the folder's name'''
-
-    def __init__(self, namespace, **kwargs):
-        super().__init__(**kwargs)
-        self.public_namespace = namespace
+    pass
 
 class Dummy(ReactionCommand):
     '''Extending Dummy will make the command a dummy command (ie the command won't do anything)

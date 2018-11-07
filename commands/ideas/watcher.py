@@ -3,7 +3,7 @@ import re, asyncio, time
 
 FILENAME = 'commands/ideas/last_messages_time.json'
 
-class Command(command.Multi):
+class Command(command.Command):
     '''A command for setting up and maintaining the scrapertidea plugin.
 
     **Usage:**

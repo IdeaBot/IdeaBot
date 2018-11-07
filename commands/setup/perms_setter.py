@@ -1,7 +1,7 @@
 from libs import command
 import re
 
-class Command(command.Multi, command.AdminCommand, command.DirectOnlyCommand):
+class Command(command.AdminCommand, command.DirectOnlyCommand):
     '''A command for setting which user can use which commands in your server
 
     **Usage:**

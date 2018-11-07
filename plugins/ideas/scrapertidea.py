@@ -21,7 +21,7 @@ def tweetLogging():
 
 twitLog = tweetLogging()
 
-class Plugin(plugin.ThreadedPlugin, plugin.Multi):
+class Plugin(plugin.ThreadedPlugin):
     '''The scraper idea plugin is for providing ideas when a channel goes a long time
     without being spoken in. The length of time allowed to pass before an idea is
     sent depends on the configuration file of Idea, but it is usually set to 24 hours

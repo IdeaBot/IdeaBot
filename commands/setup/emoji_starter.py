@@ -1,7 +1,7 @@
 from libs import command
 import re
 
-class Command(command.DirectOnlyCommand, command.AdminCommand, command.Multi):
+class Command(command.DirectOnlyCommand, command.AdminCommand):
     '''A command for setting emojis for reaction commands
     This works alongside the `emoji_setter` reaction command
 

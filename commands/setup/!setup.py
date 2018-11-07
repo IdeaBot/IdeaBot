@@ -9,7 +9,7 @@ COMMANDS = 'commands'
 PACKAGES = 'packages'
 PLUGINS = 'plugins'
 
-class Command(command.Multi, command.Dummy, command.Config):
+class Command(command.Dummy, command.Config):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.public_namespace.active_emoji_messages = dict() # dict associating messages to their reaction name, for assigning emojis

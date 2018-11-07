@@ -26,7 +26,7 @@ def forumLogging():
 
 forumLog = forumLogging()
 
-class Plugin(plugin.ThreadedPlugin, plugin.Multi):
+class Plugin(plugin.ThreadedPlugin):
     '''Multithreaded plugin for scraping Proboards (freeforums)
 
     This currently only works with a single forum - the Idea Project forum '''

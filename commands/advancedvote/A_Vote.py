@@ -3,9 +3,9 @@ from libs import command, savetome
 VOTE_DICT_LOCATION='votedictloc'
 BALLOT_LOCATION='ballotloc'
 
-class Command(command.Multi, command.Dummy, command.Config):
+class Command(command.Dummy, command.Config):
     ''''Dummy voting command for initializing the namespace
-    
+
     Please ignore'''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

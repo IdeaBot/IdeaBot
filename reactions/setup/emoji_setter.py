@@ -1,6 +1,6 @@
 from libs import reaction
 
-class Reaction(reaction.Multi, reaction.AdminReactionAddCommand):
+class Reaction(reaction.AdminReactionAddCommand):
     '''A Reaction command for setting emojis to commands in servers
     This works alongside `emoji_starter`
 

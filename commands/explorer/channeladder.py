@@ -3,7 +3,7 @@ import re, asyncio
 
 FILENAME = 'commands/explorer/channels.csv'
 
-class Command(command.Multi, command.DirectOnlyCommand):
+class Command(command.DirectOnlyCommand):
     '''Helper command for exploring
 
     **Usage:**

@@ -9,7 +9,7 @@ Created on Sun Jan 14 12:32:50 2018
 from libs import command
 import re
 
-class Command(command.DirectOnlyCommand, command.Multi):
+class Command(command.DirectOnlyCommand):
     '''UrlAdderCommand adds a url to the reddit watch list. URLs in the watch
     list will have updates posted in the discord.
 

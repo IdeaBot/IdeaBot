@@ -12,7 +12,7 @@ To get a list of commands/reaction-commands/plugins, use:
 ```@Idea list [commands/reactions/plugins]``` (respectively)
 '''
 
-class Command(command.AdminCommand, command.DirectOnlyCommand, command.Multi):
+class Command(command.AdminCommand, command.DirectOnlyCommand):
     def matches(self, message):
         return self.collect_args(message)!=None
 

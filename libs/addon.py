@@ -7,6 +7,12 @@ REMOVE_REACTION = 'remove_reaction'
 SEND_TYPING = 'send_typing'
 SEND_FILE = 'send_file'
 
+# event constants, from the Discord.py API
+READY = 'ready'
+LOGIN = 'login'
+MESSAGE = 'message'
+REACTION = 'reaction'
+
 DEFAULT = 'DEFAULT' # default config file section
 
 '''Base class for all add-on systems (Commands, Reactions and Plugins).
@@ -21,6 +27,11 @@ class AddOn:
     REMOVE_REACTION = REMOVE_REACTION
     SEND_TYPING = SEND_TYPING
     SEND_FILE = SEND_FILE
+
+    READY = READY
+    LOGIN = LOGIN
+    MESSAGE = MESSAGE
+    REACTION = REACTION
 
     DEFAULT = DEFAULT
 

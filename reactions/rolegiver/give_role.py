@@ -1,6 +1,6 @@
 from libs import reaction as reactioncommand
 
-class Reaction(reactioncommand.AdminReactionAddCommand, reactioncommand.RoleReaction):
+class Reaction(reactioncommand.AdminReactionAddCommand):
     '''A Reaction Command to give you a role when you react with the right emoji
 
     **Usage:**
