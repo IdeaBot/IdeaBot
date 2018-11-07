@@ -138,12 +138,13 @@ class Command(command.AdminCommand, command.DirectOnlyCommand):
 
             # load add-on
             py_filename = name[name.rfind('/')+1:]
+            cmd_name = py_filename[:-len('.py')]
             if addon_type==COMMAND:
-                bot.load_command(py_filename, name, package=package, reload=is_reload)
+                bot.load_command(py_filename, cmd_name, package=package, reload=is_reload)
             elif addon_type==REACTION:
-                bot.load_reaction(py_filename, name, package=package, reload=is_reload)
+                bot.load_reaction(py_filename, cmd_name, package=package, reload=is_reload)
             elif addon_type==PLUGIN:
-                bot.load_plugin(py_filename, name, package=package, reload=is_reload)
+                bot.load_plugin(py_filename, cmd_name, package=package, reload=is_reload)
             else:
                 return
             yield from self.send_message(message.channel, self.get_response(name, is_reload, is_download, has_config, config_loaded))
