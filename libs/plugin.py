@@ -68,13 +68,13 @@ class Plugin(addon.AddOn):
 
         the looping async method to call action()'''
         while not self.shutting_down:
-            start_time = time.time()
+            start_time = time.perf_counter()
             try:
                 await self.action()
             except: # catch any exception that could crash the task
                 # traceback.print_exc()
                 pass
-            sleep_time = self.period - (time.time() - start_time)
+            sleep_time = self.period - (time.perf_counter() - start_time)
             if sleep_time<0:
                 sleep_time=0
             await asyncio.sleep(sleep_time) # account for execution time of self.action() in asyncio.sleep()
@@ -146,13 +146,13 @@ class ThreadedPlugin(Plugin):
         Similar to _action(), the looping thread that calls threaded_action'''
 
         while not self.shutting_down:
-            start_time = time.time()
+            start_time = time.perf_counter()
             try:
                 self.threaded_action(queue, **kwargs)
             except: # catch anything that could crash the thread
                 traceback.print_exc()
                 pass
-            sleep_time = self.threaded_period - (time.time() - start_time)
+            sleep_time = self.threaded_period - (time.perf_counter() - start_time)
             if sleep_time<0:
                 sleep_time=0
             time.sleep(sleep_time) # account for execution time of self.action() in asyncio.sleep()
@@ -248,9 +248,9 @@ class OnMessagePlugin(Plugin):
     async def _action(self):
         while not self.shutting_down:
             message = await self.events[self.MESSAGE]() # this is the difference
-            start_time = time.time()
+            start_time = time.perf_counter()
             await self.action(message)
-            await asyncio.sleep(self.period - (time.time() - start_time)) # account for execution time of self.action() in asyncio.sleep()
+            await asyncio.sleep(self.period - (time.perf_counter() - start_time)) # account for execution time of self.action() in asyncio.sleep()
 
     def action(self, message):
         pass
@@ -259,9 +259,9 @@ class OnReactionPlugin(Plugin):
     async def _action(self):
         while not self.shutting_down:
             reaction, user = await self.events[self.REACTION]() # this is the difference
-            start_time = time.time()
+            start_time = time.perf_counter()
             await self.action(reaction, user)
-            await asyncio.sleep(self.period - (time.time() - start_time)) # account for execution time of self.action() in asyncio.sleep()
+            await asyncio.sleep(self.period - (time.perf_counter() - start_time)) # account for execution time of self.action() in asyncio.sleep()
 
     def action(self, reaction, user):
         pass
