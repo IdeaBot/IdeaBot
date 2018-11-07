@@ -16,7 +16,10 @@ CHANNEL = 'channel'
 class Plugin(plugin.ThreadedPlugin):
     '''Multithreaded plugin for retrieving Google Calendar info
 
-    Currently, cal only scrapes info from the Idea Project public calendar
+    **Usage:**
+    ```@Idea (add or remove) <url> ```
+
+    Currently, this will scrape any valid calendar given to it
 
     This uses Google API calls'''
 

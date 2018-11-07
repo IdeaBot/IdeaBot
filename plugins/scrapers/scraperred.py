@@ -23,7 +23,10 @@ def redditLogging():
 redditLog = redditLogging()
 
 class Plugin(plugin.ThreadedPlugin):
-    '''Multithreaded plugin for scraping the front page of the internet. Or at least certain parts of Reddit'''
+    '''Multithreaded plugin for scraping the front page of the internet. Or at least certain parts of Reddit
+
+    **Usage:**
+    ```@Idea (add or remove) <url> ``` '''
     def __init__(self, **kwargs):
         super().__init__(should_spawn_thread=False, **kwargs)
         self.data = dataloader.loadfile_safe(self.config["datafilepath"])
