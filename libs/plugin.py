@@ -67,7 +67,7 @@ class Plugin(addon.AddOn):
         in order to expand or modify it's functionality.
 
         the looping async method to call action()'''
-        while not self.shutting_down:
+        while not self.shutting_down and self.period!=-1:
             start_time = time.perf_counter()
             try:
                 await self.action()
@@ -145,7 +145,7 @@ class ThreadedPlugin(Plugin):
 
         Similar to _action(), the looping thread that calls threaded_action'''
 
-        while not self.shutting_down:
+        while not self.shutting_down and self.threaded_period!=-1:
             start_time = time.perf_counter()
             try:
                 self.threaded_action(queue, **kwargs)
@@ -271,3 +271,18 @@ class AdminPlugin(Plugin):
     This is a security risk, yay! Use wisely and sparingly '''
     def add_client_variable(self, client_var):
         self.client = self.bot = client_var
+        self._on_client_add()
+
+    def _on_client_add(self):
+        '''() -> None
+        wrapper for on_client_add method '''
+        self.on_client_add()
+
+    def on_client_add(self): 
+        '''() -> None
+        A method called when the bot client variable is passed to the AdminPlugin.
+
+        This is always called after the plugin is initialized but before the action() task is created.
+        This may be useful for overriding bot variables or methods instead
+        of directly and permanently modifying the bot.py file'''
+        pass

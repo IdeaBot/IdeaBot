@@ -190,8 +190,7 @@ class Bot(discord.Client):
                 # Catch all problems that happen in matching/executing a command.
                 # This means that if there's a bug that would cause execution to
                 # break, other commands can still be tried.
-                #traceback.print_exc()
-                self.log.warning('command %s raised an exception during its execution: %s', cmd, e)
+                yield from self._on_command_error(cmd, e)
 
     @asyncio.coroutine
     def on_reaction_add(self, reaction, user):
@@ -204,8 +203,7 @@ class Bot(discord.Client):
                         yield from self.reactions[cmd]._action(reaction, user)
                     break
                 except Exception as e:
-                    #traceback.print_exc()
-                    self.log.warning('Reaction %s raised an exception during its execution: %s', cmd, e)
+                    yield from self._on_reaction_error(cmd, e)
 
     @asyncio.coroutine
     def on_reaction_remove(self, reaction, user):
@@ -218,8 +216,8 @@ class Bot(discord.Client):
                         yield from self.reactions[cmd]._action(reaction, user)
                     break
                 except Exception as e:
-                    #traceback.print_exc()
-                    self.log.warning('Reaction %s raised an exception during its execution: %s', cmd, e)
+                    yield from self._on_reaction_error(cmd, e)
+
 
     @asyncio.coroutine
     def on_ready(self):
@@ -340,3 +338,31 @@ class Bot(discord.Client):
         for msg in self.always_watch_messages:
             if msg not in self.messages and msg!=LOADING_WARNING:
                 self.messages.append(msg)
+
+    def _on_command_error(self, cmd_name, error):
+        '''(Bot, str) -> None
+        wrapper method to catch and report errors from commands'''
+        #traceback.print_exc()
+        self.log.warning('command %s raised an exception during its execution: %s', cmd_name, error)
+        yield from self.on_command_error(cmd_name, error)
+
+    @asyncio.coroutine
+    def on_command_error(self, cmd_name, error):
+        '''(Bot, str) -> None
+        method to catch and report errors from commands
+        This should not raise it's own errors!'''
+        pass
+
+    def _on_reaction_error(self, cmd_name, error):
+        '''(Bot, str) -> None
+        wrapper method to catch and report errors from reactions'''
+        #traceback.print_exc()
+        self.log.warning('Reaction %s raised an exception during its execution: %s', cmd_name, error)
+        yield from self.on_reaction_error(cmd_name, error)
+
+    @asyncio.coroutine
+    def on_reaction_error(self, cmd_name, error):
+        '''(Bot, str) -> None
+        method to catch and report errors from reactions
+        This should not raise it's own errors!'''
+        pass
