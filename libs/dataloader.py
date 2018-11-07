@@ -1,4 +1,4 @@
-import configparser, json
+import configparser, json, sqlite3
 class datafile: # loads and parses files depending on file ending
     def loadConfig(self, filename):
         '''() -> Config class
@@ -65,6 +65,18 @@ class datafile: # loads and parses files depending on file ending
         json.dump(self.content, file, ensure_ascii=False, indent=4)
         file.close()
 
+    def loadDB(self, filename):
+        '''(str) -> SQLite database
+        opens an existing SQLite db'''
+        connection = sqlite3.connect(filename)
+        self.cursor = connection.cursor()
+        self.execute = self.cursor.execute
+        return connection
+    def saveDB(self):
+        '''() -> None
+        commit changes to db'''
+        self.content.commit()
+
     def __init__(self, filename, load_as=None, default_val=list()):
         if "." in filename:
             fileExt = filename[len(filename)-filename[::-1].index("."):].lower()
@@ -74,6 +86,8 @@ class datafile: # loads and parses files depending on file ending
                 self.content = self.loadCSV(filename)
             elif (fileExt == "json" and load_as==None) or load_as == "json":
                 self.content = self.loadJSON(filename, default_val=default_val)
+            elif (fileExt == "db" and load_as==None) or load_as == "db":
+                self.content = self.loadDB(filename)
             else:
                 self.content = self.loadRawText(filename)
             self.type = fileExt
@@ -91,6 +105,8 @@ class datafile: # loads and parses files depending on file ending
             self.saveCSV()
         elif (self.type == "json" and save_as==None) or save_as == "json":
             self.saveJSON()
+        elif (self.type == "db" and save_as==None) or save_as=="db":
+            self.saveDB()
         elif (self.type != "config" and save_as!=None) or save_as!="config":
             self.saveRawText()
         else:
