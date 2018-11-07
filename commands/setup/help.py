@@ -9,7 +9,7 @@ Use this command to show the usage instructions for a command, reaction-command 
 Shows the help information for <add-on>
 
 To get a list of commands/reaction-commands/plugins, use:
-```@Idea list [commands/reactions/plugins]``` (respectively)
+```@Idea list (commands/reactions/plugins)``` (respectively)
 '''
 
 class Command(command.AdminCommand, command.DirectOnlyCommand):

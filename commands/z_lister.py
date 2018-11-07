@@ -7,10 +7,10 @@ class Command(command.DirectOnlyCommand, command.AdminCommand):
     **Usage:**
     ```@Idea list <iterable>``` '''
     def matches(self, message):
-        return re.search(r'list\s*([^\s\(\)]+)', message.content, re.I) != None
+        return re.search(r'\blist\s*([^\s\(\)]+)', message.content, re.I) != None
 
     def action(self, message, bot):
-        args = re.search(r'list\s*([^\s\(\)]+)', message.content, re.I)
+        args = re.search(r'\blist\s*([^\s\(\)]+)', message.content, re.I)
         try:
             reply = process_list(eval("bot."+args.group(1)))
         except AttributeError:

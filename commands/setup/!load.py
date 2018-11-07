@@ -46,7 +46,7 @@ class Command(command.AdminCommand, command.DirectOnlyCommand):
             addon_name = name[name.rfind('/')+1:-len('.py')]
             # package; middle folder (<addon_type>/<middble folder>/<name>) or None
             package = name[name.find('/')+1:name.rfind('/')]
-            if package == "/":
+            if package == '':
                 package = None # no package
             # if add-on exists, reload it
             if os.path.exists(name):

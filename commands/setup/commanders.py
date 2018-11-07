@@ -19,7 +19,7 @@ class Command(command.AdminCommand, command.DirectOnlyCommand):
 
     def action(self, message, bot):
         send_func = self.send_message
-        commanders2 = self.generate_commanders(self, bot)
+        commanders2 = self.generate_commanders(bot)
         self.merge_commanders(commanders2)
         yield from send_func(message.channel, "Aye aye captain")
         # save file
