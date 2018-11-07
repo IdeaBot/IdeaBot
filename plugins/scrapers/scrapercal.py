@@ -57,16 +57,17 @@ class Plugin(plugin.ThreadedPlugin):
         # handle new items from url_adder
         while not newGCal.empty():
             item = newGCal.get()
+            item["id"]=item["id"].split('0%40group.calendar.google.com')[0]
             if item["action"] == "remove" or item["action"] == "delete":
                 try:
-                    del(self.data.content[item["url"]][self.CHANNELS][self.data.content[item["url"]][self.CHANNELS].index(item[self.CHANNEL])])
+                    del(self.data.content[item["id"]][self.CHANNELS][self.data.content[item["id"]][self.CHANNELS].index(item[self.CHANNEL])])
                 except (TypeError, KeyError, ValueError, NameError):
                     # traceback.print_exc()
                     pass
             elif item["action"]=="add":
-                if item["url"] not in self.data.content:
-                    self.data.content[item["url"]]={self.CHANNELS:list(), self.SEEN:list()} # dict
-                self.data.content[item["url"]][self.CHANNELS].append(item[self.CHANNEL])
+                if item["id"] not in self.data.content:
+                    self.data.content[item["id"]]={self.CHANNELS:list(), self.SEEN:list()} # dict
+                self.data.content[item["id"]][self.CHANNELS].append(item[self.CHANNEL])
         # do scrape things
         for calendar_id in self.data.content:
             try:
