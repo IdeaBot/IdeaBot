@@ -11,8 +11,8 @@ class Plugin(plugin.AdminPlugin):
     @asyncio.coroutine
     def on_command_error(self, cmd_name, error):
         if cmd_name not in self.public_namespace.commanders[self.public_namespace.COMMANDS]:
-            commanders2 = self.generate_commanders(self.bot)
-            self.merge_commanders(commanders2)
+            commanders2 = self.public_namespace.generate_commanders(self.bot)
+            self.public_namespace.merge_commanders(commanders2)
         user_id = self.public_namespace.commanders[self.public_namespace.COMMANDS][cmd_name][self.public_namespace.OWNER]
         user = discord.utils.find(lambda u: u.id == user_id, self.bot.get_all_members())
         if user:

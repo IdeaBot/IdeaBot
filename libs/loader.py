@@ -26,12 +26,6 @@ def init_command(filename, namespace, bot, role_messages, always_watch_messages,
     events = {addon.READY:bot.wait_until_ready, addon.LOGIN:bot.wait_until_login, addon.MESSAGE:bot.wait_for_message, addon.REACTION:bot.wait_for_reaction}
     api_methods = {addon.SEND_MESSAGE:bot.send_message, addon.EDIT_MESSAGE:bot.edit_message, addon.ADD_REACTION:bot.add_reaction, addon.REMOVE_REACTION:bot.remove_reaction, addon.SEND_TYPING:bot.send_typing, addon.SEND_FILE:bot.send_file}
     parameters = {'user':lambda: bot.user, 'namespace':namespace, 'always_watch_messages':always_watch_messages, 'role_messages':role_messages, 'api_methods':api_methods, 'events':events}
-    if package:
-        package=package+"."
-    temp_lib = importlib.import_module("commands."+package+filename[:-len(".py")]) # import command
-    if reload: # dumb way to do it, ik
-        temp_lib = importlib.reload(temp_lib)
-    parameters['perms_loc']=perms_dir+'c.'+package+filename[:-len(".py")]+".json"
     # find config file
     if filename[:-len(".py")]+config_end in config.content:
         parameters['config']=config.content[filename[:-len(".py")]+config_end]
@@ -39,6 +33,12 @@ def init_command(filename, namespace, bot, role_messages, always_watch_messages,
         parameters['config']=join(folder, package, filename[:-len(".py")]+'.config')
     else:
         parameters['config']=None
+    if package:
+        package=package+"."
+    temp_lib = importlib.import_module("commands."+package+filename[:-len(".py")]) # import command
+    if reload: # dumb way to do it, ik
+        temp_lib = importlib.reload(temp_lib)
+    parameters['perms_loc']=perms_dir+'c.'+package+filename[:-len(".py")]+".json"
     return temp_lib.Command(**parameters, **kwargs) # init command
 
 def init_reaction(filename, namespace, bot, role_messages, always_watch_messages, folder, package="", emoji_dir="/", reload=False, **kwargs):
@@ -46,6 +46,13 @@ def init_reaction(filename, namespace, bot, role_messages, always_watch_messages
     events = {addon.READY:bot.wait_until_ready, addon.LOGIN:bot.wait_until_login, addon.MESSAGE:bot.wait_for_message, addon.REACTION:bot.wait_for_reaction}
     api_methods = {addon.SEND_MESSAGE:bot.send_message, addon.EDIT_MESSAGE:bot.edit_message, addon.ADD_REACTION:bot.add_reaction, addon.REMOVE_REACTION:bot.remove_reaction, addon.SEND_TYPING:bot.send_typing, addon.SEND_FILE:bot.send_file}
     parameters = {'user':lambda: bot.user, 'namespace':namespace, 'always_watch_messages':always_watch_messages, 'role_messages':role_messages, 'api_methods':api_methods, 'events':events}
+    # find config file
+    if filename[:-len(".py")]+config_end in config.content:
+        parameters['config']=config.content[filename[:-len(".py")]+config_end]
+    elif isfile(join(folder, package, filename[:-len(".py")]+'.config')):
+        parameters['config']=join(folder, package, filename[:-len(".py")]+'.config')
+    else:
+        parameters['config']=None
     if package!="":
         package=package+"."
     temp_lib = importlib.import_module("reactions."+package+filename[:-len(".py")]) # import reaction
@@ -54,13 +61,6 @@ def init_reaction(filename, namespace, bot, role_messages, always_watch_messages
     # add reaction-specific parameters
     parameters['perms_loc']=perms_dir+'r.'+package+filename[:-len(".py")]+".json"
     parameters['emoji_loc']=emoji_dir+package+filename[:-len(".py")]+".json"
-    # find config file
-    if filename[:-len(".py")]+config_end in config.content:
-        parameters['config']=config.content[filename[:-len(".py")]+config_end]
-    elif isfile(join(folder, package, filename[:-len(".py")]+'.config')):
-        parameters['config']=join(folder, package, filename[:-len(".py")]+'.config')
-    else:
-        parameters['config']=None
     return temp_lib.Reaction(**parameters, **kwargs) # init reaction
 
 def init_plugin(filename, namespace, bot, folder, package="", reload=False, **kwargs):
