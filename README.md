@@ -9,13 +9,13 @@ To get started,
 [add Idea to your server](https://discordapp.com/oauth2/authorize?client_id=397854238774001673&scope=bot&permissions=268561472).
 
 
-###Important Links
+### Important Links ###
 
 * [IdeaBot dev & support server](https://discord.gg/gwq2vS7)
 * [Bugs & feature requests](https://github.com/NGnius/IdeaBot/issues)
 * [Invite link](https://discordapp.com/oauth2/authorize?client_id=397854238774001673&scope=bot&permissions=268561472)
 
-###Idea Flavours
+### Idea Flavours ###
 
 >***Self-hosted***
 This is the easier option for the devs and curious users, since it allows you to maintain and modify Idea without affecting anyone else.
