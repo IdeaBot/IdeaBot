@@ -26,7 +26,7 @@ class Command(command.AdminCommand, command.DirectOnlyCommand):
         args = self.collect_args(message)
         return args != None and args.group(1).count('/')<=2
     def collect_args(self, message):
-        return re.search(r'load\s*\`?((reactions|commands|plugins)\/[\w\_\/]+(?=\.py))\`?',message.content)
+        return re.search(r'\bload\s*\`?((reactions|commands|plugins)\/[\w\_\/]+(?=\.py))\`?',message.content)
 
     def action(self, message, bot):
         try:
@@ -45,9 +45,7 @@ class Command(command.AdminCommand, command.DirectOnlyCommand):
             name = args.group(1)+'.py' # name of add-on file
             addon_name = name[name.rfind('/')+1:-len('.py')]
             # package; middle folder (<addon_type>/<middble folder>/<name>) or None
-            package = name[name.find('/')+1:name.rfind('/')]
-            if package == '':
-                package = None # no package
+            
             # if add-on exists, reload it
             if os.path.exists(name):
                 is_reload = True
