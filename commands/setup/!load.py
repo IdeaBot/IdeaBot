@@ -44,8 +44,8 @@ class Command(command.AdminCommand, command.DirectOnlyCommand):
             addon_type = args.group(2).lower() # either 'reactions', 'commands' or 'plugins'
             name = args.group(1)+'.py' # name of add-on file
             addon_name = name[name.rfind('/')+1:-len('.py')]
-            # package; middle folder (<addon_type>/<middble folder>/<name>) or None
-            
+            package = name[name.find('/')+1:name.rfind('/')]# package; middle folder (<addon_type>/<middble folder>/<name>) or None
+
             # if add-on exists, reload it
             if os.path.exists(name):
                 is_reload = True

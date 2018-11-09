@@ -67,10 +67,20 @@ class Command(command.DirectOnlyCommand, command.AdminCommand, command.Config):
         else: # reset permissions
             # check perms
             if commanders_name in self.public_namespace.commanders[type]:
+                # check that add-on exists
+                if addon_type==self.public_namespace.COMMANDS and name[:-len('.py')] in bot.commands:
+                    pass
+                elif addon_type==self.public_namespace.REACTIONS and name[:-len('.py')] in bot.reactions:
+                    pass
+                elif addon_type==self.public_namespace.PLUGINS and name[:-len('.py')] in bot.plugins:
+                    pass
+                else:
+                    yield from self.send_message(message.channel, '`%s` %s does not exist' %(addon_name[:-len('.py')], type[:-1]) )
+                    return
                 if message.author.id == self.public_namespace.commanders[type][commanders_name][self.public_namespace.OWNER]:
                     has_perms = True
             else:
-                yield from self.send_message(message.channel, '`%s` %s does not exist' %(cmd_name, type[:-1]) )
+                yield from self.send_message(message.channel, '`%s` %s does not exist' %(commanders_name, type[:-1]) )
                 return
 
             if has_perms or message.author.id in bot.ADMINS:
@@ -85,7 +95,7 @@ class Command(command.DirectOnlyCommand, command.AdminCommand, command.Config):
                     del(bot.reactions[addon_name])
                 elif addon_type==self.public_namespace.PLUGINS:
                     del(bot.plugins[addon_name])
-                yield from self.send_message(message.channel, 'Unloaded %s' %commanders_name)
+                yield from self.send_message(message.channel, 'Unloaded %s' %addon_name)
                 return
             else:
                 yield from self.send_message(message.channel, 'You do not have permissions for the %s %s' %(commanders_name, type))
