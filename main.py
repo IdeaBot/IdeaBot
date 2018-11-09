@@ -72,19 +72,19 @@ if __name__ == '__main__':
     commands = loader.load_commands(COMMANDS_DIR, bot, role_messages, always_watch_messages)
     #register commands
     for cmd_name in commands:
-        bot.register_command(commands[cmd_name], cmd_name)
+        bot.register_command(commands[cmd_name], cmd_name, package='')
 
     # load reactions, up to two levels deep
     reactions = loader.load_reactions(REACTIONS_DIR, bot, role_messages, always_watch_messages, all_emojis_func)
     # register reactions
     for cmd_name in reactions:
-        bot.register_reaction_command(reactions[cmd_name], cmd_name)
+        bot.register_reaction_command(reactions[cmd_name], cmd_name, package='')
 
     # load plugins, up to two levels deep
     plugins = loader.load_plugins(PLUGINS_DIR, bot)
     # register plugins
     for plugin_name in plugins:
-        bot.register_plugin(plugins[plugin_name], plugin_name)
+        bot.register_plugin(plugins[plugin_name], plugin_name, package='')
 
     #run until logged out
     stop = False

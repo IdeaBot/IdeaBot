@@ -24,6 +24,10 @@ ROLE_MSG_LOCATION='rolemessagesloc'
 LOADING_WARNING = "Things are loading"
 ADMINS = ["106537989684887552", "255041793417019393"]
 
+COMMANDS = 'commands'
+REACTIONS = 'reactions'
+PLUGINS = 'plugins'
+
 class Bot(discord.Client):
     '''A Discord client which has config data and a list of commands to try when
     a message is received.'''
@@ -32,6 +36,12 @@ class Bot(discord.Client):
     MSG_BACKUP_LOCATION='msgbackuploc'
     WATCH_MSG_LOCATION='alwayswatchmsgloc'
     ROLE_MSG_LOCATION='rolemessagesloc'
+
+    COMMANDS=COMMANDS
+    REACTIONS=REACTIONS
+    PLUGINS=PLUGINS
+
+    ADMINS=ADMINS
 
     def __init__(self, config, log, always_watch_messages):
         '''(str, Logger, fun) -> Bot
@@ -48,8 +58,8 @@ class Bot(discord.Client):
         self.commands = OrderedDict() # maps names to commands
         self.reactions = OrderedDict() # maps names to reaction commands
         self.plugins = OrderedDict() # maps names to plugins
+        self.packages = dict()
         self.always_watch_messages=always_watch_messages
-        self.ADMINS = ADMINS
         self.role_messages=dict()
 
     def add_data(self, name, content_from=DEFAULT):
@@ -68,7 +78,7 @@ class Bot(discord.Client):
             return self.data[name][key]
         return self.data[name]
 
-    def register_command(self, cmd, name):
+    def register_command(self, cmd, name, package=None):
         '''(Command, str) -> None
         Registers a Command for execution when a message is received.'''
         if not isinstance(cmd, command.Command):
@@ -82,8 +92,10 @@ class Bot(discord.Client):
                     break
                 elif sorted([name, key])[0]==name:
                     self.commands.move_to_end(key)
+        if package!='':
+            self.register_package(COMMANDS, name, package)
 
-    def register_plugin(self, plugin_object, name):
+    def register_plugin(self, plugin_object, name, package=None):
         '''(Plugin, str) -> None
         Registers a Plugin which executes in a separate process'''
         if not isinstance(plugin_object, plugin.Plugin):
@@ -99,9 +111,11 @@ class Bot(discord.Client):
                     break
                 elif sorted([name, key])[0]==name:
                     self.plugins.move_to_end(key)
+        if package!='':
+            self.register_package(PLUGINS, name, package)
         self.loop.create_task(plugin_object._action())
 
-    def register_reaction_command(self, cmd, name):
+    def register_reaction_command(self, cmd, name, package=None):
         '''(reaction.Command, str) -> None
         Registers a reaction command for execution when a message is reacted to'''
         if not (isinstance(cmd, reactioncommand.ReactionAddCommand) or isinstance(cmd, reactioncommand.ReactionRemoveCommand) or isinstance(cmd, reactioncommand.Dummy)):
@@ -115,6 +129,17 @@ class Bot(discord.Client):
                     break
                 elif sorted([name, key])[0]==name:
                     self.reactions.move_to_end(key)
+        if package!='':
+            self.register_package(REACTIONS, name, package)
+
+    def register_package(self, addon_type, name, package):
+        '''(str, str) -> None
+        Registers an add-on into a package'''
+        if package not in self.packages:
+            new_package = {self.COMMANDS:list(), self.REACTIONS:list(), self.PLUGINS:list()}
+            self.packages[package]=new_package
+        if name not in self.packages[package][addon_type]:
+            self.packages[package][addon_type].append(name)
 
     def load_command(self, filename, name, package=None, reload=False):
         '''(str, str[, str]) -> command.Command
@@ -133,7 +158,7 @@ class Bot(discord.Client):
         # init command
         cmd = loader.init_command(filename, namespace, self, self.role_messages, self.always_watch_messages, 'commands', package_loader, reload)
         # register command to bot
-        self.register_command(cmd, name)
+        self.register_command(cmd, name, package=package)
         return self.commands[name]
     def load_reaction(self, filename, name, package=None, reload=False):
         '''(str, str[, str]) -> reaction.Reaction
@@ -152,7 +177,7 @@ class Bot(discord.Client):
         # init command
         cmd = loader.init_reaction(filename, namespace, self, self.role_messages, self.always_watch_messages, 'reactions', package_loader, loader.emoji_dir, reload)
         #register reaction to bot
-        self.register_reaction_command(cmd, name)
+        self.register_reaction_command(cmd, name, package=package)
         return self.reactions[name]
     def load_plugin(self, filename, name, package=None, reload=False):
         '''(str, str[, str]) -> plugin.Plugin
@@ -171,7 +196,7 @@ class Bot(discord.Client):
         # init command
         cmd = loader.init_plugin(filename, namespace, self, 'plugins', package_loader, reload)
         # register plugin to bot
-        self.register_plugin(cmd, name)
+        self.register_plugin(cmd, name, package=package)
         return self.plugins[name]
 
     @asyncio.coroutine
@@ -190,7 +215,7 @@ class Bot(discord.Client):
                 # Catch all problems that happen in matching/executing a command.
                 # This means that if there's a bug that would cause execution to
                 # break, other commands can still be tried.
-                yield from self._on_command_error(cmd, e)
+                yield from self._on_command_error(cmd, e, message)
 
     @asyncio.coroutine
     def on_reaction_add(self, reaction, user):
@@ -203,7 +228,7 @@ class Bot(discord.Client):
                         yield from self.reactions[cmd]._action(reaction, user)
                     break
                 except Exception as e:
-                    yield from self._on_reaction_error(cmd, e)
+                    yield from self._on_reaction_add_error(cmd, e, reaction, user)
 
     @asyncio.coroutine
     def on_reaction_remove(self, reaction, user):
@@ -216,7 +241,7 @@ class Bot(discord.Client):
                         yield from self.reactions[cmd]._action(reaction, user)
                     break
                 except Exception as e:
-                    yield from self._on_reaction_error(cmd, e)
+                    yield from self._on_reaction__remove_error(cmd, e, reaction, user)
 
 
     @asyncio.coroutine
@@ -339,29 +364,36 @@ class Bot(discord.Client):
             if msg not in self.messages and msg!=LOADING_WARNING:
                 self.messages.append(msg)
 
-    def _on_command_error(self, cmd_name, error):
+    def _on_command_error(self, cmd_name, error, message):
         '''(Bot, str) -> None
         wrapper method to catch and report errors from commands'''
         #traceback.print_exc()
         self.log.warning('command %s raised an exception during its execution: %s', cmd_name, error)
-        yield from self.on_command_error(cmd_name, error)
+        yield from self.on_command_error(cmd_name, error, message)
 
     @asyncio.coroutine
-    def on_command_error(self, cmd_name, error):
+    def on_command_error(self, cmd_name, error, message):
         '''(Bot, str) -> None
         method to catch and report errors from commands
         This should not raise it's own errors!'''
         pass
 
-    def _on_reaction_error(self, cmd_name, error):
+    def _on_reaction_error(self, cmd_name, error, reaction, user):
         '''(Bot, str) -> None
         wrapper method to catch and report errors from reactions'''
         #traceback.print_exc()
         self.log.warning('Reaction %s raised an exception during its execution: %s', cmd_name, error)
-        yield from self.on_reaction_error(cmd_name, error)
+        yield from self.on_reaction_error(cmd_name, error, reaction, user)
 
     @asyncio.coroutine
-    def on_reaction_error(self, cmd_name, error):
+    def on_reaction_add_error(self, cmd_name, error):
+        '''(Bot, str) -> None
+        method to catch and report errors from reactions
+        This should not raise it's own errors!'''
+        pass
+
+    @asyncio.coroutine
+    def on_reaction_remove_error(self, cmd_name, error, reaction, user):
         '''(Bot, str) -> None
         method to catch and report errors from reactions
         This should not raise it's own errors!'''

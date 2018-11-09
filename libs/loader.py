@@ -99,6 +99,7 @@ def load_commands(folder, bot, role_messages, always_watch_messages):
         if isfile(join(folder, item)):
             if item[-len(".py"):] == ".py" and item[0]!="_":
                 log.info("Loading command in %a " % item)
+                bot.register_package(bot.COMMANDS, item, None)
                 commands[item[:-len(".py")]]=init_command(item, namespace, bot, role_messages, always_watch_messages, folder)
         elif item[0] != "_": # second level
             if item not in sub_namespaces:
@@ -107,6 +108,7 @@ def load_commands(folder, bot, role_messages, always_watch_messages):
                 if isfile(join(join(folder, item), sub_item)):
                     if sub_item[-len(".py"):] == ".py" and sub_item[0]!="_":
                         log.info("Loading command in %a " % join(item, sub_item))
+                        bot.register_package(bot.COMMANDS, sub_item[:-len(".py")], item)
                         commands[sub_item[:-len(".py")]]=init_command(sub_item, sub_namespaces[item], bot, role_messages, always_watch_messages, folder, package=item)
     return commands
 
@@ -116,6 +118,7 @@ def load_reactions(folder, bot, role_messages, always_watch_messages, all_emojis
         if isfile(join(folder, item)):
             if item[-len(".py"):] == ".py" and item[0]!="_":
                 log.info("Loading reaction in %a " % item)
+                bot.register_package(bot.REACTIONS, item, None)
                 reactions[item[:-len(".py")]]=init_reaction(item, namespace, bot, role_messages, always_watch_messages, folder, all_emojis_func=all_emojis_func, emoji_dir=emoji_dir)
         elif item[0] != "_": # second level
             if item not in sub_namespaces:
@@ -124,6 +127,7 @@ def load_reactions(folder, bot, role_messages, always_watch_messages, all_emojis
                 if isfile(join(folder, item, sub_item)):
                     if sub_item[-len(".py"):] == ".py" and sub_item[0]!="_":
                         log.info("Loading reaction in %a " % join(item, sub_item))
+                        bot.register_package(bot.REACTIONS, sub_item[:-len(".py")], item)
                         reactions[sub_item[:-len(".py")]]=init_reaction(sub_item, sub_namespaces[item], bot, role_messages, always_watch_messages, folder, package=item, all_emojis_func=all_emojis_func, emoji_dir=emoji_dir)
     return reactions
 
@@ -133,6 +137,7 @@ def load_plugins(folder, bot):
         if isfile(join(folder, item)):
             if item[-len(".py"):] == ".py" and item[0]!="_":
                 log.info("Loading plugin in %a " % item)
+                bot.register_package(bot.PLUGINS, item, None)
                 plugins[item[:-len(".py")]]=init_plugin(item, namespace, bot, folder)
         elif item[0] != "_": # second level
             if item not in sub_namespaces:
@@ -141,5 +146,6 @@ def load_plugins(folder, bot):
                 if isfile(join(folder, item, sub_item)):
                     if sub_item[-len(".py"):] == ".py" and sub_item[0]!="_":
                         log.info("Loading plugin in %a " % join(item, sub_item))
+                        bot.register_package(bot.PLUGINS, sub_item[:-len(".py")], item)
                         plugins[sub_item[:-len(".py")]]=init_plugin(sub_item, sub_namespaces[item], bot, folder, package=item)
     return plugins
