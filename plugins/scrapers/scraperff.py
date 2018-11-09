@@ -9,7 +9,10 @@ print(config.content["datafilepath"])
 data = dataloader.datafile(config.content["datafilepath"])'''
 
 CHANNEL = 'channel'
+CHANNELS = 'channels'
 FORUM_URL = r"http://ideahavers.freeforums.net/"
+MOST_RECENT = 'most-recent'
+FIRST = 'aaa-000'
 
 def forumLogging():
     '''() -> Logger class
@@ -24,88 +27,122 @@ def forumLogging():
 forumLog = forumLogging()
 
 class Plugin(plugin.ThreadedPlugin):
+    '''Multithreaded plugin for scraping Proboards (freeforums)
+
+    **Usage:**
+    ```@Idea (add or remove) <url> ```
+
+    Currently, this will scrape any valid forum given to it'''
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.CHANNEL_ID = self.config[CHANNEL] # discord server channel ID for sending forum updates to
-
-
-    async def action(self): # 1/3 of the old doChecks function in main.py
-        threads = list()
-        while not self.queue.empty():
-            threads.append(self.queue.get())
-        for thread in threads[::-1]:
-            await self.send_message(discord.Object(id=self.CHANNEL_ID), embed=embed.create_embed(description="In: "+thread[0], author={"name" : thread[1][-1]["name"], "url" : FORUM_URL+thread[1][-1]["url"], "icon_url" : None}, footer={"text":"Forum", "icon_url":None}))
-            # NOTE: mentionChain has been removed, since it wasn't used much and it was more annoying than useful
-
-    def _threaded_action(self, queue, **kwargs):
+        super().__init__(should_spawn_thread=False, **kwargs)
+        self.CHANNEL = CHANNEL
+        self.CHANNELS = CHANNELS
+        self.MOST_RECENT = MOST_RECENT
+        self.FIRST = FIRST
         self.data = dataloader.loadfile_safe(self.config["datafilepath"])
-        super()._threaded_action(queue, **kwargs)
+        if not isinstance(self.data.content, dict):
+            self.data.content = dict()
+        self.threaded_kwargs = {"newForum":self.public_namespace.newProBoardsForum}
+        self.spawn_process()
 
-    def threaded_action(self, q, **kwargs):
-        forumLog.info("Starting scraping run")
-        mostrecentrunstart = time.time()
-        try:
-            rss = BeautifulSoup(pageRet.pageRet(self.config["url"]).decode(), "html.parser") # landing page
-            items = rss.find_all("item")
-            threads = [[x.find("guid").get_text(), x.find("title").get_text()] for x in items] # list of [url, thread title]
+    def threaded_action(self, q, newForum=plugin.Queue(), **kwargs):
+        # handle new items from url_adder
+        while not newForum.empty():
+            item = newForum.get()
+            if item["action"] == "remove" or item["action"] == "delete":
+                try:
+                    del(self.data.content[item["url"]][self.CHANNELS][self.data.content[item["url"]][self.CHANNELS].index(item[self.CHANNEL])])
+                    if self.data.content[item["url"]][self.CHANNELS] == list():
+                        del(self.data.content[item["url"]])
+                except (TypeError, KeyError, ValueError, NameError):
+                    # traceback.print_exc()
+                    pass
+            elif item["action"]=="add":
+                forumLog.debug("Adding "+item['url'])
+                if not item['url'].endswith(r"/rss/public"):
+                    item['url'].strip(r"/")
+                    item['url']+=r"/rss/public"
+                if item["url"] not in self.data.content:
+                    self.data.content[item["url"]]={self.CHANNELS:list(), self.MOST_RECENT:self.FIRST} # dict
+                self.data.content[item["url"]][self.CHANNELS].append(item[self.CHANNEL])
+        # do scrape things
+        for forum in self.data.content:
+            forumLog.debug("Now scraping %s" %forum)
+            mostrecentrunstart = time.time()
+            try:
+                rss = BeautifulSoup(pageRet.pageRet(forum).decode(), "html.parser") # landing page
+                items = rss.find_all("item")
+                threads = [[x.find("guid").get_text(), x.find("title").get_text()] for x in items] # list of [url, thread title]
 
-            if self.is_new_thread(threads[0][0]):
-                newestint = self.get_trailing_int(self.get_most_recent())
-                for i in threads:
-                    if self.get_trailing_int(i[0]) > newestint:
-                        forumLog.info("New thread found: " + i[0])
-                        #scrape stuff
-                        recentThread = BeautifulSoup(pageRet.pageRet(i[0]).decode(),"html.parser")
-                        authors = []
-                        for x in recentThread.find_all("div", class_="mini-profile"):
-                            try:
-                                authors.append({"name" : x.find("a").get_text(),"url" : x.find("a").get("href"), "img" : x.find("div", class_="avatar").find("img").get("src")})
-                            except AttributeError: # if author is a guest, x.find("a") will return a NoneType, and None.get("href") will raise an AttributeError
-                                pass
-                        #authors = [x.find("a").get("href") for x in recentThread.find_all("div", class_="mini-profile")]
-                        q.put([i[0], authors])
-                    else:
-                        break
-                self.delete_entry("most recent thread:")
-                self.data.content.append("most recent thread:" + threads[0][0])
-                self.data.save()
-                forumLog.info("Most recent thread is now: " + threads[0][0])
-            forumLog.info("Finished scraping run in "+ str(time.time() - mostrecentrunstart))
-        except:
-            # Prevent a failed run from crashing the whole thread
-            # traceback.print_exc()
-            forumLog.warning("Scraping run failed. Either the page has changed or the page is unavailable...")
+                if self.is_new_thread(threads[0][0], forum):
+                    newestint = self.get_trailing_int(self.get_most_recent(forum))
+                    if self.get_most_recent(forum)==self.FIRST:
+                        threads=[threads[0]]
+                    for i in threads:
+                        if self.get_trailing_int(i[0]) > newestint:
+                            forumLog.debug("New thread found: " + i[0])
+                            #scrape stuff
+                            recentThread = BeautifulSoup(pageRet.pageRet(i[0]).decode(),"html.parser")
+                            authors = []
+                            for x in recentThread.find_all("div", class_="mini-profile"):
+                                try:
+                                    authors.append({"name" : x.find("a").get_text(),"url" : x.find("a").get("href"), "img" : x.find("div", class_="avatar").find("img").get("src")})
+                                except AttributeError: # if author is a guest, x.find("a") will return a NoneType, and None.get("href") will raise an AttributeError
+                                    pass
+                            #authors = [x.find("a").get("href") for x in recentThread.find_all("div", class_="mini-profile")]
+                            thread = [i[0], authors]
+                            for discord_channel in self.data.content[forum][self.CHANNELS]:
+                                q.put({self.SEND_MESSAGE:
+                                        {plugin.ARGS:[discord.Object(id=discord_channel)],
+                                        plugin.KWARGS:{'embed':embed.create_embed(description="In: "+thread[0], author={"name" : thread[1][-1]["name"], "url" : forum+thread[1][-1]["url"], "icon_url" : None}, footer={"text":"Forum", "icon_url":None})}}})
+                                # q.put([i[0], authors])
+                        else:
+                            break
+                    # self.delete_entry("most recent thread:", forum)
+                    self.data.content[forum][self.MOST_RECENT]= threads[0][0]
+                    forumLog.debug("Most recent thread is now: " + threads[0][0])
+                forumLog.debug("Finished scraping run in "+ str(time.time() - mostrecentrunstart))
+            except:
+                # Prevent a failed run from crashing the whole thread
+                # traceback.print_exc()
+                forumLog.warning("Scraping run failed for %s. Either the page has changed or the page is unavailable..." %forum)
+        self.data.save()
 
 
-    def is_new_thread(self, url):
+    def is_new_thread(self, url, forum):
         '''(str) -> bool
         checks freeforums.txt for whether the url is new or not'''
-        is_new = True
-        if len(self.data.content) > 0:
+        most_recent = self.get_most_recent(forum)
+        return most_recent!=url
+        '''
+        if len(self.data.content[forum]) > 0:
             for i in range(len(self.data.content)):
-                if self.data.content[i][:len("Most Recent Thread:")].lower() == "most recent thread:" : # if it's the file line about most recent thread
-                    if url[:-3] == self.data.content[i][len("Most Recent Thread:"):len("Most Recent Thread:")+len(url)][:-3]:
+                if self.data.content[forum][i][:len("Most Recent Thread:")].lower() == "most recent thread:" : # if it's the file line about most recent thread
+                    if url[:-3] == self.data.content[forum][i][len("Most Recent Thread:"):len("Most Recent Thread:")+len(url)][:-3]:
                         is_new = False
                     else:
                         break
         return is_new
 
-    def has_new_stuff(self, url):
-        if len(self.data.content) > 0:
-            for i in range(len(self.data.content)):
-                if self.data.content[i][:len("Most Recent Thread:")].lower() == "most recent thread:" : # if it's the file line about most recent thread
-                    if url == self.data.content[i][len("Most Recent Thread:"):len("Most Recent Thread:")+len(url)]:
+    def has_new_stuff(self, url, forum):
+        most_recent = self.get_most_recent(forum)
+        return most_recent!=url
+        if len(self.data.content[forum]) > 0:
+            for i in range(len(self.data.content[forum])):
+                if self.data.content[forum][i][:len("Most Recent Thread:")].lower() == "most recent thread:" : # if it's the file line about most recent thread
+                    if url == self.data.content[forum][i][len("Most Recent Thread:"):len("Most Recent Thread:")+len(url)]:
                         is_new = False
                     else:
                         break
-        return is_new
+        return is_new'''
 
-    def get_most_recent(self):
+    def get_most_recent(self, forum):
         '''(None) -> str
         returns the url of the most recent thread in self.data.content'''
+        return self.data.content[forum][self.MOST_RECENT]
         for i in range(len(self.data.content)):
-            if self.data.content[i][:len("Most Recent Thread:")].lower() == "most recent thread:" : # if it's the file line about most recent thread
-                return self.data.content[i][len("Most Recent Thread:")+1:]
+            if self.data.content[forum][i][:len("Most Recent Thread:")].lower() == "most recent thread:" : # if it's the file line about most recent thread
+                return self.data.content[forum][i][len("Most Recent Thread:")+1:]
 
     def get_trailing_int(self, url):
         '''(str) -> int
@@ -114,11 +151,11 @@ class Plugin(plugin.ThreadedPlugin):
         return int(url.split("-")[-1])
 
 
-    def delete_entry(self, string):
+    def delete_entry(self, string, forum):
         '''(str [, bool])->bool
         delete the first entry in self.data.content that contains string, if it exists'''
-        for i in range(len(self.data.content)):
-            if string.lower() in self.data.content[i].lower():
-                del(self.data.content[i])
+        for i in range(len(self.data.content[forum])):
+            if string.lower() in self.data.content[forum][i].lower():
+                del(self.data.content[forum][i])
                 return True
         return False

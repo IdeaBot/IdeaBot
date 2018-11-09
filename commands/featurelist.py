@@ -9,26 +9,30 @@ from libs import command
 import re
 
 class Command(command.DirectOnlyCommand):
+    '''Gives information about my features
 
-    MESSAGE = (
-        'You can see the requested features or add more here: '
-        '<http://ideahavers.freeforums.net/thread/74/discord-bot-feature-wishlist> '
-        ' or here: '
-        '<https://docs.google.com/document/d/1CREz-CWA0GrinAa7d22Q3nfpqj60wywQzJrYCcH1xhU/edit?usp=sharing>'
-    )
+    **Usage:**
+    ```@Idea featurelist [-v]```
 
-    MESSAGE_V = MESSAGE+(
-        ' To learn how to use features, go here: '
-        '<https://github.com/NGnius/IdeaBot/wiki> '
-        ' or ping `@Bot Dev` with your question or suggestion '
+    If you're interested in helping to improve Idea, check out what happens when you include `-v`'''
 
-    )
+    MESSAGE = '''
+    Got a sweet new idea for Idea? Send it to the devs here:
+    <https://discord.gg/gwq2vS7> in #wishlist
+    Or create a feature request on GitHub:
+    <https://github.com/NGnius/IdeaBot/issues>'''
+
+    MESSAGE_V = MESSAGE+'''
+
+    To learn how to add new features, go here:
+    <https://github.com/NGnius/IdeaBot/wiki>
+    Contact the devs with your question through the server invite'''
 
     def matches(self, message):
-        return re.search(r'feature\s?(list|request)', message.content, re.I)
+        return re.search(r'\bfeature\s?(list|request)', message.content, re.I)
 
-    def action(self, message, send_func):
+    def action(self, message):
         if "-v" in message.content.lower():
-            yield from send_func(message.channel, FeatureListCommand.MESSAGE_V)
+            yield from self.send_message(message.channel, self.MESSAGE_V)
         else:
-            yield from send_func(message.channel, FeatureListCommand.MESSAGE)
+            yield from self.send_message(message.channel, self.MESSAGE)

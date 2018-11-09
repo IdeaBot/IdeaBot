@@ -2,13 +2,27 @@ from libs import reaction as reactioncommand
 import asyncio, re, discord
 from libs import savetome
 
-class Reaction(reactioncommand.AdminReactionAddCommand, reactioncommand.WatchReactionCommand, reactioncommand.RoleReaction):
+class Reaction(reactioncommand.AdminReactionAddCommand):
+    '''A Reaction command for creating messages that work with `give_role` and `remove_role` reaction commands
+
+    **Usage:**
+    Send a message of the following form
+    ```
+    ` ``
+    <emoji id 1> : <role id 1>
+    <emoji id 2> : <role id 2>
+    (...)
+    ` `` ```
+    (triple backticks should not have a space in them)
+
+    and then react with the rolemessage_create emoji
+    (The emoji is server-defined; ask your fellow server members for the correct emoji) '''
     @asyncio.coroutine
     def action(self, reaction, user, bot):
         emojiToRoleDict = self.associateEmojiToRoles(reaction.message.content)
         if emojiToRoleDict!=None:
             for emoji in emojiToRoleDict: #add all the emojis so people don't have to search through the list
-                yield from bot.add_reaction(reaction.message, emoji)
+                yield from self.add_reaction(reaction.message, emoji)
             self.always_watch_messages.add(reaction.message)
             self.role_messages[reaction.message.id]=dict(emojiToRoleDict)
             for emoji in emojiToRoleDict: #make sure the bot doesn't get the roles as it reacts with the emojis

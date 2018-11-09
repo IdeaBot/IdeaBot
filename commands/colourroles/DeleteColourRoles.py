@@ -17,11 +17,19 @@ for i in RAINBOW:
 
 
 class Command(command.AdminCommand, command.DirectOnlyCommand):
+    '''Removes the colour roles
+
+    **Usage:**
+    ```@Idea remove colour role```
+
+    The Remove Colour Role command is probably restricted to certain users
+    Please use this sparingly, since it is rather intensive'''
     def matches(self,message):
         return "remove colour roles" in message.content.lower()
 
     @asyncio.coroutine
-    def action(self, message, send_func, bot):
+    def action(self, message, bot):
+        send_func = self.send_message
         count = yield from deleteColourRoles(message.server, bot)
         yield from send_func(message.channel, "Deleted "+str(count)+" rainbow roles")
 

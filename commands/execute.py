@@ -14,7 +14,12 @@ evalDictOriginalNameThisIs = {}
 
 class Command(command.DirectOnlyCommand, command.AdminCommand, command.BenchmarkableCommand):
     '''ExecuteCommand tries to execute a passed in piece of code and responds
-    with the result of the execution.'''
+    with the result of the execution.
+
+    **Usage:**
+    ```@Idea execute `<code>` ```
+
+    You probably don't have permissions to run this command '''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.perms = None
@@ -22,7 +27,8 @@ class Command(command.DirectOnlyCommand, command.AdminCommand, command.Benchmark
     def matches(self, message):
         return self.collect_args(message)
 
-    def action(self, message, send_func, client):
+    def action(self, message, client):
+        send_func = self.send_message
         if message.author.id in client.ADMINS:
             args_match = self.collect_args(message)
             # TODO(14flash): Avoid magic number.

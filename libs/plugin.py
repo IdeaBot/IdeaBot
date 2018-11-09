@@ -10,20 +10,11 @@ Plugin is designed to be similar to Command and Reaction interface classes while
 import asyncio, time, traceback
 from multiprocessing import Process, Queue
 
-from libs import dataloader
+from libs import dataloader, addon
 
 # general plugin constants
 PERIOD = 'period'
-DEFAULT = 'DEFAULT'
-
-# bot api methods accessible to a regular Plugin
-# if more functionality is required, consider using an AdminPlugin
-SEND_MESSAGE = 'send_message'
-EDIT_MESSAGE = 'edit_message'
-ADD_REACTION = 'add_reaction'
-REMOVE_REACTION = 'remove_reaction'
-SEND_TYPING = 'send_typing'
-SEND_FILE = 'send_file'
+DEFAULT = addon.DEFAULT
 
 # threaded constants
 THREADED_PERIOD = 'threadedperiod'
@@ -40,33 +31,35 @@ CUSTOM = None
 ARGS = 'args'
 KWARGS = 'kwargs'
 
-# event constants
-READY = 'ready'
-LOGIN = 'login'
-MESSAGE = 'message'
-REACTION = 'reaction'
-
-class Plugin():
+class Plugin(addon.AddOn):
     '''Plugin represents a plugin that the discord bot can work alongside
     to add custom functionality not present in the base bot'''
 
-    def __init__(self, api_methods=dict(), config=None, **kwargs):
+    def __init__(self, api_methods=dict(), config=None, events=dict(), namespace=None, **kwargs):
         '''(Plugin, dict, str, dict) -> Plugin
         api_methods: a dict of api methods accessible to the Plugin, so that most plugins don't have to be AdminPlugins
         kwargs: included to simplify sub-classing'''
         self.shutting_down = False
-        try:
-            self.config = dataloader.datafile(config).content[DEFAULT] # configuration file for the Plugin
-        except FileNotFoundError:
-            self.config = None # NOTE: This is a bad state for a Plugin to be in, since it may cause unexpected errors
-            raise ImportError("No config file found")
+        if config:
+            try:
+                self.config = dataloader.datafile(config) # configuration file for the Plugin
+                if self.config.type=='config':
+                    self.config=self.config.content[self.DEFAULT]
+            except FileNotFoundError:
+                self.config = None # NOTE: This is a bad state for a Plugin to be in, since it may cause unexpected errors
+                raise ImportError("No config file found")
+        else:
+            raise ImportError("Config file cannot be None")
         self.period = float(self.config[PERIOD]) # period for each repetition of action()
-        self.send_message = api_methods[SEND_MESSAGE]
-        self.edit_message = api_methods[EDIT_MESSAGE]
-        self.add_reaction = api_methods[ADD_REACTION]
-        self.remove_reaction = api_methods[REMOVE_REACTION]
-        self.send_typing = api_methods[SEND_TYPING]
-        self.send_file = api_methods[SEND_FILE]
+        self.send_message = api_methods[self.SEND_MESSAGE]
+        self.edit_message = api_methods[self.EDIT_MESSAGE]
+        self.add_reaction = api_methods[self.ADD_REACTION]
+        self.remove_reaction = api_methods[self.REMOVE_REACTION]
+        self.send_typing = api_methods[self.SEND_TYPING]
+        self.send_file = api_methods[self.SEND_FILE]
+
+        self.events = events
+        self.public_namespace = namespace
 
     async def _action(self):
         '''(Plugin) -> None
@@ -74,14 +67,14 @@ class Plugin():
         in order to expand or modify it's functionality.
 
         the looping async method to call action()'''
-        while not self.shutting_down:
-            start_time = time.time()
+        while not self.shutting_down and self.period!=-1:
+            start_time = time.perf_counter()
             try:
                 await self.action()
             except: # catch any exception that could crash the task
                 # traceback.print_exc()
                 pass
-            sleep_time = self.period - (time.time() - start_time)
+            sleep_time = self.period - (time.perf_counter() - start_time)
             if sleep_time<0:
                 sleep_time=0
             await asyncio.sleep(sleep_time) # account for execution time of self.action() in asyncio.sleep()
@@ -126,6 +119,8 @@ class ThreadedPlugin(Plugin):
             self.threaded_kwargs
         except AttributeError:
             self.threaded_kwargs = dict()
+        # please note that ThreadedPlugin will create a copy of all variables
+        # for the new thread, unless they're compatible with multiple threads
         if should_spawn_thread:
             self.spawn_process()
 
@@ -150,14 +145,14 @@ class ThreadedPlugin(Plugin):
 
         Similar to _action(), the looping thread that calls threaded_action'''
 
-        while not self.shutting_down:
-            start_time = time.time()
+        while not self.shutting_down and self.threaded_period!=-1:
+            start_time = time.perf_counter()
             try:
                 self.threaded_action(queue, **kwargs)
             except: # catch anything that could crash the thread
-                # traceback.print_exc()
+                traceback.print_exc()
                 pass
-            sleep_time = self.threaded_period - (time.time() - start_time)
+            sleep_time = self.threaded_period - (time.perf_counter() - start_time)
             if sleep_time<0:
                 sleep_time=0
             time.sleep(sleep_time) # account for execution time of self.action() in asyncio.sleep()
@@ -189,7 +184,7 @@ class ThreadedPlugin(Plugin):
                     if KWARGS not in action_dict[key]:
                         action_dict[key][KWARGS]={}
 
-                    if key==SEND_MESSAGE:
+                    if key==self.SEND_MESSAGE:
                         try:
                             await self.send_message(*action_dict[key][ARGS], **action_dict[key][KWARGS])
                         except TypeError:
@@ -197,7 +192,8 @@ class ThreadedPlugin(Plugin):
                             # or when action_dict[key] is not mapping
                             # (ie **action_dict[key] is not a valid operation)
                             pass
-                    elif key==EDIT_MESSAGE:
+                            print('Failed to send messsage')
+                    elif key==self.EDIT_MESSAGE:
                         try:
                             await self.edit_message(*action_dict[key][ARGS], **action_dict[key][KWARGS])
                         except TypeError:
@@ -205,7 +201,7 @@ class ThreadedPlugin(Plugin):
                             # or when action_dict[key] is not mapping
                             # (ie **action_dict[key] is not a valid operation)
                             pass
-                    elif key==ADD_REACTION:
+                    elif key==self.ADD_REACTION:
                         try:
                             await self.add_reaction(*action_dict[key][ARGS], **action_dict[key][KWARGS])
                         except TypeError:
@@ -213,7 +209,7 @@ class ThreadedPlugin(Plugin):
                             # or when action_dict[key] is not mapping
                             # (ie **action_dict[key] is not a valid operation)
                             pass
-                    elif key==REMOVE_REACTION:
+                    elif key==self.REMOVE_REACTION:
                         try:
                             await self.remove_reaction(*action_dict[key][ARGS], **action_dict[key][KWARGS])
                         except TypeError:
@@ -221,7 +217,7 @@ class ThreadedPlugin(Plugin):
                             # or when action_dict[key] is not mapping
                             # (ie **action_dict[key] is not a valid operation)
                             pass
-                    elif key==SEND_TYPING:
+                    elif key==self.SEND_TYPING:
                         try:
                             await self.send_typing(*action_dict[key][ARGS], **action_dict[key][KWARGS])
                         except TypeError:
@@ -229,7 +225,7 @@ class ThreadedPlugin(Plugin):
                             # or when action_dict[key] is not mapping
                             # (ie **action_dict[key] is not a valid operation)
                             pass
-                    elif key==SEND_FILE:
+                    elif key==self.SEND_FILE:
                         try:
                             await self.send_file(*action_dict[key][ARGS], **action_dict[key][KWARGS])
                         except TypeError:
@@ -238,42 +234,34 @@ class ThreadedPlugin(Plugin):
                             # (ie **action_dict[key] is not a valid operation)
                             pass
 
-
-class EventPlugin(Plugin):
-    '''Subclass for catching the events dict.
-    This probably shouldn't be used on it's own, since it adds no (concrete) functionality.'''
-    def __init__(self, events, **kwargs):
-        super().__init__(**kwargs)
-        self.events = events
-
-class OnReadyPlugin(EventPlugin):
+class OnReadyPlugin(Plugin):
     async def _action(self):
-        await self.events[READY]()
+        await self.events[self.READY]()
         await super()._action()
 
-class OnLoginPlugin(EventPlugin):
+class OnLoginPlugin(Plugin):
     async def _action(self):
-        await self.events[LOGIN]()
+        await self.events[self.LOGIN]()
         await super()._action()
 
-class OnMessagePlugin(EventPlugin):
+class OnMessagePlugin(Plugin):
     async def _action(self):
         while not self.shutting_down:
-            message = await self.events[MESSAGE]() # this is the difference
-            start_time = time.time()
+            message = await self.events[self.MESSAGE]() # this is the difference
+            start_time = time.perf_counter()
             await self.action(message)
-            await asyncio.sleep(self.period - (time.time() - start_time)) # account for execution time of self.action() in asyncio.sleep()
+            await asyncio.sleep(self.period - (time.perf_counter() - start_time)) # account for execution time of self.action() in asyncio.sleep()
 
     def action(self, message):
         pass
 
-class OnReactionPlugin(EventPlugin):
+class OnReactionPlugin(Plugin):
     async def _action(self):
         while not self.shutting_down:
-            reaction, user = await self.events[REACTION]() # this is the difference
-            start_time = time.time()
+            reaction, user = await self.events[self.REACTION]() # this is the difference
+            start_time = time.perf_counter()
             await self.action(reaction, user)
-            await asyncio.sleep(self.period - (time.time() - start_time)) # account for execution time of self.action() in asyncio.sleep()
+            await asyncio.sleep(self.period - (time.perf_counter() - start_time)) # account for execution time of self.action() in asyncio.sleep()
 
     def action(self, reaction, user):
         pass
@@ -283,14 +271,18 @@ class AdminPlugin(Plugin):
     This is a security risk, yay! Use wisely and sparingly '''
     def add_client_variable(self, client_var):
         self.client = self.bot = client_var
+        self._on_client_add()
 
-class Multi(Plugin):
-    '''Similar to a regular plugin, but has access to a namespace which is also
-    accessible to commands and reactions in any folder of the same name'''
+    def _on_client_add(self):
+        '''() -> None
+        wrapper for on_client_add method '''
+        self.on_client_add()
 
-    def __init__(self, namespace, **kwargs):
-        # please note that ThreadedPlugin will create a copy of all variables, unless they're compatible with multiple threads
+    def on_client_add(self): 
+        '''() -> None
+        A method called when the bot client variable is passed to the AdminPlugin.
 
-        # the following two lines are flipped because of the 'snapshot' that is created when a process is spawned (which super().__init__) might do)
-        self.public_namespace = namespace
-        super().__init__(**kwargs)
+        This is always called after the plugin is initialized but before the action() task is created.
+        This may be useful for overriding bot variables or methods instead
+        of directly and permanently modifying the bot.py file'''
+        pass

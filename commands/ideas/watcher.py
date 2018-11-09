@@ -3,7 +3,18 @@ import re, asyncio, time
 
 FILENAME = 'commands/ideas/last_messages_time.json'
 
-class Command(command.Multi):
+class Command(command.Command):
+    '''A command for setting up and maintaining the scrapertidea plugin.
+
+    **Usage:**
+    To enable ideas in the current channel:
+    ```enable ideas```
+
+    To disable ideas in the current channel:
+    ```disable ideas```
+
+    For more information, use
+    ```@Idea help scrapertidea``` '''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.load_last_times(FILENAME)
@@ -12,7 +23,8 @@ class Command(command.Multi):
         return (message.channel.id in self.public_namespace.last_messages_time) or (self.collect_args(message.content) != None)
 
     @asyncio.coroutine
-    def action(self, message, send_func):
+    def action(self, message):
+        send_func = self.send_message
         args = self.collect_args(message.content)
         if args != None:
             if args.group(1) == 'enable':

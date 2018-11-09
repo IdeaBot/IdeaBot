@@ -10,7 +10,13 @@ INVALID_MESSAGE = "I'm sorry, did you say `KILL ALL HUMANS`?"
 from libs import command
 # TODO(NGnius): Make this actually run last
 class Command(command.DirectOnlyCommand):
-    '''InvalidCommand is a catch all for direct commands that didn't work.'''
+    '''InvalidCommand is a catch all for direct commands that didn't work.
+
+    **Usage:**
+    Step 1: type
+    ```@Idea ```
+    Step 2: *facekeyboard*
+    Step 3: send your message '''
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -19,5 +25,5 @@ class Command(command.DirectOnlyCommand):
     def matches(self, message):
         return True
 
-    def action(self, message, send_func):
-        yield from send_func(message.channel, self.invalid_message)
+    def action(self, message):
+        yield from self.send_message(message.channel, self.invalid_message)

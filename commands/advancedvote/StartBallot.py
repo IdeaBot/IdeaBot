@@ -12,7 +12,14 @@ DEFAULT_NAME_GEN=time.time #function
 DEFAULT_OPTIONS=["Yes", "No"] #list
 DEFAULT_TRANSFERABLES=3 #int
 
-class Command(command.DirectOnlyCommand, command.Multi):
+class Command(command.DirectOnlyCommand):
+    '''Command for allowing individuals to case their ballot
+
+    **Usage:**
+    ```@Idea vote in "<poll name>"```
+
+    Alternately, react to the poll message with the ballot/vote emoji
+    (The emoji is server-defined; ask your fellow server members for the correct emoji)'''
     def __init__(self, vote_dict=dict(), ballots=dict(), **kwargs):
         super().__init__(**kwargs)
         self.vote_dict = self.public_namespace.vote_dict
@@ -28,7 +35,7 @@ class Command(command.DirectOnlyCommand, command.Multi):
                 return True
         return False
 
-    def action(self, message, send_func):
+    def action(self, message):
         reply = "Poll: **"+self.vote_dict[self.ballots[message.author.id]][NAME]+"**\n"
         for i in range(len(self.vote_dict[self.ballots[message.author.id]][VOTES].options)):
             reply += REACTIONS[i]+" : "+self.vote_dict[self.ballots[message.author.id]][VOTES].options[i]+"\n"
@@ -36,5 +43,5 @@ class Command(command.DirectOnlyCommand, command.Multi):
 Please place your vote by reacting with your choice(s).
 In the event that multiple choices are accepted, choices will be considered in chronological order (ie first reaction is first choice, second reaction is second choice, etc).
 **No take-backsies.**"""
-        msg = yield from send_func(message.author, reply)
+        msg = yield from self.send_message(message.author, reply)
         self.always_watch_messages.add(msg)

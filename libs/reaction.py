@@ -7,16 +7,31 @@ is a reaction (reaction.message is equivalent to message in message command) and
 a user (the person who added/removed/updated the reaction)
 """
 
-from libs import dataloader
+from libs import dataloader, addon
 
-class ReactionCommand():
+DEFAULT = addon.DEFAULT
+
+class ReactionCommand(addon.AddOn):
     '''ReactionAddCommand represents a command that the bot can use to take action
     based on reactions added to any discord message it listens to.'''
 
-    def __init__(self, all_emojis_func=None, emoji_loc=None, perms_loc=None, **kwargs):
+    def __init__(self, api_methods=dict(), all_emojis_func=None, emoji_loc=None, perms_loc=None, always_watch_messages=set(), role_messages=dict(), namespace=None, events=dict(), **kwargs):
         '''(ReactionCommand, func, str, dict) -> Command
         perms: str of users who have permission to use this command
         kwargs: included for sub-classing'''
+        # associate API methods
+        self.send_message = api_methods[self.SEND_MESSAGE]
+        self.edit_message = api_methods[self.EDIT_MESSAGE]
+        self.add_reaction = api_methods[self.ADD_REACTION]
+        self.remove_reaction = api_methods[self.REMOVE_REACTION]
+        self.send_typing = api_methods[self.SEND_TYPING]
+        self.send_file = api_methods[self.SEND_FILE]
+
+        self.always_watch_messages=always_watch_messages
+        self.role_messages=role_messages
+        self.public_namespace = namespace
+        self.events = events
+
         self.all_emojis_func = all_emojis_func
         self.emoji_action = set()
         try:
@@ -34,7 +49,7 @@ class ReactionCommand():
             self.perms = dict()
 
     def _matches(self, reaction, user):
-        '''(Command, discord.Reaction, discord.Member or discord.User) -> bool
+        '''(ReactionCommand, discord.Reaction, discord.Member or discord.User) -> bool
         This should only be overriden by non-concrete sub-classes to modify
         functionality. This calls matches()
 
@@ -47,12 +62,12 @@ class ReactionCommand():
         return (self.perms is None or reaction.message.server is None or reaction.message.server.id not in self.perms or user.id in self.perms[reaction.message.server.id]) and emoji_match and self.matches(reaction, user)
 
     def matches(self, reaction, user):
-        '''(Command, discord.Reaction, discord.Member or discord.User) -> bool
+        '''(ReactionCommand, discord.Reaction, discord.Member or discord.User) -> bool
         Returns True if the reaction should be interpreted by the command'''
         return self.emoji!=None # matches should always be overriden when self.emoji==None
 
     def _action(self, reaction, user):
-        '''(Command, discord.Reaction, discord.Member or discord.User) -> None
+        '''(ReactionCommand, discord.Reaction, discord.Member or discord.User) -> None
         This should only be overriden by non-concrete sub-classes to modify
         functionality. This calls action()
 
@@ -60,14 +75,16 @@ class ReactionCommand():
         yield from self.action(reaction, user)
 
     def action(self, reaction, user):
-        '''(Command, discord.Reaction, discord.Member or discord.User) -> None
+        '''(ReactionCommand, discord.Reaction, discord.Member or discord.User) -> None
         Reacts to a Reaction '''
         pass
 
-    def shutdown(self):
+    def _shutdown(self):
         '''(ReactionCommand) -> None
-        This is called during bot shutdown
-        Use this to save any variables that need to be loaded again when the bot restarts'''
+        Concrete implementations should NOT override this function. Only sub-classes should override this,
+        in order to expand or modify it's functionality.
+
+        the method to call shutdown()'''
         if self.emoji != None: # save emojis
             self.emoji_file.content = self.emoji
             self.emoji_file.save()
@@ -75,6 +92,13 @@ class ReactionCommand():
         if self.perms != None: # save permissions
             self.perms_file.content = self.perms
             self.perms_file.save()
+        return self.shutdown()
+
+    def shutdown(self):
+        '''(ReactionCommand) -> None
+        This is called during bot shutdown
+        Use this to save any variables that need to be loaded again when the bot restarts'''
+        pass
 
     #useful methods just in case
     def matchemoji(self, emoji_id):
@@ -157,23 +181,7 @@ class WatchReactionCommand(ReactionCommand):
     To add a message to the watchlist, use self.always_watch_messages.add(<discord.Message object>)
     self.always_watch_messages is a set()'''
 
-    def __init__(self, always_watch_messages, **kwargs):
-        super().__init__(**kwargs)
-        self.always_watch_messages=always_watch_messages
-
-class RoleReaction(ReactionCommand):
-    '''Extending RoleReaction will make the command "catch" the role_messages variables'''
-
-    def __init__(self, role_messages, **kwargs):
-        super().__init__(**kwargs)
-        self.role_messages=role_messages
-
-class Multi(ReactionCommand):
-    '''Extending Multi will make the reaction command "catch" the public_namespace associated with the folder's name'''
-
-    def __init__(self, namespace, **kwargs):
-        super().__init__(**kwargs)
-        self.public_namespace = namespace
+    pass
 
 class Dummy(ReactionCommand):
     '''Extending Dummy will make the command a dummy command (ie the command won't do anything)
@@ -193,6 +201,12 @@ class Config(ReactionCommand):
     def __init__(self, config=None, **kwargs):
         super().__init__(**kwargs)
         if config:
-            self.config = dataloader.datafile(config)
+            try:
+                self.config = dataloader.datafile(config) # configuration file for the Reaction
+                if self.config.type=='config':
+                    self.config=self.config.content[self.DEFAULT]
+            except FileNotFoundError:
+                self.config = None # NOTE: This is a bad state for a Config Reaction to be in, since it will cause unexpected errors
+                raise ImportError("No config file found")
         else:
-            self.config = None
+            raise ImportError("Config file cannot be None")

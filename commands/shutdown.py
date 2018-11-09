@@ -10,7 +10,10 @@ from libs import discordstats
 import re, time
 
 class Command(command.DirectOnlyCommand, command.AdminCommand):
-    '''ShutdownCommand shuts the bot down.'''
+    '''ShutdownCommand shuts the bot down.
+
+    You must be a bot admin to use this
+    Only special developpers are bot admins'''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.perms=None
@@ -18,11 +21,12 @@ class Command(command.DirectOnlyCommand, command.AdminCommand):
     def matches(self, message):
         return re.search(r'shutdown protocol', message.content, re.IGNORECASE)
 
-    def action(self, message, send_func, client):
+    def action(self, message, client):
         if message.author.id in client.ADMINS:
-            client.stop_queue.put("Stopping time!")
+            # client.stop_queue.put("Stopping time!")
             if re.search(r'shutdown protocol 1', message.content, re.IGNORECASE): # basic shutdown with stats
                 discordstats.dumpMessages(client, filename="./data/msgdump"+str(time.time())+".csv")
             elif re.search(r'shutdown protocol 0', message.content, re.IGNORECASE): # basic shutdown
                 pass
             yield from client.logout()
+            raise KeyboardInterrupt

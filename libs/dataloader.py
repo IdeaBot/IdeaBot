@@ -1,4 +1,4 @@
-import configparser, json
+import configparser, json, sqlite3
 class datafile: # loads and parses files depending on file ending
     def loadConfig(self, filename):
         '''() -> Config class
@@ -12,7 +12,7 @@ class datafile: # loads and parses files depending on file ending
         returns each file of the line as an element in the list'''
         file = open(filename, "r")
         result = file.readlines()
-        result = [x.strip() for x in result] # remove page returns and other whitespace around lines
+        result = [x if x[-1]!='\n' else x[:-1] for x in result] # remove page returns and other whitespace around lines
         return result
     def saveRawText(self):
         '''() -> None
@@ -48,11 +48,14 @@ class datafile: # loads and parses files depending on file ending
         file.write(text)
         file.close()
 
-    def loadJSON(self, filename):
+    def loadJSON(self, filename, default_val=list()):
         '''(str) -> dict or list or other iterable (depending on input)
         returns the filename interpreted as JSON'''
         file = open(filename)
-        contents = json.load(file)
+        try:
+            contents = json.load(file)
+        except json.decoder.JSONDecodeError:
+            contents = default_val
         file.close()
         return contents
     def saveJSON(self):
@@ -62,15 +65,29 @@ class datafile: # loads and parses files depending on file ending
         json.dump(self.content, file, ensure_ascii=False, indent=4)
         file.close()
 
-    def __init__(self, filename, load_as=None):
+    def loadDB(self, filename):
+        '''(str) -> SQLite database
+        opens an existing SQLite db'''
+        connection = sqlite3.connect(filename)
+        self.cursor = connection.cursor()
+        self.execute = self.cursor.execute
+        return connection
+    def saveDB(self):
+        '''() -> None
+        commit changes to db'''
+        self.content.commit()
+
+    def __init__(self, filename, load_as=None, default_val=list()):
         if "." in filename:
             fileExt = filename[len(filename)-filename[::-1].index("."):].lower()
-            if fileExt == "config" or load_as == "config":
+            if (fileExt == "config" and load_as==None) or load_as == "config":
                 self.content = self.loadConfig(filename)
-            elif fileExt == "csv" or load_as == "csv":
+            elif (fileExt == "csv" and load_as==None) or load_as == "csv":
                 self.content = self.loadCSV(filename)
-            elif fileExt == "json" or load_as == "json":
-                self.content = self.loadJSON(filename)
+            elif (fileExt == "json" and load_as==None) or load_as == "json":
+                self.content = self.loadJSON(filename, default_val=default_val)
+            elif (fileExt == "db" and load_as==None) or load_as == "db":
+                self.content = self.loadDB(filename)
             else:
                 self.content = self.loadRawText(filename)
             self.type = fileExt
@@ -84,13 +101,17 @@ class datafile: # loads and parses files depending on file ending
     def save(self, save_as=None):
         '''() -> None
         saves the file in the original format it was parsed from, including any chances'''
-        if self.type == "csv" or save_as == "csv":
+        if (self.type == "csv" and save_as==None) or save_as == "csv":
             self.saveCSV()
-        elif self.type == "json" or save_as == "json":
+        elif (self.type == "json" and save_as==None) or save_as == "json":
             self.saveJSON()
-        elif self.type != "config" and save_as!="config":
+        elif (self.type == "db" and save_as==None) or save_as=="db":
+            self.saveDB()
+        elif (self.type != "config" and save_as!=None) or save_as!="config":
             self.saveRawText()
-        # it's nasty saving Configs
+        else:
+            # it's nasty saving Configs
+            pass
 
     def contains(self, string):
         '''(str) -> bool

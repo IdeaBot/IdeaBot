@@ -10,10 +10,14 @@ from libs import command
 import re
 
 class Command(command.Command):
-    '''BlameJoshCommand blames josh when anyone says to blame josh.'''
+    '''BlameJoshCommand blames josh when anyone says to blame josh.
+    Josh should always be blamed.
+
+    **Usage:**
+    ```blame josh```'''
 
     def matches(self, message):
         return re.search(r'\bblame josh\b', message.content, re.IGNORECASE)
 
-    def action(self, message, send_func):
-        yield from send_func(message.channel, 'https://cdn.discordapp.com/attachments/382856950079291395/392398975686279168/unknown.png')
+    def action(self, message):
+        yield from self.send_message(message.channel, 'https://cdn.discordapp.com/attachments/382856950079291395/392398975686279168/unknown.png')

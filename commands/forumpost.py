@@ -8,7 +8,7 @@ Created on Sun Jan 14 13:08:24 2018
 from libs import command
 import re
 
-class Command(command.AdminCommand):
+class Command(command.Command):
     '''ForumPostCommand adds an emoji reaction to any message that has
     the words "forum post".'''
 
@@ -19,5 +19,5 @@ class Command(command.AdminCommand):
     def matches(self, message):
         return re.search(r'\bforum post\b', message.content, re.IGNORECASE)
 
-    def action(self, message, send_func, bot):
-        yield from bot.add_reaction(message, self.emoji)
+    def action(self, message, bot):
+        yield from self.add_reaction(message, self.emoji)

@@ -3,7 +3,12 @@ import re, asyncio
 
 FILENAME = 'commands/explorer/channels.csv'
 
-class Command(command.Multi, command.DirectOnlyCommand):
+class Command(command.DirectOnlyCommand):
+    '''Helper command for exploring
+
+    **Usage:**
+    To explore current channel:
+    ```@Idea explore this channel``` '''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # load channels that explorer Plugin will respond to
@@ -14,7 +19,8 @@ class Command(command.Multi, command.DirectOnlyCommand):
         # essentially checks for "explore channel" or "explore this channel"
         return re.search(r'explore\s*(?:this\s*)?channel', message.content, re.I)
 
-    def action(self, message, send_func):
+    def action(self, message):
+        send_func = self.send_message
         if message.channel.id in self.public_namespace.exploring_channels:
             del(self.public_namespace.exploring_channels[self.public_namespace.exploring_channels.index(message.channel.id)])
             yield from send_func(message.channel, 'Exploration **disabled** for this channel')

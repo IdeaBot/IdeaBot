@@ -16,7 +16,14 @@ for i in RAINBOW:
     RAINBOW_MESSAGE+=RAINBOW[i]+" : "+EMOJIS[n]+"\n"
     n+=1
 
-class Command(command.AdminCommand, command.DirectOnlyCommand, command.WatchCommand):
+class Command(command.AdminCommand, command.DirectOnlyCommand):
+    '''Generates the colour roles and a message for assigning the roles to yourself
+
+    **Usage:**
+    ```@Idea create colour role message```
+
+    The Create Colour Role command is probably restricted to certain users
+    Please use this sparingly, since it is rather intensive'''
     def __init__(self, role_messages, **kwargs):
         super().__init__(**kwargs)
         self.role_messages=role_messages
@@ -24,7 +31,8 @@ class Command(command.AdminCommand, command.DirectOnlyCommand, command.WatchComm
         return "create colour role message" in message.content.lower()
 
     @asyncio.coroutine
-    def action(self, message, send_func, bot, speed=SPEED):
+    def action(self, message, bot, speed=SPEED):
+        send_func = self.send_message
         yield from deleteColourRoles(message.server, bot)
         n=1 #len(EMOJIS)
         colourRoleDict = dict()

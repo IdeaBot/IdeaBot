@@ -21,7 +21,15 @@ def tweetLogging():
 
 twitLog = tweetLogging()
 
-class Plugin(plugin.ThreadedPlugin, plugin.Multi):
+class Plugin(plugin.ThreadedPlugin):
+    '''The scraper idea plugin is for providing ideas when a channel goes a long time
+    without being spoken in. The length of time allowed to pass before an idea is
+    sent depends on the configuration file of Idea, but it is usually set to 24 hours
+
+    To learn how to enable/disable ideas in a channel, use
+    ```@Idea help watcher```
+
+    The ideas used in this plugin are scraped from the @AnIdeaHere twitter account '''
     def __init__(self, **kwargs):
         super().__init__(should_spawn_thread=False, **kwargs)
         self.data = dataloader.loadfile_safe('potato.txt') #self.config["datafilepath"])

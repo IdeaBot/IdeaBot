@@ -6,7 +6,11 @@ MODE = "mode"
 VOTES = "votes"
 NAME = "name"
 
-class Reaction(reactioncommand.AdminReactionAddCommand, reactioncommand.Multi):
+class Reaction(reactioncommand.ReactionAddCommand):
+    '''A Reaction command for voting
+
+    **Usage:**
+    React to the ballot message I sent you with the appropriate regional indicator(s) '''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.vote_dict=self.public_namespace.vote_dict
@@ -14,11 +18,11 @@ class Reaction(reactioncommand.AdminReactionAddCommand, reactioncommand.Multi):
     def matches(self, reaction, user):
         return (reaction.emoji in REACTIONS) and (self.ballots[user.id] in self.vote_dict) and (ord(reaction.emoji)-FIRST_REACTION_ORD < len(self.vote_dict[self.ballots[user.id]][VOTES].options)) and (ord(reaction.emoji)>=FIRST_REACTION_ORD) and (reaction.message.server == None)
 
-    def action(self, reaction, user, client):
+    def action(self, reaction, user):
         registered = self.vote_dict[self.ballots[user.id]][VOTES].addChoice(user.id, self.vote_dict[self.ballots[user.id]][VOTES].options[ord(reaction.emoji)-FIRST_REACTION_ORD])
         if registered:
-            yield from client.send_message(reaction.message.channel, "Your choice "+str(reaction.emoji)+" for "+self.vote_dict[self.ballots[user.id]][NAME]+" has been recorded")
+            yield from self.send_message(reaction.message.channel, "Your choice "+str(reaction.emoji)+" for "+self.vote_dict[self.ballots[user.id]][NAME]+" has been recorded")
             if self.vote_dict[self.ballots[user.id]][MODE]=="stv" and self.vote_dict[self.ballots[user.id]][VOTES].votes[user.id].count(None)>0:
-                yield from client.send_message(reaction.message.channel, "You have "+str(self.vote_dict[self.ballots[user.id]][VOTES].votes[user.id].count(None))+" votes remaining")
+                yield from self.send_message(reaction.message.channel, "You have "+str(self.vote_dict[self.ballots[user.id]][VOTES].votes[user.id].count(None))+" votes remaining")
             else:
-                yield from client.send_message(reaction.message.channel, "Thanks for voting!")
+                yield from self.send_message(reaction.message.channel, "Thanks for voting!")

@@ -12,7 +12,13 @@ DEFAULT_NAME_GEN=time.time #function
 DEFAULT_OPTIONS=["Yes", "No"] #list
 DEFAULT_TRANSFERABLES=3 #int
 
-class Command(command.DirectOnlyCommand, command.Multi):
+class Command(command.DirectOnlyCommand):
+    '''Command for closing already opened polls
+
+    **Usage:**
+    ```@Idea end "<poll name>" vote```
+
+    The End Vote command is probably restricted to certain users'''
 
     def __init__(self, vote_dict=None, **kwargs):
         super().__init__(**kwargs)
@@ -21,11 +27,11 @@ class Command(command.DirectOnlyCommand, command.Multi):
     def matches(self, message):
         return re.search(r'\bend\s+["]([^"]+)["]+\s+\bvote', message.content, re.I) != None
 
-    def action(self, message, send_func):
+    def action(self, message):
         args = re.search(r'\b(end)\s+["]([^"]+)["]+\s+\b(vote)', message.content, re.I)
         #group(1) is end, group(2) is vote name, group(3) is vote
         try:
-            yield from self.close_poll(message, send_func, args.group(2))
+            yield from self.close_poll(message, self.send_message, args.group(2))
         except:
             traceback.print_exc()
         '''

@@ -12,7 +12,13 @@ DEFAULT_NAME_GEN=time.time #function
 DEFAULT_OPTIONS=["Yes", "No"] #list
 DEFAULT_TRANSFERABLES=3 #int
 
-class Command(command.DirectOnlyCommand, command.WatchCommand, command.Multi):
+class Command(command.DirectOnlyCommand):
+    '''Command for starting polls
+
+    **Usage:**
+    ```@Idea start vote [name "<name>"] [options "<option1>" "<option2>" (...)] [mode (FPTP or STV)] [-v]```
+
+    The Start Vote command is probably restricted to certain users'''
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -22,7 +28,8 @@ class Command(command.DirectOnlyCommand, command.WatchCommand, command.Multi):
         messagelowercase = message.content.lower()
         return re.search(r'start\s+vote\s*', message.content, re.I) != None
 
-    def action(self, message, send_func):
+    def action(self, message):
+        send_func = self.send_message
         reply = ""
         temp_dict = dict()
         mode = re.compile(r'\bmode[:=]?\s*([^\s]+)\s*', re.I).search(message.content)

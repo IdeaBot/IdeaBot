@@ -4,19 +4,27 @@ import re, random
 KARMA_UP_LOC = "karmauploc"
 KARMA_DOWN_LOC = "karmadownloc"
 
-class Command(command.Multi, command.Config):
+class Command(command.Command):
     '''KarmaAdderCommand finds ++ and -- messages and adjusts the karma
-    appropriately.'''
+    appropriately.
+
+    **Usage:**
+    To add karma to <word>
+    ```<word> karma++```
+
+    To subtract karma from <word>
+    ```<word> karma--``` '''
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.karma_up_data = dataloader.datafile(self.public_namespace.config.content["DEFAULT"][KARMA_UP_LOC]).content
-        self.karma_down_data = dataloader.datafile(self.public_namespace.config.content["DEFAULT"][KARMA_DOWN_LOC]).content
+        self.karma_up_data = dataloader.datafile(self.public_namespace.config[KARMA_UP_LOC]).content
+        self.karma_down_data = dataloader.datafile(self.public_namespace.config[KARMA_DOWN_LOC]).content
 
     def matches(self, message):
         return len(self.collect_args(message)) > 0
 
-    def action(self, message, send_func):
+    def action(self, message):
+        send_func = self.send_message
         args_match = self.collect_args(message)
         for args in args_match:
             entity = args[0]
