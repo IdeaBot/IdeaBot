@@ -19,4 +19,5 @@ class Reaction(reaction.AdminReactionAddCommand):
             bot.reactions[self.public_namespace.active_emoji_messages[reaction.message.id]].emoji[reaction.message.server.id]=emoji_id
         else:
             bot.reactions[self.public_namespace.active_emoji_messages[reaction.message.id]].emoji={reaction.message.server.id:emoji_id}
+        del(self.public_namespace.active_emoji_messages[reaction.message.id]) # remove message watch
         yield from self.send_message(reaction.message.channel, "Success!")
