@@ -36,6 +36,7 @@ class Bot(discord.Client):
     MSG_BACKUP_LOCATION='msgbackuploc'
     WATCH_MSG_LOCATION='alwayswatchmsgloc'
     ROLE_MSG_LOCATION='rolemessagesloc'
+    MAX_MESSAGES='maxmessages'
 
     COMMANDS=COMMANDS
     REACTIONS=REACTIONS
@@ -48,11 +49,16 @@ class Bot(discord.Client):
         config: a string which is the loaction of the base config file
         log: a Logger for dumping info
         checks: a function which checks reddit/forum/twitter for new stuff'''
-        super().__init__()
         if not config:
             # TODO: raise some kind of exception
             pass
         self.data_config = dataloader.datafile(config).content[DEFAULT]
+        if self.MAX_MESSAGES in self.data_config:
+            max_messages=int(self.data_config[self.MAX_MESSAGES])
+            # NOTE: if value provided is not a valid integer, bot will fail to start. INTENDED!
+        else:
+            max_messages=None
+        super().__init__(max_messages=max_messages)
         self.log = log
         self.data = dict()
         self.commands = OrderedDict() # maps names to commands
