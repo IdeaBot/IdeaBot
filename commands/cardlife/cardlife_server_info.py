@@ -16,13 +16,18 @@ class Command(command.DirectOnlyCommand, command.Config):
         return re.search(r'server\s*info(?:rmation)?(?:\s*for)\s+\"([^\"]+)\"', message.content, re.I)
 
     def action(self, message):
-        # cardlife REST API queries
-        # login to CardLife to get PublicId
-        auth = requests.post("https://live-auth.cardlifegame.com/api/auth/authenticate", json={"EmailAddress":self.config["email"], "Password":self.config["password"]})
-        auth_json = auth.json()
-        # get information about all servers
-        lobby = requests.post('https://live-lobby.cardlifegame.com/api/client/games', json={"PublicId":auth_json["PublicId"]})
-        lobby_json = lobby.json()
+        try:
+            # cardlife REST API queries
+            # login to CardLife to get PublicId
+            auth = requests.post("https://live-auth.cardlifegame.com/api/auth/authenticate", json={"EmailAddress":self.config["email"], "Password":self.config["password"]})
+            auth_json = auth.json()
+            # get information about all servers
+            lobby = requests.post('https://live-lobby.cardlifegame.com/api/client/games', json={"PublicId":auth_json["PublicId"]})
+            lobby_json = lobby.json()
+        except:
+            # catch server errors
+            yield from self.send_message(message.channel, 'Unable to CardLife servers' % name_id)
+            return
 
         args = self.collect_args(message)
         name_id = args.group(1) # server name OR id
@@ -31,7 +36,7 @@ class Command(command.DirectOnlyCommand, command.Config):
         # print(server_info)
 
         if server_info==None:
-            yield from self.send_message(message.channel, 'Unable to find the %s server' % name_id)
+            yield from self.send_message(message.channel, 'Unable to find `%s`, maybe it\'s offline?' % name_id)
             return
 
         # fix for ModInfo returned as string instead of dict
@@ -60,7 +65,7 @@ class Command(command.DirectOnlyCommand, command.Config):
             description=description[:-2]+'`\n'
 
         description_end = \
-        '''`{CurrentPlayers}/{MaxPlayers}` online @{Ping}ms (from bot)
+        '''`{CurrentPlayers}/{MaxPlayers}` online @ {Ping}ms
 Region: {0}
 AntiCheat: {IsAntiCheatEnabled}
 Password: {HasPassword}
@@ -76,5 +81,5 @@ Password: {HasPassword}
 
     def find_name_or_id(self, name_or_id, servers):
         for server in servers:
-            if server['Id']==name_or_id or server['WorldName']==name_or_id:
+            if str(server['Id'])==name_or_id or server['WorldName']==name_or_id:
                 return server
