@@ -16,7 +16,7 @@ class Reaction(reactioncommand.ReactionAddCommand):
         self.vote_dict=self.public_namespace.vote_dict
         self.ballots=self.public_namespace.ballot
     def matches(self, reaction, user):
-        return (reaction.emoji in REACTIONS) and (self.ballots[user.id] in self.vote_dict) and (ord(reaction.emoji)-FIRST_REACTION_ORD < len(self.vote_dict[self.ballots[user.id]][VOTES].options)) and (ord(reaction.emoji)>=FIRST_REACTION_ORD) and (reaction.message.server == None)
+        return (reaction.emoji in REACTIONS) and (user.id in self.ballots) and (self.ballots[user.id] in self.vote_dict) and (ord(reaction.emoji)-FIRST_REACTION_ORD < len(self.vote_dict[self.ballots[user.id]][VOTES].options)) and (ord(reaction.emoji)>=FIRST_REACTION_ORD) and (reaction.message.server == None)
 
     def action(self, reaction, user):
         registered = self.vote_dict[self.ballots[user.id]][VOTES].addChoice(user.id, self.vote_dict[self.ballots[user.id]][VOTES].options[ord(reaction.emoji)-FIRST_REACTION_ORD])
