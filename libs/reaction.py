@@ -54,10 +54,10 @@ class ReactionCommand(addon.AddOn):
         functionality. This calls matches()
 
         Returns True if the reaction should be interpreted by the command'''
-        if self.emoji != None and reaction.message.server.id in self.emoji:
+        if self.emoji != None and reaction.message.server is not None and reaction.message.server.id in self.emoji:
             emoji_match = self.are_same_emoji(self.emoji[reaction.message.server.id], reaction.emoji)
         else:
-            emoji_match = (self.emoji == None)
+            emoji_match = (self.emoji is None)
 
         return (self.perms is None or reaction.message.server is None or reaction.message.server.id not in self.perms or user.id in self.perms[reaction.message.server.id]) and emoji_match and self.matches(reaction, user)
 
