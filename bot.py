@@ -35,6 +35,7 @@ messages = None
 commands = None
 reactions = None
 plugins = None
+packages = None
 
 class Bot(discord.Client):
     '''A Discord client which has config data and a list of commands to try when
@@ -158,6 +159,7 @@ class Bot(discord.Client):
             self.packages[package]=new_package
         if name not in self.packages[package][addon_type]:
             self.packages[package][addon_type].append(name)
+        packages = self.packages
 
     def load_command(self, filename, name, package=None, reload=False):
         '''(str, str[, str]) -> command.Command
@@ -218,6 +220,8 @@ class Bot(discord.Client):
         return self.plugins[name]
 
     def load_addons(self):
+        if packages is not None:
+            self.packages = packages
         if commands is None:
             loader.load_commands('commands', self, register=True)
         else:

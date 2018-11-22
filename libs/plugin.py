@@ -108,7 +108,6 @@ class ThreadedPlugin(Plugin):
     def spawn_process(self):
         self.process = Process(target = self._threaded_action, args = (self.queue, ), kwargs = self.threaded_kwargs) # secondary thread
         self.process.start()
-        print("Process started")
 
     def __init__(self, should_spawn_thread=True,**kwargs):
         '''(ThreadedPlugin, dict) -> ThreadedPlugin'''
@@ -124,7 +123,6 @@ class ThreadedPlugin(Plugin):
         # for the new thread, unless they're compatible with multiple threads
         if should_spawn_thread:
             self.spawn_process()
-        print("Initialized")
 
     def _shutdown(self):
         '''(ThreadedPlugin) -> None
@@ -195,7 +193,6 @@ class ThreadedPlugin(Plugin):
                             # or when action_dict[key] is not mapping
                             # (ie **action_dict[key] is not a valid operation)
                             pass
-                            print('Failed to send messsage')
                     elif key==self.EDIT_MESSAGE:
                         try:
                             await self.edit_message(*action_dict[key][ARGS], **action_dict[key][KWARGS])

@@ -4,6 +4,9 @@ import discord, traceback, datetime, os
 CHANNEL = 'channel'
 MESSAGE = 'message'
 
+running = False
+weird_restarts = 0
+
 class Plugin(plugin.OnReadyPlugin, plugin.AdminPlugin):
     ''''Displays pretty messages about the bot's status on the Idea Development Server
 
@@ -17,9 +20,6 @@ class Plugin(plugin.OnReadyPlugin, plugin.AdminPlugin):
         self.message = discord.Object(id=self.MESSAGE_ID)
         self.message.channel = self.channel
         self.startup_time = datetime.datetime.now()
-        self.weird_restarts = -1
-        self.stats_fileend = 0
-        self.last_message_count = -1
 
     async def action(self):
         try:
@@ -42,12 +42,10 @@ class Plugin(plugin.OnReadyPlugin, plugin.AdminPlugin):
 
             description += " - - - - - - - - - - - - - - - - - - - - - - \n" # seperator
 
-            description += "**Last saved stats file** : %s \n" % self.stats_fileend
+            description += "**Startup** : %s \n" % self.startup_time.isoformat()
             description += "**Uptime** : %s \n" % str(datetime.datetime.now()-self.startup_time).split('.')[0] # uptime, without decimal seconds
-            description +="**Weird Restarts** : %s \n" % self.weird_restarts
             description += "**Idea Size** : %s bytes \n" % get_size()
-            description += "***Last Updated** : %s* \n" % datetime.datetime.now().isoformat()
-            # description += "~~Potatoes picked~~ : 2\n"
+            description += "***Last Updated*** *: %s* \n" % datetime.datetime.now().isoformat()
 
             # create embed author
             author=dict()
@@ -57,11 +55,7 @@ class Plugin(plugin.OnReadyPlugin, plugin.AdminPlugin):
 
             await self.edit_message(self.message, embed=embed.create_embed(description=description, author=author))
 
-            if self.last_message_count>len(self.bot.messages) or self.last_message_count==-1: # detect partial bot restarts
-                self.stats_fileend = self.startup_time.isoformat() # change filename to not save over last file
-                self.weird_restarts += 1
-            discordstats.dumpMessages(self.bot, filename='./data/msgdump%s.csv' % self.stats_fileend)
-            self.last_message_count = len(self.bot.messages)
+            discordstats.dumpMessages(self.bot, filename='./data/msgdump%s.csv' % self.startup_time.isoformat())
         except:
             traceback.print_exc()
     '''
