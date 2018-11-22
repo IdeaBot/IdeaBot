@@ -21,11 +21,11 @@ config.content = config.content["DEFAULT"]
 perms_dir=config.content[PERMISSIONS_LOCATION]
 emoji_dir=config.content[EMOJIS_LOCATION]
 
-def init_command(filename, namespace, bot, role_messages, always_watch_messages, folder, package="", reload=False, **kwargs):
+def init_command(filename, namespace, bot, folder, package="", reload=False, **kwargs):
     config_end=config.content[CONFIGEND]
     events = {addon.READY:bot.wait_until_ready, addon.LOGIN:bot.wait_until_login, addon.MESSAGE:bot.wait_for_message, addon.REACTION:bot.wait_for_reaction}
     api_methods = {addon.SEND_MESSAGE:bot.send_message, addon.EDIT_MESSAGE:bot.edit_message, addon.ADD_REACTION:bot.add_reaction, addon.REMOVE_REACTION:bot.remove_reaction, addon.SEND_TYPING:bot.send_typing, addon.SEND_FILE:bot.send_file}
-    parameters = {'user':lambda: bot.user, 'namespace':namespace, 'always_watch_messages':always_watch_messages, 'role_messages':role_messages, 'api_methods':api_methods, 'events':events}
+    parameters = {'user':lambda: bot.user, 'namespace':namespace, 'always_watch_messages':bot.always_watch_messages, 'role_messages':bot.role_messages, 'api_methods':api_methods, 'events':events}
     # find config file
     if filename[:-len(".py")]+config_end in config.content:
         parameters['config']=config.content[filename[:-len(".py")]+config_end]
@@ -41,11 +41,13 @@ def init_command(filename, namespace, bot, role_messages, always_watch_messages,
     parameters['perms_loc']=perms_dir+'c.'+package+filename[:-len(".py")]+".json"
     return temp_lib.Command(**parameters, **kwargs) # init command
 
-def init_reaction(filename, namespace, bot, role_messages, always_watch_messages, folder, package="", emoji_dir="/", reload=False, **kwargs):
+def init_reaction(filename, namespace, bot, folder, package="", emoji_dir="/", reload=False, **kwargs):
     config_end=config.content[CONFIGEND]
     events = {addon.READY:bot.wait_until_ready, addon.LOGIN:bot.wait_until_login, addon.MESSAGE:bot.wait_for_message, addon.REACTION:bot.wait_for_reaction}
     api_methods = {addon.SEND_MESSAGE:bot.send_message, addon.EDIT_MESSAGE:bot.edit_message, addon.ADD_REACTION:bot.add_reaction, addon.REMOVE_REACTION:bot.remove_reaction, addon.SEND_TYPING:bot.send_typing, addon.SEND_FILE:bot.send_file}
-    parameters = {'user':lambda: bot.user, 'namespace':namespace, 'always_watch_messages':always_watch_messages, 'role_messages':role_messages, 'api_methods':api_methods, 'events':events}
+    # user_func uses lambda to create a closure on bot. This way when bot.user
+    # updates it's available to DirectOnlyCommand's without giving extra info.
+    parameters = {'user':lambda: bot.user, 'namespace':namespace, 'always_watch_messages':bot.always_watch_messages, 'role_messages':bot.role_messages, 'api_methods':api_methods, 'events':events, 'all_emojis_func':bot.get_all_emojis}
     # find config file
     if filename[:-len(".py")]+config_end in config.content:
         parameters['config']=config.content[filename[:-len(".py")]+config_end]
@@ -93,14 +95,17 @@ in commands/ and any python files in commands/*/, where * can be any folder name
 This means you can "hide" functions by putting them into a deeper folder. Anything starting with an underscore ("_") will also be ignored (folders *and* files).
 '''
 
-def load_commands(folder, bot, role_messages, always_watch_messages):
+def load_commands(folder, bot, register=False):
     commands = OrderedDict()
     for item in sorted(listdir(folder)):
         if isfile(join(folder, item)):
             if item[-len(".py"):] == ".py" and item[0]!="_":
                 log.info("Loading command in %a " % item)
-                bot.register_package(bot.COMMANDS, item, None)
-                commands[item[:-len(".py")]]=init_command(item, namespace, bot, role_messages, always_watch_messages, folder)
+                if register:
+                    commands[item[:-len(".py")]]=bot.load_command(item, item[:-len(".py")], package=None)
+                else:
+                    bot.register_package(bot.COMMANDS, item, None)
+                    commands[item[:-len(".py")]]=init_command(item, namespace, bot, folder)
         elif item[0] != "_": # second level
             if item not in sub_namespaces:
                 sub_namespaces[item]=CustomNamespace()
@@ -108,18 +113,24 @@ def load_commands(folder, bot, role_messages, always_watch_messages):
                 if isfile(join(join(folder, item), sub_item)):
                     if sub_item[-len(".py"):] == ".py" and sub_item[0]!="_":
                         log.info("Loading command in %a " % join(item, sub_item))
-                        bot.register_package(bot.COMMANDS, sub_item[:-len(".py")], item)
-                        commands[sub_item[:-len(".py")]]=init_command(sub_item, sub_namespaces[item], bot, role_messages, always_watch_messages, folder, package=item)
+                        if register:
+                            commands[item[:-len(".py")]]=bot.load_command(sub_item, sub_item[:-len(".py")], package=item)
+                        else:
+                            bot.register_package(bot.COMMANDS, sub_item[:-len(".py")], item)
+                            commands[sub_item[:-len(".py")]]=init_command(sub_item, sub_namespaces[item], bot, folder, package=item)
     return commands
 
-def load_reactions(folder, bot, role_messages, always_watch_messages, all_emojis_func):
+def load_reactions(folder, bot, register=False):
     reactions = OrderedDict()
     for item in sorted(listdir(folder)):
         if isfile(join(folder, item)):
             if item[-len(".py"):] == ".py" and item[0]!="_":
                 log.info("Loading reaction in %a " % item)
-                bot.register_package(bot.REACTIONS, item, None)
-                reactions[item[:-len(".py")]]=init_reaction(item, namespace, bot, role_messages, always_watch_messages, folder, all_emojis_func=all_emojis_func, emoji_dir=emoji_dir)
+                if register:
+                    reactions[item[:-len(".py")]]=bot.load_reaction(item, item[:-len(".py")], package=None)
+                else:
+                    bot.register_package(bot.REACTIONS, item, None)
+                    reactions[item[:-len(".py")]]=init_reaction(item, namespace, bot, folder, emoji_dir=emoji_dir)
         elif item[0] != "_": # second level
             if item not in sub_namespaces:
                 sub_namespaces[item]=CustomNamespace()
@@ -127,18 +138,24 @@ def load_reactions(folder, bot, role_messages, always_watch_messages, all_emojis
                 if isfile(join(folder, item, sub_item)):
                     if sub_item[-len(".py"):] == ".py" and sub_item[0]!="_":
                         log.info("Loading reaction in %a " % join(item, sub_item))
-                        bot.register_package(bot.REACTIONS, sub_item[:-len(".py")], item)
-                        reactions[sub_item[:-len(".py")]]=init_reaction(sub_item, sub_namespaces[item], bot, role_messages, always_watch_messages, folder, package=item, all_emojis_func=all_emojis_func, emoji_dir=emoji_dir)
+                        if register:
+                            reactions[sub_item[:-len(".py")]]=bot.load_reaction(sub_item, sub_item[:-len(".py")], package=item)
+                        else:
+                            bot.register_package(bot.REACTIONS, sub_item[:-len(".py")], item)
+                            reactions[sub_item[:-len(".py")]]=init_reaction(sub_item, sub_namespaces[item], bot, folder, package=item, emoji_dir=emoji_dir)
     return reactions
 
-def load_plugins(folder, bot):
+def load_plugins(folder, bot, register=False):
     plugins = OrderedDict()
     for item in sorted(listdir(folder)):
         if isfile(join(folder, item)):
             if item[-len(".py"):] == ".py" and item[0]!="_":
                 log.info("Loading plugin in %a " % item)
-                bot.register_package(bot.PLUGINS, item, None)
-                plugins[item[:-len(".py")]]=init_plugin(item, namespace, bot, folder)
+                if register:
+                    plugins[item[:-len(".py")]]=bot.load_plugin(item, item[:-len(".py")], package=None)
+                else:
+                    bot.register_package(bot.PLUGINS, item, None)
+                    plugins[item[:-len(".py")]]=init_plugin(item, namespace, bot, folder)
         elif item[0] != "_": # second level
             if item not in sub_namespaces:
                 sub_namespaces[item]=CustomNamespace()
@@ -146,6 +163,9 @@ def load_plugins(folder, bot):
                 if isfile(join(folder, item, sub_item)):
                     if sub_item[-len(".py"):] == ".py" and sub_item[0]!="_":
                         log.info("Loading plugin in %a " % join(item, sub_item))
-                        bot.register_package(bot.PLUGINS, sub_item[:-len(".py")], item)
-                        plugins[sub_item[:-len(".py")]]=init_plugin(sub_item, sub_namespaces[item], bot, folder, package=item)
+                        if register:
+                            plugins[item[:-len(".py")]]=bot.load_plugin(sub_item, sub_item[:-len(".py")], package=item)
+                        else:
+                            bot.register_package(bot.PLUGINS, sub_item[:-len(".py")], item)
+                            plugins[sub_item[:-len(".py")]]=init_plugin(sub_item, sub_namespaces[item], bot, folder, package=item)
     return plugins

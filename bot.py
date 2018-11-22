@@ -28,6 +28,14 @@ COMMANDS = 'commands'
 REACTIONS = 'reactions'
 PLUGINS = 'plugins'
 
+# saved stuff
+# in the event of a crash, the data stored here can be used instead of loading
+# from storage and/or internet (slow)
+messages = None
+commands = None
+reactions = None
+plugins = None
+
 class Bot(discord.Client):
     '''A Discord client which has config data and a list of commands to try when
     a message is received.'''
@@ -44,7 +52,7 @@ class Bot(discord.Client):
 
     ADMINS=ADMINS
 
-    def __init__(self, config, log, always_watch_messages):
+    def __init__(self, config, log):
         '''(str, Logger, fun) -> Bot
         config: a string which is the loaction of the base config file
         log: a Logger for dumping info
@@ -65,8 +73,9 @@ class Bot(discord.Client):
         self.reactions = OrderedDict() # maps names to reaction commands
         self.plugins = OrderedDict() # maps names to plugins
         self.packages = dict()
-        self.always_watch_messages=always_watch_messages
-        self.role_messages=dict()
+        self.always_watch_messages = {LOADING_WARNING}
+        self.role_messages= savetome.load_role_messages(self.data_config[ROLE_MSG_LOCATION], self.get_all_emojis)
+        self.load_addons()
 
     def add_data(self, name, content_from=DEFAULT):
         '''(str, str) -> None
@@ -100,6 +109,7 @@ class Bot(discord.Client):
                     self.commands.move_to_end(key)
         if package!='':
             self.register_package(COMMANDS, name, package)
+        commands = self.commands
 
     def register_plugin(self, plugin_object, name, package=None):
         '''(Plugin, str) -> None
@@ -120,6 +130,7 @@ class Bot(discord.Client):
         if package!='':
             self.register_package(PLUGINS, name, package)
         self.loop.create_task(plugin_object._action())
+        plugins = self.plugins
 
     def register_reaction_command(self, cmd, name, package=None):
         '''(reaction.Command, str) -> None
@@ -137,6 +148,7 @@ class Bot(discord.Client):
                     self.reactions.move_to_end(key)
         if package!='':
             self.register_package(REACTIONS, name, package)
+        reactions = self.reactions
 
     def register_package(self, addon_type, name, package):
         '''(str, str) -> None
@@ -162,7 +174,7 @@ class Bot(discord.Client):
         else:
             package_loader = package
         # init command
-        cmd = loader.init_command(filename, namespace, self, self.role_messages, self.always_watch_messages, 'commands', package_loader, reload)
+        cmd = loader.init_command(filename, namespace, self, 'commands', package_loader, reload)
         # register command to bot
         self.register_command(cmd, name, package=package)
         return self.commands[name]
@@ -181,7 +193,7 @@ class Bot(discord.Client):
         else:
             package_loader = package
         # init command
-        cmd = loader.init_reaction(filename, namespace, self, self.role_messages, self.always_watch_messages, 'reactions', package_loader, loader.emoji_dir, reload)
+        cmd = loader.init_reaction(filename, namespace, self, 'reactions', package_loader, loader.emoji_dir, reload)
         #register reaction to bot
         self.register_reaction_command(cmd, name, package=package)
         return self.reactions[name]
@@ -204,6 +216,25 @@ class Bot(discord.Client):
         # register plugin to bot
         self.register_plugin(cmd, name, package=package)
         return self.plugins[name]
+
+    def load_addons(self):
+        if commands is None:
+            loader.load_commands('commands', self, register=True)
+        else:
+            self.commands = commands
+        if reactions is None:
+            loader.load_reactions('reactions', self, register=True)
+        else:
+            self.reactions = reactions
+        if plugins is None:
+            loader.load_plugins('plugins', self, register=True)
+        else:
+            # this may not play nicely with asyncio
+            self.plugins = plugins
+            for name in plugins:
+                plugin_object = plugins[name]
+                self.loop.create_task(plugin_object._action())
+
 
     @asyncio.coroutine
     def on_message(self, message):
@@ -272,14 +303,17 @@ class Bot(discord.Client):
             messagefile.content = list()
 
         self.log.info("Loading %a messages" % len(messagefile.content))
-        for msg_str in messagefile.content:
-            channel_id, msg_id = msg_str.strip().split(":")
-            try:
-                msg = yield from self.get_message_properly(channel_id, msg_id)
-                if msg.server: # PATCH: private messages can't be loaded properly, this prevents them from being used
-                    self.messages.append(msg)
-            except (discord.NotFound, discord.Forbidden, discord.InvalidArgument):
-                self.log.warning("Unable to load %a message" % msg_id)
+        if messages is None:
+            for msg_str in messagefile.content:
+                channel_id, msg_id = msg_str.strip().split(":")
+                try:
+                    msg = yield from self.get_message_properly(channel_id, msg_id)
+                    if msg.server: # PATCH: private messages can't be loaded properly, this prevents them from being used
+                        self.messages.append(msg)
+                except (discord.NotFound, discord.Forbidden, discord.InvalidArgument):
+                    self.log.warning("Unable to load %a message" % msg_id)
+        else:
+            self.messages = messages
         self.log.info("Finished loading messages")
 
         #load always_watch_messages from file
@@ -348,6 +382,7 @@ class Bot(discord.Client):
                 messagefile.content.append(msg.channel.id + ":" + msg.id)
             messagefile.save()
             # self.log.info("Saved %a messages" % len(messagefile.content))
+            messages = self.messages
         else:
             self.log.info("Messages are still being loaded, skipping save messages")
 
@@ -404,3 +439,18 @@ class Bot(discord.Client):
         method to catch and report errors from reactions
         This should not raise it's own errors!'''
         pass
+
+    def _shutdown(self):
+        self.shutdown()
+
+    def shutdown(self):
+        # do command shutdown
+        for cmd_name in self.commands:
+            self.commands[cmd_name]._shutdown()
+        for cmd_name in self.reactions:
+            self.reactions[cmd_name]._shutdown()
+        for cmd_name in self.plugins:
+            self.plugins[cmd_name]._shutdown()
+
+        savetome.save_role_messages(self.data_config[ROLE_MSG_LOCATION], self.role_messages)
+        self.loop.stop()

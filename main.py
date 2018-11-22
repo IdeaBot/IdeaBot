@@ -44,8 +44,7 @@ def mainLogging():
 
 configureDiscordLogging()
 
-if __name__ == '__main__':
-    # main
+if __name__ == '__main__': # main
     # init stuff
     loop = asyncio.get_event_loop()
     config = dataloader.datafile("./data/config.config")
@@ -55,46 +54,20 @@ if __name__ == '__main__':
 
     log = mainLogging()
 
-    always_watch_messages = {botlib.LOADING_WARNING} # set
-
-    print("Initializing bot...")
-    bot = botlib.Bot("./data/config.config", log, always_watch_messages)
-    bot.add_data(botlib.CHANNEL_LOC)
-
-    # user_func uses lambda to create a closure on bot. This way when bot.user
-    # updates it's available to DirectOnlyCommand's without giving extra info.
-    user_func = lambda: bot.user
-    all_emojis_func = bot.get_all_emojis #lambda: bot.get_all_emojis wasn't working predictably
-    role_messages = savetome.load_role_messages(config.content[ROLE_MSG_LOCATION], all_emojis_func)
-    bot.role_messages = role_messages
-
-    # load commands, up to two levels deep (ie in ./commands and in ./commands/*, but no deeper)
-    commands = loader.load_commands(COMMANDS_DIR, bot, role_messages, always_watch_messages)
-    #register commands
-    for cmd_name in commands:
-        bot.register_command(commands[cmd_name], cmd_name, package='')
-
-    # load reactions, up to two levels deep
-    reactions = loader.load_reactions(REACTIONS_DIR, bot, role_messages, always_watch_messages, all_emojis_func)
-    # register reactions
-    for cmd_name in reactions:
-        bot.register_reaction_command(reactions[cmd_name], cmd_name, package='')
-
-    # load plugins, up to two levels deep
-    plugins = loader.load_plugins(PLUGINS_DIR, bot)
-    # register plugins
-    for plugin_name in plugins:
-        bot.register_plugin(plugins[plugin_name], plugin_name, package='')
-
+    print("Starting bot...")
     #run until logged out
     stop = False
     while not stop:
         try:
+            # init bot
+            bot = botlib.Bot("./data/config.config", log)
+            bot.add_data(botlib.CHANNEL_LOC)
             # log in
             if "token" in credentials.content:
                 loop.run_until_complete(bot.login(credentials.content["token"]))
             else:
                 loop.run_until_complete(bot.login(credentials.content["username"], credentials.content["password"]))
+            # run bot
             loop.run_until_complete(bot.connect())
         except KeyboardInterrupt:
             stop = True
@@ -105,14 +78,5 @@ if __name__ == '__main__':
         if not stop:
             print("Something tripped up - reconnecting Discord API")
 
-    # do command shutdown
-    for cmd_name in bot.commands:
-        bot.commands[cmd_name]._shutdown()
-    for cmd_name in bot.reactions:
-        bot.reactions[cmd_name]._shutdown()
-    for cmd_name in bot.plugins:
-        bot.plugins[cmd_name]._shutdown()
-
-    savetome.save_role_messages(config.content[ROLE_MSG_LOCATION], role_messages)
-
+    bot._shutdown()
     print("Ended")

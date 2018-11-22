@@ -72,7 +72,7 @@ class Plugin(addon.AddOn):
             try:
                 await self.action()
             except: # catch any exception that could crash the task
-                # traceback.print_exc()
+                traceback.print_exc()
                 pass
             sleep_time = self.period - (time.perf_counter() - start_time)
             if sleep_time<0:
@@ -108,6 +108,7 @@ class ThreadedPlugin(Plugin):
     def spawn_process(self):
         self.process = Process(target = self._threaded_action, args = (self.queue, ), kwargs = self.threaded_kwargs) # secondary thread
         self.process.start()
+        print("Process started")
 
     def __init__(self, should_spawn_thread=True,**kwargs):
         '''(ThreadedPlugin, dict) -> ThreadedPlugin'''
@@ -123,6 +124,7 @@ class ThreadedPlugin(Plugin):
         # for the new thread, unless they're compatible with multiple threads
         if should_spawn_thread:
             self.spawn_process()
+        print("Initialized")
 
     def _shutdown(self):
         '''(ThreadedPlugin) -> None
@@ -137,6 +139,7 @@ class ThreadedPlugin(Plugin):
                 self.process.kill()
             elif self.end_process == NONE or self.end_process == CUSTOM:
                 pass # assume user has defined shutdown() and it has already handled ending the thread
+        self.process.join() # wait for process ot terminate, indefinitely if necessary
 
     def _threaded_action(self, queue, **kwargs):
         '''(ThreadedPlugin, Queue, dict) -> None
@@ -278,7 +281,7 @@ class AdminPlugin(Plugin):
         wrapper for on_client_add method '''
         self.on_client_add()
 
-    def on_client_add(self): 
+    def on_client_add(self):
         '''() -> None
         A method called when the bot client variable is passed to the AdminPlugin.
 
