@@ -1,5 +1,18 @@
 from libs import plugin, embed
 import discord, traceback, asyncio
+import logging
+
+def errorLogging():
+    '''() -> Logger class
+    set ups main log so that it outputs to errors.log and then returns the log'''
+    logger = logging.getLogger('errors')
+    logger.setLevel(logging.INFO)
+    handler = logging.FileHandler(filename='errors.log', encoding='utf-8', mode='w')
+    handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s: %(message)s'))
+    logger.addHandler(handler)
+    return logger
+
+log = errorLogging()
 
 class Plugin(plugin.AdminPlugin):
     '''Dummy plugin for modifying the error catching methods of the bot.
@@ -10,6 +23,9 @@ class Plugin(plugin.AdminPlugin):
 
     @asyncio.coroutine
     def on_command_error(self, cmd_name, error, message):
+        if isinstance(error, discord.DiscordException):
+            log.info("Caught discord exception in %s" %cmd_name)
+            return
         package = self.get_package(cmd_name, self.bot.COMMANDS)
         if not package:
             type = self.public_namespace.COMMANDS
@@ -36,6 +52,9 @@ class Plugin(plugin.AdminPlugin):
 
     @asyncio.coroutine
     def on_reaction_error(self, cmd_name, error, reaction, user):
+        if isinstance(error, discord.DiscordException):
+            log.info("Caught discord exception in %s" %cmd_name)
+            return
         package = self.get_package(cmd_name, self.bot.COMMANDS)
         if not package:
             type = self.public_namespace.COMMANDS
