@@ -23,7 +23,7 @@ class Command(command.DirectOnlyCommand, command.Config):
         self.snark_data = self.config.content
 
     def matches(self, message):
-        return re.search(r'\bsnark\b', message.content, re.IGNORECASE)
+        return re.search(r'\bsnark\b', message.content, re.IGNORECASE)!=None
 
     def action(self, message):
         match = re.search(r'\bsnark\s*(\blist\b)?', message.content, re.IGNORECASE)

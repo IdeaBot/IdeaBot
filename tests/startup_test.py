@@ -1,8 +1,8 @@
 import unittest
 import bot as botlib
-import main
+from libs import testlib
 
-class TestTest(unittest.TestCase):
+class StartupTest(unittest.TestCase):
 
     ''' Test case to test a full startup of the bot
     This tests importing and initialization of all add-ons
@@ -11,6 +11,5 @@ class TestTest(unittest.TestCase):
     (mainly threaded plugins that won't finish on their own)
     '''
     def test_startup(self):
-        log = main.mainLogging()
-        bot = botlib.Bot('./data/config.config', log)
+        bot = botlib.Bot('./data/config.config', testlib.testlog)
         bot._shutdown()

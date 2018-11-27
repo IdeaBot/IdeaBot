@@ -113,4 +113,7 @@ data/credentials.config
 
 #temp add-on files
 data/temp*.py
-**/test.*
+test.*
+plugins/**/test.py
+reactions/**/test.py
+commands/**/test.py

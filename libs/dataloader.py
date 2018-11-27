@@ -13,6 +13,7 @@ class datafile: # loads and parses files depending on file ending
         file = open(filename, "r")
         result = file.readlines()
         result = [x if x[-1]!='\n' else x[:-1] for x in result] # remove page returns and other whitespace around lines
+        file.close()
         return result
     def saveRawText(self):
         '''() -> None
