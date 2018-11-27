@@ -1,6 +1,6 @@
 from libs import command
 
-class Command(command.Command):
+class Command(command.DirectOnlyCommand):
     '''Display roles and their IDs
 
     **Usage:**
