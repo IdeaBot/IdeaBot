@@ -8,16 +8,18 @@ REACTION = 'reactions'
 PLUGIN = 'plugins'
 
 class Command(command.AdminCommand, command.DirectOnlyCommand):
-    '''load command loads a python file from the server and tries to add it as an add-on
+    '''Loads a python file from the server and tries to add it as an add-on
 
-    This replaces the now deprecated load_command and download_command commands
-
-    **Usage:**
+    **Usage**
     ```@Idea load <filepath>```
-    where <filepath> is an appropriate filepath for the add-on to be saved to
+    where
+    **`<filepath>`** is an appropriate filepath for the add-on to be saved to
     Please use forward slashes / to denote the filepath, not back slashes \\
 
-    If an add-on file is attached to the message, the I will verify that it follows
+    **Example**
+    `@Idea load commands/setup/help.py`
+
+    If an add-on file is attached to the message, I will verify that it follows
     everything described here: <https://github.com/NGnius/IdeaBot/wiki/Rules-&-Suggestions-for-Good-Add-Ons>
 
     The Load command is probably restricted to certain users'''
@@ -26,7 +28,7 @@ class Command(command.AdminCommand, command.DirectOnlyCommand):
         args = self.collect_args(message)
         return args != None and args.group(1).count('/')<=2
     def collect_args(self, message):
-        return re.search(r'\bload\s*\`?((reactions|commands|plugins)\/[\w\_\/]+(?=\.py))\`?',message.content)
+        return re.search(r'load\s+\`?((reactions|commands|plugins)\/[\w\_\/]+(?=\.py))\`?',message.content)
 
     def action(self, message, bot):
         try:
