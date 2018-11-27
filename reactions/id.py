@@ -20,4 +20,3 @@ class Reaction(reaction.ReactionAddCommand):
         except AttributeError:
             yield from self.send_message(reaction.message.channel, reaction.emoji + " doesn't have an ID")
             print(reaction.emoji)
-        yield from self.send_message(reaction.message.channel, 'Test')
