@@ -7,7 +7,7 @@ class Command(command.DirectOnlyCommand, command.AdminCommand):
 
     **Usage:**
     ```@Idea emoji -> <reaction-command>```
-    where <reaction-command> is a valid reaction-command (aka reactions)
+    where <reaction-command> is a valid reaction-command 
 
     (Use `@Idea list reactions` to view the list of reaction-commands)'''
     def matches(self, message):
@@ -23,4 +23,7 @@ class Command(command.DirectOnlyCommand, command.AdminCommand):
             self.public_namespace.active_emoji_messages[reply.id]=args.group(1)
             #print(self.public_namespace.active_emoji_messages)
         else:
-            yield from send_func(message.channel, "I'm sorry, that doesn't work or doesn't let you set it's emoji")
+            if args.group(1) in bot.reactions:
+                yield from send_func(message.channel, "I'm sorry, that doesn't let you set an emoji")
+            else:
+                yield from send_func(message.channel, "I'm sorry, that isn't a valid reaction-command. For a list of valid reaction-commands, use ```@Idea list reactions``` ")
