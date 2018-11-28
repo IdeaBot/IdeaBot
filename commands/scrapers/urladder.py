@@ -31,6 +31,7 @@ class Command(command.DirectOnlyCommand):
         type = self.determine_type(url)
         channel = args_match.group(3) if args_match.group(3) else message.channel.id
         params = {'action': args_match.group(1), 'url': url, 'id':url.strip('/').split('/')[-1], 'channel':channel}
+        action = args_match.group(1).lower()
         if type == 'reddit':
             self.public_namespace.newRedditThread.put(params)
         elif type == 'twitter':
@@ -45,9 +46,9 @@ class Command(command.DirectOnlyCommand):
             yield from self.send_message(message.channel, 'The site for the url provided `%s` is not currently supported. Use ```@Idea help urladder``` to learn more.' % url)
             return
         if '-v' in message.content:
-            yield from self.send_message(message.channel, 'Trying to add `%s`' % params)
+            yield from self.send_message(message.channel, 'Trying to %s `%s`' %(action, params))
         else:
-            yield from self.send_message(message.channel, 'Trying to add <%s> ' % url)
+            yield from self.send_message(message.channel, 'Trying to %s <%s> ' %(action, url))
 
     def collect_args(self, message):
         return re.search(r'\b(add|remove)\s+(\S+)\s?(\d{18})?', message.content, re.I)

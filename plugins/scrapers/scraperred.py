@@ -81,7 +81,7 @@ class Plugin(plugin.ThreadedPlugin):
                 if self.is_new_comment(comments[0][0], url):
                     redditLog.debug("New response found: " + comments[0][0])
                     self.data.content[url][self.SEEN].append(comments[0][0])
-                    comment = [url[:-len(".rss?sort=new")], "https://reddit.com"+comments[0][0]]
+                    comment = [url[:-len(".rss?sort=new")], comments[0][0]]
                     for discord_channel in self.data.content[url][self.CHANNELS]:
                         params = {self.SEND_MESSAGE:{plugin.ARGS:[discord.Object(id=discord_channel)], plugin.KWARGS:{'embed':embed.create_embed(description="A new reply has been made to <" + comment[0] + "> (direct link: <"+comment[1]+"> )", footer={"text":"Reddit", "icon_url":REDDIT_LOGO})}}}
                         q.put(params)
