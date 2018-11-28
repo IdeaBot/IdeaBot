@@ -9,8 +9,10 @@ from libs import command
 import re
 
 class Command(command.Command):
-    '''ForumPostCommand adds an emoji reaction to any message that has
-    the words "forum post".'''
+    '''Adds an emoji reaction to any message that has
+    the words "forum post".
+
+    This. Is. A. Joke.'''
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -19,5 +21,5 @@ class Command(command.Command):
     def matches(self, message):
         return re.search(r'\bforum post\b', message.content, re.IGNORECASE)
 
-    def action(self, message, bot):
+    def action(self, message):
         yield from self.add_reaction(message, self.emoji)
