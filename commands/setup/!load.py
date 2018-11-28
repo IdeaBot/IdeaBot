@@ -28,7 +28,7 @@ class Command(command.AdminCommand, command.DirectOnlyCommand):
         args = self.collect_args(message)
         return args != None and args.group(1).count('/')<=2
     def collect_args(self, message):
-        return re.search(r'load\s+\`?((reactions|commands|plugins)\/[\w\_\/]+(?=\.py))\`?',message.content)
+        return re.search(r'\bload\s+\`?((reactions|commands|plugins)\/[\w\_\/]+(?=\.py))\`?',message.content)
 
     def action(self, message, bot):
         try:
@@ -64,7 +64,7 @@ class Command(command.AdminCommand, command.DirectOnlyCommand):
 
             Add-ons in subfolders ("packages") have package-level commander
             permissions (ie all add-ons in a package share permissions) '''
-            if package != None:
+            if package:
                 type = self.public_namespace.PACKAGES
             else:
                 type = addon_type
@@ -78,11 +78,11 @@ class Command(command.AdminCommand, command.DirectOnlyCommand):
                 self.public_namespace.commanders[type][package]=dict()
                 self.public_namespace.commanders[type][package][self.public_namespace.OWNER]=message.author.id
                 self.public_namespace.commanders[type][package][self.public_namespace.MAINTAINERS] = list()
-            elif package==None and not(self.public_namespace.is_commander(message.author.id, addon_name, type) or message.author.id in bot.ADMINS):
+            elif not package and not(self.public_namespace.is_commander(message.author.id, addon_name, type) or message.author.id in bot.ADMINS):
                 # add-on already exists and user is missing permissions
                 yield from self.send_message(message.channel, "`%s` add-on already exists and you do not have permissions to modify it." % addon_name)
                 return
-            elif package!=None and not(self.public_namespace.is_commander(message.author.id, package, type) or message.author.id in bot.ADMINS):
+            elif package and not(self.public_namespace.is_commander(message.author.id, package, type) or message.author.id in bot.ADMINS):
                 # add-on is in package and user is missing permissions for package
                 yield from self.send_message(message.channel, "`%s` package already exists and you do not have permissions to modify it." % package)
                 return

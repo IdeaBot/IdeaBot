@@ -39,4 +39,4 @@ class Command(command.Dummy, command.Config):
         self.public_namespace.commandersfile.save()
 
     def is_commander(self, id, name, type):
-            return (id == self.public_namespace.commanders[type][name][self.public_namespace.OWNER] or id in self.public_namespace.commanders[type][name][self.public_namespace.MAINTAINERS])
+        return (id == self.public_namespace.commanders[type][name][self.public_namespace.OWNER] or id in self.public_namespace.commanders[type][name][self.public_namespace.MAINTAINERS])

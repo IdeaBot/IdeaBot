@@ -31,13 +31,13 @@ class Command(command.DirectOnlyCommand, command.AdminCommand, command.Config):
         args = self.collect_args(message)
         return args!=None and args.group(1).count('/')<=2
     def collect_args(self, message):
-        return re.search(r'\bunload\s*\`?((reactions|commands|plugins)\/[\w\_\/]+(?=\.py))\`?', message.content)
+        return re.search(r'\bunload\s*\`?((reactions|commands|plugins)\/[\w\!\_\/]+(?=\.py))\`?', message.content)
 
     def action(self, message, bot):
         args = self.collect_args(message)
         addon_type=args.group(2).lower()
         name = args.group(1)+'.py'
-        addon_name = name[name.rfind('/')+1:-len('.py')]
+        addon_name = args.group(1)[args.group(1).rfind('/')+1:]
         package = name[name.find('/')+1:name.rfind('/')]
         has_perms = False
         # verify package
@@ -68,14 +68,14 @@ class Command(command.DirectOnlyCommand, command.AdminCommand, command.Config):
             # check perms
             if commanders_name in self.public_namespace.commanders[type]:
                 # check that add-on exists
-                if addon_type==self.public_namespace.COMMANDS and name[:-len('.py')] in bot.commands:
+                if addon_type==self.public_namespace.COMMANDS and addon_name in bot.commands:
                     pass
-                elif addon_type==self.public_namespace.REACTIONS and name[:-len('.py')] in bot.reactions:
+                elif addon_type==self.public_namespace.REACTIONS and addon_name in bot.reactions:
                     pass
-                elif addon_type==self.public_namespace.PLUGINS and name[:-len('.py')] in bot.plugins:
+                elif addon_type==self.public_namespace.PLUGINS and addon_name in bot.plugins:
                     pass
                 else:
-                    yield from self.send_message(message.channel, '`%s` %s does not exist' %(addon_name[:-len('.py')], type[:-1]) )
+                    yield from self.send_message(message.channel, '`%s` %s does not exist' %(addon_name, type[:-1]) )
                     return
                 if message.author.id == self.public_namespace.commanders[type][commanders_name][self.public_namespace.OWNER]:
                     has_perms = True
@@ -96,6 +96,7 @@ class Command(command.DirectOnlyCommand, command.AdminCommand, command.Config):
                 elif addon_type==self.public_namespace.PLUGINS:
                     del(bot.plugins[addon_name])
                 yield from self.send_message(message.channel, 'Unloaded %s' %addon_name)
+                self.commanders_swap.save()
                 return
             else:
                 yield from self.send_message(message.channel, 'You do not have permissions for the %s %s' %(commanders_name, type))
