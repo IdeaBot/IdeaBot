@@ -6,8 +6,11 @@ class Reaction(reaction.AdminReactionAddCommand):
 
     **Usage:**
     React with an emoji to the message sent in response to `emoji_starter` to use that emoji'''
+    def __init__(self, *args, **kwargs):
+        self.emoji=None
+        super().__init__(*args, **kwargs)
+        #print(self.emoji is None)
     def matches(self, reaction, user):
-        #print(self.public_namespace.active_emoji_messages)
         return reaction.message.id in self.public_namespace.active_emoji_messages
 
     def action(self, reaction, user, bot):

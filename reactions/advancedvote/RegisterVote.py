@@ -12,6 +12,7 @@ class Reaction(reactioncommand.ReactionAddCommand):
     **Usage:**
     React to the ballot message I sent you with the appropriate regional indicator(s) '''
     def __init__(self, **kwargs):
+        self.emoji = None
         super().__init__(**kwargs)
         self.vote_dict=self.public_namespace.vote_dict
         self.ballots=self.public_namespace.ballot

@@ -34,12 +34,18 @@ class ReactionCommand(addon.AddOn):
 
         self.all_emojis_func = all_emojis_func
         self.emoji_action = set()
+
+        # NOTE: self.emoji should be set to None if it does not apply to the ReactionCommand
+        # otherwise, self.emoji will be use the last saved emoji json backup
         try:
-            self.emoji_file = dataloader.datafile(emoji_loc, load_as="json")
-            self.emoji = self.emoji_file.content
-        except FileNotFoundError:
-            self.emoji_file = dataloader.newdatafile(emoji_loc)
-            self.emoji = None
+            self.emoji # make sure self.emoji is not already defined by the subclass
+        except AttributeError:
+            try:
+                self.emoji_file = dataloader.datafile(emoji_loc, load_as="json")
+                self.emoji = self.emoji_file.content
+            except FileNotFoundError:
+                self.emoji_file = dataloader.newdatafile(emoji_loc)
+                self.emoji = dict()
 
         try:
             self.perms_file = dataloader.datafile(perms_loc, load_as="json")
@@ -54,12 +60,12 @@ class ReactionCommand(addon.AddOn):
         functionality. This calls matches()
 
         Returns True if the reaction should be interpreted by the command'''
-        if self.emoji != None and reaction.message.server is not None and reaction.message.server.id in self.emoji:
+        if self.emoji is not None and reaction.message.server is not None and reaction.message.server.id in self.emoji:
             emoji_match = self.are_same_emoji(self.emoji[reaction.message.server.id], reaction.emoji)
         else:
             emoji_match = (self.emoji is None)
-
-        return (self.perms is None or reaction.message.server is None or reaction.message.server.id not in self.perms or user.id in self.perms[reaction.message.server.id]) and emoji_match and self.matches(reaction, user)
+        has_perms = (self.perms is None or reaction.message.server is None or reaction.message.server.id not in self.perms or user.id in self.perms[reaction.message.server.id])
+        return has_perms and emoji_match and self.matches(reaction, user)
 
     def matches(self, reaction, user):
         '''(ReactionCommand, discord.Reaction, discord.Member or discord.User) -> bool

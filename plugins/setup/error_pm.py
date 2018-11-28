@@ -55,7 +55,7 @@ class Plugin(plugin.AdminPlugin):
         if isinstance(error, discord.DiscordException):
             log.info("Caught discord exception in %s" %cmd_name)
             return
-        package = self.get_package(cmd_name, self.bot.COMMANDS)
+        package = self.get_package(cmd_name, self.bot.REACTIONS)
         if not package:
             type = self.public_namespace.COMMANDS
             name = cmd_name
@@ -63,8 +63,8 @@ class Plugin(plugin.AdminPlugin):
             type = self.public_namespace.PACKAGES
             name = package
         if name not in self.public_namespace.commanders[type]:
-            commanders2 = self.generate_commanders(self.bot)
-            self.merge_commanders(commanders2)
+            commanders2 = self.public_namespace.generate_commanders(self.bot)
+            self.public_namespace.merge_commanders(commanders2)
         user_id = self.public_namespace.commanders[type][name][self.public_namespace.OWNER]
         user = discord.utils.find(lambda u: u.id == user_id, self.bot.get_all_members())
         if user:

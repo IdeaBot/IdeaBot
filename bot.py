@@ -138,7 +138,7 @@ class Bot(discord.Client):
         Registers a reaction command for execution when a message is reacted to'''
         if not (isinstance(cmd, reactioncommand.ReactionAddCommand) or isinstance(cmd, reactioncommand.ReactionRemoveCommand) or isinstance(cmd, reactioncommand.Dummy)):
             raise ValueError("%s is not a reaction command. Only reaction add/remove commands may be registered in Bot::register_reaction_command" % name)
-        if name in self.commands:
+        if name in self.reactions:
             self.reactions[name]=cmd
         else:
             self.reactions[name]=cmd
@@ -282,7 +282,7 @@ class Bot(discord.Client):
                         yield from self.reactions[cmd]._action(reaction, user)
                     break
                 except Exception as e:
-                    yield from self._on_reaction__remove_error(cmd, e, reaction, user)
+                    yield from self._on_reaction_remove_error(cmd, e, reaction, user)
 
 
     @asyncio.coroutine
@@ -423,12 +423,12 @@ class Bot(discord.Client):
         This should not raise it's own errors!'''
         pass
 
-    def _on_reaction_error(self, cmd_name, error, reaction, user):
+    def _on_reaction_add_error(self, cmd_name, error, reaction, user):
         '''(Bot, str) -> None
         wrapper method to catch and report errors from reactions'''
         #traceback.print_exc()
         self.log.warning('Reaction %s raised an exception during its execution: %s', cmd_name, error)
-        yield from self.on_reaction_error(cmd_name, error, reaction, user)
+        yield from self.on_reaction_add_error(cmd_name, error, reaction, user)
 
     @asyncio.coroutine
     def on_reaction_add_error(self, cmd_name, error):
@@ -436,6 +436,13 @@ class Bot(discord.Client):
         method to catch and report errors from reactions
         This should not raise it's own errors!'''
         pass
+
+    def _on_reaction_remove_error(self, cmd_name, error, reaction, user):
+        '''(Bot, str) -> None
+        wrapper method to catch and report errors from reactions'''
+        #traceback.print_exc()
+        self.log.warning('Reaction %s raised an exception during its execution: %s', cmd_name, error)
+        yield from self.on_reaction_remove_error(cmd_name, error, reaction, user)
 
     @asyncio.coroutine
     def on_reaction_remove_error(self, cmd_name, error, reaction, user):

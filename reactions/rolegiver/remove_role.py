@@ -5,7 +5,16 @@ class Reaction(reactioncommand.AdminReactionRemoveCommand):
 
     **Usage:**
     Remove your reaction to a role message'''
+    def __init__(self, *args, **kwargs):
+        self.emoji=None
+        super().__init__(*args, **kwargs)
     def matches(self, reaction, user):
-        return reaction.message.id in self.role_messages and reaction.emoji in self.role_messages[reaction.message.id]
+        if not isinstance(reaction.emoji, str):
+            key=reaction.emoji.id
+        else: key=reaction.emoji
+        return reaction.message.id in self.role_messages and key in self.role_messages[reaction.message.id]
     def action(self, reaction, user, bot):
-        yield from bot.remove_roles(user, self.role_messages[reaction.message.id][reaction.emoji])
+        if not isinstance(reaction.emoji, str):
+            key = reaction.emoji.id
+        else: key=reaction.emoji
+        yield from bot.remove_roles(user, self.role_messages[reaction.message.id][key])
