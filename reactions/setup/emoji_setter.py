@@ -1,11 +1,14 @@
 from libs import reaction
 
 class Reaction(reaction.AdminReactionAddCommand):
-    '''A Reaction command for setting emojis to commands in servers
+    '''Sets emojis to commands in servers
     This works alongside `emoji_starter`
 
     **Usage:**
-    React with an emoji to the message sent in response to `emoji_starter` to use that emoji'''
+    React with an emoji to the message sent in response to `emoji_starter` to use that emoji
+
+    To learn how to use `emoji_starter`
+    ```@Idea help emoji_starter ``` '''
     def __init__(self, *args, **kwargs):
         self.emoji=None
         super().__init__(*args, **kwargs)

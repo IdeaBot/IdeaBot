@@ -1,5 +1,5 @@
 from libs import plugin, embed, discordstats
-import discord, traceback, datetime, os
+import discord, traceback, datetime, os, time
 
 CHANNEL = 'channel'
 MESSAGE = 'message'
@@ -20,12 +20,15 @@ class Plugin(plugin.OnReadyPlugin, plugin.AdminPlugin):
         self.message = discord.Object(id=self.MESSAGE_ID)
         self.message.channel = self.channel
         self.startup_time = datetime.datetime.now()
+        self.startup_time_seconds = None
 
     async def action(self):
         try:
             # used to reset stuff while developing
             # (edit_message does weird stuff sometimes)
             # await self.edit_message(self.message, embed=embed.create_embed(description=''))
+            if not self.startup_time_seconds:
+                self.startup_time_seconds = time.perf_counter()
 
             # create embed description
             description = ""
@@ -44,7 +47,8 @@ class Plugin(plugin.OnReadyPlugin, plugin.AdminPlugin):
 
             description += "**Startup** : %s \n" % self.startup_time.isoformat()
             description += "**Uptime** : %s \n" % str(datetime.datetime.now()-self.startup_time).split('.')[0] # uptime, without decimal seconds
-            description += "**Idea Size** : %s bytes \n" % get_size()
+            description += "**Time Leak** : %.8fs  \n" % ( (time.perf_counter() - self.startup_time_seconds)%self.period ) # time leak since startup
+            description += "**Idea Size** : %4.2f kB \n" % (get_size()/1024)
             description += "***Last Updated*** *: %s* \n" % datetime.datetime.now().isoformat()
 
             # create embed author

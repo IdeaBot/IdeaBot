@@ -40,7 +40,7 @@ class FPTP(Poll):
     def tallyVotes(self):
         '''(FPTP) -> list
         returns a list of [option, total votes], sorted by total votes'''
-        print(self.dumpVotes())
+        # print(self.dumpVotes())
         votes_by_option = dict(zip(self.options, [0]*len(self.options)))
         for voter in self.votes:
             votes_by_option[self.votes[voter]]+=1
@@ -107,7 +107,7 @@ class STV(Poll):
 
     def tallyVotes(self):
         '''Recursion: kill me now...'''
-        print(self.dumpVotes())
+        # print(self.dumpVotes())
         self.setModifiedBordaCounts()
         return self.recursiveTallySort(self.votes, self.options)
 

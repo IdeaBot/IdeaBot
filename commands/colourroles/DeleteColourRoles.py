@@ -19,11 +19,11 @@ for i in RAINBOW:
 class Command(command.AdminCommand, command.DirectOnlyCommand):
     '''Removes the colour roles
 
-    **Usage:**
-    ```@Idea remove colour role```
+**Usage:**
+```@Idea remove colour role```
 
-    The Remove Colour Role command is probably restricted to certain users
-    Please use this sparingly, since it is rather intensive'''
+The Remove Colour Role command is probably restricted to certain users
+Please use this sparingly, since it is rather intensive'''
     def matches(self,message):
         return "remove colour roles" in message.content.lower()
 

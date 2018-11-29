@@ -15,10 +15,12 @@ DEFAULT_TRANSFERABLES=3 #int
 class Command(command.DirectOnlyCommand):
     '''Command for closing already opened polls
 
-    **Usage:**
-    ```@Idea end "<poll name>" vote```
+**Usage**
+```@Idea end "<poll name>" vote```
+Where
+**`<poll name>`** is an open poll
 
-    The End Vote command is probably restricted to certain users'''
+The End Vote command is probably restricted to certain users'''
 
     def __init__(self, vote_dict=None, **kwargs):
         super().__init__(**kwargs)
@@ -84,6 +86,11 @@ class Command(command.DirectOnlyCommand):
                     yield from send_func(message.author, embed=embed.create_embed(title=self.vote_dict[poll][NAME], description=description_v, footer={"text":"Votes (verbose mode)", "icon_url":None}, colour=0xeeee00))
             yield from send_func(message.channel, embed=embed.create_embed(title=self.vote_dict[poll][NAME], description=description, footer={"text":"Voting ended", "icon_url":None}, colour=0xee3333))
             del(self.vote_dict[poll])
+            # remove message from always_watch_messages
+            for item in self.always_watch_messages:
+                if item.id == poll:
+                    self.always_watch_messages.remove(item)
+                    break
         else:
             yield from send_func(message.channel, "Invalid ID or name")
 

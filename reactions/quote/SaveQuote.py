@@ -5,7 +5,7 @@ import asyncio
 SAVE_LOC = 'saveloc'
 
 class Reaction(reactioncommand.ReactionAddCommand, reactioncommand.Config):
-    '''Saves messages when they get the right reaction
+    '''Saves messages for retrieval later
 
     **Usage:**
     React to the message you want to be saved with the save emoji

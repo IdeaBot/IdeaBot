@@ -3,7 +3,7 @@ from libs import reaction as rc
 import asyncio
 
 class Reaction(rc.ReactionAddCommand, rc.ReactionRemoveCommand):
-    '''A Reaction command for invalid reactions
+    '''Invalid reactions
 
     **Usage:**
     Step 1: Find a message

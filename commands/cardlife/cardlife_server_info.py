@@ -3,13 +3,14 @@ import re, requests, json
 
 class Command(command.DirectOnlyCommand, command.Config):
     '''A command for setting emojis for reaction commands
-    This works alongside the `emoji_setter` reaction command
+This works alongside the `emoji_setter` reaction command
 
-    **Usage:**
-    ```@Idea server info <server>```
-    where <server> is an online server displayed in the CardLife server list
+**Usage:**
+```@Idea server info <server>```
+Where
+**`<server>`** is an online server displayed in the CardLife server list
 
-    Please do not overuse this command - respect the CardLife servers'''
+Please do not overuse this command - respect the CardLife servers'''
     def matches(self, message):
         return self.collect_args(message)!=None
     def collect_args(self, message):
