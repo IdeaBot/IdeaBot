@@ -19,11 +19,11 @@ for i in RAINBOW:
 class Command(command.AdminCommand, command.DirectOnlyCommand):
     '''Generates the colour roles and a message for assigning the roles to yourself
 
-    **Usage:**
-    ```@Idea create colour role message```
+**Usage:**
+```@Idea create colour role message```
 
-    The Create Colour Role command is probably restricted to certain users
-    Please use this sparingly, since it is rather intensive'''
+The Create Colour Role command is probably restricted to certain users
+Please use this sparingly, since it is rather intensive'''
     def __init__(self, role_messages, **kwargs):
         super().__init__(**kwargs)
         self.role_messages=role_messages

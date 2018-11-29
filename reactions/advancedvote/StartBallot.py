@@ -7,10 +7,10 @@ VOTES = "votes"
 NAME = "name"
 
 class Reaction(reactioncommand.ReactionAddCommand):
-    '''A Reaction command for casting your vote
+    '''Allows individuals to case their ballot. I will DM you your ballot.
 
-    **Usage:**
-    Poll message with the ballot/vote emoji
+    **Usage**
+    React to a poll started message with the ballot/vote emoji
     (The emoji is server-defined; ask your fellow server members for the correct emoji) '''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

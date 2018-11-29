@@ -1,10 +1,10 @@
 from libs import reaction as reactioncommand
 
 class Reaction(reactioncommand.AdminReactionAddCommand):
-    '''A Reaction Command to give you a role when you react with the right emoji
+    '''Gives you a role when you react with the right emoji
 
     **Usage:**
-    React to a message with emojis associated to roles with the appropriate emoji'''
+    React to a role message'''
     def __init__(self, *args, **kwargs):
         self.emoji=None
         super().__init__(*args, **kwargs)

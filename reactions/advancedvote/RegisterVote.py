@@ -7,7 +7,7 @@ VOTES = "votes"
 NAME = "name"
 
 class Reaction(reactioncommand.ReactionAddCommand):
-    '''A Reaction command for voting
+    '''Casts your vote
 
     **Usage:**
     React to the ballot message I sent you with the appropriate regional indicator(s) '''

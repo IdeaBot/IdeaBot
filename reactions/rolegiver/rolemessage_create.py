@@ -3,7 +3,7 @@ import asyncio, re, discord
 from libs import savetome
 
 class Reaction(reactioncommand.AdminReactionAddCommand):
-    '''A Reaction command for creating messages that work with `give_role` and `remove_role` reaction commands
+    '''Creates messages that work with `give_role` and `remove_role` reaction commands
 
     **Usage:**
     Send a message of the following form

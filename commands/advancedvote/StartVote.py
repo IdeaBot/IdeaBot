@@ -13,12 +13,22 @@ DEFAULT_OPTIONS=["Yes", "No"] #list
 DEFAULT_TRANSFERABLES=3 #int
 
 class Command(command.DirectOnlyCommand):
-    '''Command for starting polls
+    '''Starts a poll
 
-    **Usage:**
-    ```@Idea start vote [name "<name>"] [options "<option1>" "<option2>" (...)] [mode (FPTP or STV)] [-v]```
+**Usage**
+```@Idea start vote [name "<name>"] [options "<option1>" "<option2>" (...)] [mode (FPTP or STV)] [-v]```
+Where
+**`FPTP`** stands for First Past The Post *(default)*
+**`STV`** stands for Single Transferable Vote
+*(You know where Google is if you don't know what those are)*
 
-    The Start Vote command is probably restricted to certain users'''
+**NOTE:** everything surrounded by [ and ] is optional
+
+**Example**
+`@Idea start vote name "Yomama is..." options "fat" "easy" "ugly" mode FPTP`
+`@Idea start vote name "Is Idea Great?" options "yes" "no doubt"`
+
+The StartVoteCommand is probably restricted to certain users'''
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

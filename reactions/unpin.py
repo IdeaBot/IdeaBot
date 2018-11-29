@@ -3,13 +3,13 @@ import asyncio
 
 PIN = '📌'
 
-class Reaction(reactioncommand.AdminReactionAddCommand):
+class Reaction(reactioncommand.AdminReactionRemoveCommand):
     '''So you don't have to give users permissions to delete messages in order to let them pin messages
 
     **Usage:**
-    React to a message you want pinned with the `:pushpin:` emoji
+    Remove your `:pushpin:` reaction emoji
 
-    The Pin command is probably restricted to certain users'''
+    The Unpin command is probably restricted to certain users'''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.emoji = None
@@ -19,4 +19,4 @@ class Reaction(reactioncommand.AdminReactionAddCommand):
     @asyncio.coroutine
     def action(self, reaction, user, client):
         if reaction.message.channel.permissions_for(reaction.message.server.me).manage_messages:
-            yield from client.pin_message(reaction.message)
+            yield from client.unpin_message(reaction.message)

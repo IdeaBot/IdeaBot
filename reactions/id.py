@@ -1,7 +1,7 @@
 from libs import reaction #as reactioncommand
 
 class Reaction(reaction.ReactionAddCommand):
-    '''A Reaction command for getting the ID of an emoji
+    '''Gets the ID of an emoji
 
     **Usage:**
     React to a message containing the word "id" with the emoji you want the ID of

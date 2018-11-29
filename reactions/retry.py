@@ -1,7 +1,7 @@
 from libs import reaction as reactioncommand
 
 class Reaction(reactioncommand.AdminReactionAddCommand):
-    '''A reaction command to retry a regular command
+    '''Retries a text command
 
     **Usage:**
     React to the message you want to re-run with the retry emoji
