@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/NGnius/IdeaBot.svg?style=svg)](https://circleci.com/gh/NGnius/IdeaBot)
+
 # IdeaBot
 Hello! Welcome to IdeaBot's repository.
 
@@ -31,6 +33,7 @@ To solve that, Idea comes with a lot of useful add-ons pre-installed ([see basic
 To get started with dev-hosted, [invite Idea to your server](https://discordapp.com/oauth2/authorize?client_id=397854238774001673&scope=bot&permissions=268561472).
 
 ## Development Aims and Goals
+
 **Modular, Fast, Simple and Intuitive**
 
 These are requirements Idea development is always striving to achieve and maintain.
