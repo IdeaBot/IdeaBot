@@ -48,7 +48,7 @@ class Plugin(plugin.OnReadyPlugin, plugin.AdminPlugin):
             description += "**Startup** : %s \n" % self.startup_time.isoformat()
             description += "**Uptime** : %s \n" % str(datetime.datetime.now()-self.startup_time).split('.')[0] # uptime, without decimal seconds
             description += "**Time Leak** : %.8fs  \n" % ( (time.perf_counter() - self.startup_time_seconds)%self.period ) # time leak since startup
-            description += "**Idea Size** : %s bytes \n" % get_size()
+            description += "**Idea Size** : %4.2f kB \n" % (get_size()/1024)
             description += "***Last Updated*** *: %s* \n" % datetime.datetime.now().isoformat()
 
             # create embed author
