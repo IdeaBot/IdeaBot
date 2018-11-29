@@ -7,10 +7,10 @@ MESSAGE = 'message'
 OFFICIAL_SERVERS = 'official_server_data'
 
 class Plugin(plugin.OnReadyPlugin):
-    ''''Displays pretty messages about the bot's status on the Idea Development Server
+    '''Displays pretty messages about the bot's status on the Idea Development Server
 
-    **Usage**
-    ```NONE``` '''
+**Usage**
+```NONE``` '''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.CHANNEL_ID = self.config[CHANNEL]

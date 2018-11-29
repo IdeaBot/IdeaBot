@@ -22,12 +22,12 @@ YOUTUBE_LOGO = 'https://s.ytimg.com/yts/img/favicon_144-vfliLAfaB.png'
 class Plugin(plugin.ThreadedPlugin, plugin.OnReadyPlugin):
     '''Multithreaded plugin for YouTube channel information gathering
 
-    **Usage:**
-    ```@Idea (add or remove) <url> ```
+**Usage**
+```@Idea (add or remove) <url> ```
 
-    Currently, this will scrape any valid YouTube channel given to it
+Currently, this will scrape any valid YouTube channel given to it
 
-    This uses Google API calls '''
+This uses Google API calls '''
     def __init__(self, **kwargs):
         super().__init__(should_spawn_thread=False, **kwargs)
         self.data = dataloader.loadfile_safe(self.config["datafilepath"]) # should be a JSON file

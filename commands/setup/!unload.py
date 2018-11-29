@@ -6,14 +6,14 @@ DATA_FILE='commanderswap'
 class Command(command.DirectOnlyCommand, command.AdminCommand, command.Config):
     '''unload command unloads an add-on from the bot and resets the permissions of the add-on
 
-    **Usage:**
-    ```@Idea unload <filepath>```
-    where <filepath> is an existing add-on filepath
-    Please use forward slashes / to denote the filepath, not back slashes \\
+**Usage**
+```@Idea unload <filepath>```
+where <filepath> is an existing add-on filepath
+Please use forward slashes / to denote the filepath, not back slashes \\
 
-    If the add-on has already been unloaded, this command restores the permissions
+If the add-on has already been unloaded, this command restores the permissions
 
-    The Unload command is probably restricted to certain users'''
+The Unload command is definitely restricted to certain users'''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.commanders_swap = dataloader.loadfile_safe(self.config[DATA_FILE])

@@ -11,10 +11,12 @@ import re
 
 class Command(command.Command):
     '''BlameJoshCommand blames josh when anyone says to blame josh.
-    Josh should always be blamed.
+Josh should always be blamed.
 
-    **Usage:**
-    ```blame josh```'''
+**Usage**
+```blame josh```
+
+**NOTE:** This is a joke command and will probably be removed very soon '''
 
     def matches(self, message):
         return re.search(r'\bblame josh\b', message.content, re.IGNORECASE)

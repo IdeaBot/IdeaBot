@@ -10,11 +10,18 @@ import re
 from libs import timezones
 
 class Command(command.DirectOnlyCommand):
-    '''Time Zone command converts a specified time to the desired timezone and
-    responds with a message.
+    '''Converts a specified time to the desired timezone and responds with a message.
 
-    **Usage:**
-    ```@Idea what's <time> <timezone> in <new timezone>?``` '''
+**Usage**
+```@Idea what's <time> <timezone> in <new timezone>?```
+Where
+**`<time>`** is a digital time (##:##)
+**`<timezone>`** is a valid timezone (UTC-# or TLA)
+**`<new timezone>`** is a valid timezone
+
+**Example**
+`@Idea what's 12:00 EST in EDT?`
+`@Idea what's 4:00 UTC-1 in UTC+6?` '''
 
     def matches(self, message):
         return re.search(r'\bwhat\'?s?\s+(.*)\s+in\s+([A-Z]{3})', message.content, re.IGNORECASE)

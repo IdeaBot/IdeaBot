@@ -10,10 +10,10 @@ from libs import discordstats
 import re, time
 
 class Command(command.DirectOnlyCommand, command.AdminCommand):
-    '''ShutdownCommand shuts the bot down.
+    '''Shuts the bot down.
 
-    You must be a bot admin to use this
-    Only special developpers are bot admins'''
+You must be a bot admin to use this
+Only special developpers are bot admins'''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.perms=None

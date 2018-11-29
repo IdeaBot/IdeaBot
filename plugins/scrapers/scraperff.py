@@ -29,10 +29,10 @@ forumLog = forumLogging()
 class Plugin(plugin.ThreadedPlugin):
     '''Multithreaded plugin for scraping Proboards (freeforums)
 
-    **Usage:**
-    ```@Idea (add or remove) <url> ```
+**Usage**
+```@Idea (add or remove) <url> ```
 
-    Currently, this will scrape any valid forum given to it'''
+Currently, this will scrape any valid forum given to it'''
     def __init__(self, **kwargs):
         super().__init__(should_spawn_thread=False, **kwargs)
         self.CHANNEL = CHANNEL

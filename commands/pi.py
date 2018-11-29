@@ -4,8 +4,8 @@ from libs import dataloader
 class Command(command.DirectOnlyCommand, command.Config):
     '''Your daily dose of pi
 
-    **Usage:**
-    ```@Idea pi``` '''
+**Usage**
+```@Idea pi``` '''
 
     def matches(self, message):
         return " pi " in message.content.lower() or " pi" == message.content.lower()[-3:] or "pi " == message.content.lower()[:3]

@@ -9,8 +9,8 @@ NAME = "name"
 class Reaction(reactioncommand.ReactionAddCommand):
     '''Casts your vote
 
-    **Usage:**
-    React to the ballot message I sent you with the appropriate regional indicator(s) '''
+**Usage**
+React to the ballot message I sent you with the appropriate regional indicator(s) '''
     def __init__(self, **kwargs):
         self.emoji = None
         super().__init__(**kwargs)

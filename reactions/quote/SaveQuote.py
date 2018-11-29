@@ -7,9 +7,9 @@ SAVE_LOC = 'saveloc'
 class Reaction(reactioncommand.ReactionAddCommand, reactioncommand.Config):
     '''Saves messages for retrieval later
 
-    **Usage:**
-    React to the message you want to be saved with the save emoji
-    (The emoji is server-defined; ask your fellow server members for the correct emoji)'''
+**Usage**
+React to the message you want to be saved with the save emoji
+(The emoji is server-defined; ask your fellow server members for the correct emoji)'''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.saveloc = self.config[SAVE_LOC]

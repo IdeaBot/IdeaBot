@@ -11,10 +11,10 @@ import re
 class Command(command.DirectOnlyCommand):
     '''Gives information about my features
 
-    **Usage:**
-    ```@Idea featurelist [-v]```
+**Usage**
+```@Idea featurelist [-v]```
 
-    If you're interested in helping to improve Idea, check out what happens when you include `-v`'''
+If you're interested in helping to improve Idea, check out what happens when you include `-v`'''
 
     MESSAGE = '''
     Got a sweet new idea for Idea? Send it to the devs here:

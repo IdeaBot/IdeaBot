@@ -5,9 +5,9 @@ import re
 class Command(command.DirectOnlyCommand):
     '''A bit of spam never hurt anyone
 
-    **Usage:**
-    To get a message warning about spoilers above, with <number> blank lines above it
-    ```@Idea spoiler <number>```'''
+**Usage**
+To get a message warning about spoilers above, with <number> blank lines above it
+```@Idea spoiler <number>```'''
     def matches(self, message):
         args = re.search(r'\bspoiler\s([\d]{1,2})', message.content, re.I)
         return args != None

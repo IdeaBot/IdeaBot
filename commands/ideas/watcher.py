@@ -6,15 +6,15 @@ FILENAME = 'commands/ideas/last_messages_time.json'
 class Command(command.Command):
     '''A command for setting up and maintaining the scrapertidea plugin.
 
-    **Usage:**
-    To enable ideas in the current channel:
-    ```enable ideas```
+**Usage**
+To enable ideas in the current channel:
+```enable ideas```
 
-    To disable ideas in the current channel:
-    ```disable ideas```
+To disable ideas in the current channel:
+```disable ideas```
 
-    For more information, use
-    ```@Idea help scrapertidea``` '''
+For more information, use
+```@Idea help scrapertidea``` '''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.load_last_times(FILENAME)

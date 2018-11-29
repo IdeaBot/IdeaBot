@@ -8,15 +8,15 @@ TODO_LOC = "todosavedir"
 class Command(command.DirectOnlyCommand, command.Config):
     '''Your personal todo list
 
-    **Usage:**
-    To display your todo list
-    ```@Idea todo```
-    
-    To add <task> to your todo list
-    ```@Idea todo <task>```
+**Usage**
+To display your todo list
+```@Idea todo```
 
-    To remove task in position <number> of your todo list
-    ```@Idea remove <number>``` '''
+To add <task> to your todo list
+```@Idea todo <task>```
+
+To remove task in position <number> of your todo list
+```@Idea remove <number>``` '''
     def __init__(self, saveloc="./", **kwargs):
         super().__init__(**kwargs)
         self.saveloc = self.config[TODO_LOC]

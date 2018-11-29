@@ -10,19 +10,20 @@ PLUGIN = 'plugins'
 class Command(command.AdminCommand, command.DirectOnlyCommand):
     '''Loads a python file from the server and tries to add it as an add-on
 
-    **Usage**
-    ```@Idea load <filepath>```
-    where
-    **`<filepath>`** is an appropriate filepath for the add-on to be saved to
-    Please use forward slashes / to denote the filepath, not back slashes \\
+**Usage**
+```@Idea load <filepath>```
+where
+**`<filepath>`** is an appropriate filepath for the add-on to be saved to
+Please use forward slashes / to denote the filepath, not back slashes \\
 
-    **Example**
-    `@Idea load commands/setup/help.py`
+**Example**
+`@Idea load commands/setup/help.py`
 
-    If an add-on file is attached to the message, I will verify that it follows
-    everything described here: <https://github.com/NGnius/IdeaBot/wiki/Rules-&-Suggestions-for-Good-Add-Ons>
+If an add-on file is attached to the message, I will verify that it follows
+everything described here: <https://github.com/NGnius/IdeaBot/wiki/Rules-&-Suggestions-for-Good-Add-Ons>
 
-    The Load command is probably restricted to certain users'''
+The Load command is restricted to certain owners and maintainers for existing commands
+For new commands, anyone can add them!'''
 
     def matches(self, message):
         args = self.collect_args(message)

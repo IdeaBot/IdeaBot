@@ -3,10 +3,10 @@ from libs import reaction #as reactioncommand
 class Reaction(reaction.ReactionAddCommand):
     '''Gets the ID of an emoji
 
-    **Usage:**
-    React to a message containing the word "id" with the emoji you want the ID of
+**Usage**
+React to a message containing the word "id" with the emoji you want the ID of
 
-    **NOTE:** This is a debug command, so it may be removed or deprecated without notice in the future'''
+**NOTE:** This is a debug command, so it may be removed or deprecated without notice in the future'''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.emoji=None

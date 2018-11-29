@@ -10,13 +10,13 @@ from libs import command
 import re
 
 class Command(command.DirectOnlyCommand):
-    '''UrlAdderCommand adds a url to the appropriate scraper watch list. URLs in the watch
-    list will have updates posted in the current channel or the channel with id <channel id>.
+    '''UrlAdderCommand adds a url to the appropriate scraper watch list.
+URLs in the watch list will have updates posted in the current channel or the channel with id <channel id>.
 
-    Currently supported sites: reddit, twitter, youtube, google calendar and freeforum
+Currently supported sites: reddit, twitter, youtube, google calendar and freeforum
 
-    **Usage:**
-    ```@Idea (add or remove) <url> [<channel id>]``` '''
+**Usage**
+```@Idea (add or remove) <url> [<channel id>]``` '''
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

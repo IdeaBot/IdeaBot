@@ -10,13 +10,13 @@ INVALID_MESSAGE = "I'm sorry, did you say `KILL ALL HUMANS`?"
 from libs import command
 # TODO(NGnius): Make this actually run last
 class Command(command.DirectOnlyCommand):
-    '''InvalidCommand is a catch all for direct commands that didn't work.
+    '''Catch all for direct commands that didn't work.
 
-    **Usage:**
-    Step 1: type
-    ```@Idea ```
-    Step 2: *facekeyboard*
-    Step 3: send your message '''
+**Usage**
+Step 1: type
+```@Idea ```
+Step 2: *facekeyboard*
+Step 3: send your message '''
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

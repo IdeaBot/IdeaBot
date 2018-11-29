@@ -6,14 +6,14 @@ KARMA_DOWN_LOC = "karmadownloc"
 
 class Command(command.Command):
     '''KarmaAdderCommand finds ++ and -- messages and adjusts the karma
-    appropriately.
+appropriately.
 
-    **Usage:**
-    To add karma to <word>
-    ```<word> karma++```
+**Usage**
+To add karma to <word>
+```<word> karma++```
 
-    To subtract karma from <word>
-    ```<word> karma--``` '''
+To subtract karma from <word>
+```<word> karma--``` '''
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

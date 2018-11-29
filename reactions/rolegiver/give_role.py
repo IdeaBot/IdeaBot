@@ -3,8 +3,8 @@ from libs import reaction as reactioncommand
 class Reaction(reactioncommand.AdminReactionAddCommand):
     '''Gives you a role when you react with the right emoji
 
-    **Usage:**
-    React to a role message'''
+**Usage**
+React to a role message'''
     def __init__(self, *args, **kwargs):
         self.emoji=None
         super().__init__(*args, **kwargs)

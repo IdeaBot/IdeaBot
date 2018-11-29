@@ -5,14 +5,14 @@ DATAPATH='datafilepath'
 PATHDATAPATH = 'playerdatapath'
 
 class Plugin(plugin.OnMessagePlugin):
-    '''The explorer plugin is a simple demo application of the potential of plugins.
+    '''A simple demo application of the potential of plugins.
 
-    This is like an old text-based adventure, where you move from room to room by
-    choosing the direction to move (or in this case, the direction of the portal
-    to enter). Hopefully, in the future, this game will actually be interesting.
+This is like an old text-based adventure, where you move from room to room by
+choosing the direction to move (or in this case, the direction of the portal
+to enter). Hopefully, in the future, this game will actually be interesting.
 
-    To enable explorer in a channel, do:
-    ```@Idea explore this channel``` '''
+To enable explorer in a channel, do:
+```@Idea explore this channel``` '''
     # movement words
     UP = ["w", "up", "north"]
     DOWN = ["s", "down", "south"]

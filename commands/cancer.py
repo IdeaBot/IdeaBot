@@ -11,10 +11,12 @@ import re
 class Command(command.Command):
     '''Replies with a specific image
 
-    Anyone who uses this is worse than the disease
+Anyone who uses this is worse than the disease
 
-    **Usage:**
-    ```<conjugated get> cancer``` '''
+**Usage**
+```<conjugated get> cancer```
+Where
+**`<conjugated get>`** is a valid verb tense of "get" '''
 
     def matches(self, message):
         return re.search(r'\b(gave\sme|gives\sme|get|gets|got)\scancer\b', message.content, re.I)

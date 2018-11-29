@@ -7,9 +7,9 @@ NO_EMOJI = "✖️"
 class Reaction(reactioncommand.ReactionRemoveCommand):
     '''A Reaction command for simple voting on messages
 
-    **Usage:**
-    Remove the upvote and downvote reaction to the message to remove your vote
-    (The emojis are server-defined; ask your fellow server members for the correct emojis)'''
+**Usage**
+Remove the upvote and downvote reaction to the message to remove your vote
+(The emojis are server-defined; ask your fellow server members for the correct emojis)'''
     def __init__(self, **kwargs):
         '''(RetryCommand, func, str, str, str, dict) -> None '''
         super().__init__(**kwargs)

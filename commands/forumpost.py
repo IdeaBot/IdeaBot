@@ -10,9 +10,11 @@ import re
 
 class Command(command.Command):
     '''Adds an emoji reaction to any message that has
-    the words "forum post".
+the words "forum post".
 
-    This. Is. A. Joke.'''
+This. Is. A. Joke.
+
+**NOTE:** This is a joke command and will probably be removed very soon '''
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

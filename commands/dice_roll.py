@@ -4,11 +4,11 @@ import random, re
 class Command(command.DirectOnlyCommand):
     '''Dice Roll command is a command that responds to messages asking for a random number
 
-    **Usage:**
+**Usage**
 
-    ```@Idea roll <number of dice> <sides of all dice> dice```
+```@Idea roll <number of dice> <sides of all dice> dice```
 
-    ```@Idea flip <number of coins> coins``` '''
+```@Idea flip <number of coins> coins``` '''
 
     def matches(self, message):
         return self._get_args(message) != None

@@ -3,8 +3,8 @@ from libs import reaction as reactioncommand
 class Reaction(reactioncommand.AdminReactionRemoveCommand):
     '''Removes the appropriate role when you react with the right emoji
 
-    **Usage:**
-    Remove your reaction to a role message'''
+**Usage**
+Remove your reaction to a role message'''
     def __init__(self, *args, **kwargs):
         self.emoji=None
         super().__init__(*args, **kwargs)

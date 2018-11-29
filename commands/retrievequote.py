@@ -7,9 +7,11 @@ SAVE_LOC = 'saveloc'
 class Command(command.Config):
     '''Retrieves saved quotes
 
-    **Usage:**
-    To display message with ID <message id>
-    ```<message id>``` '''
+**Usage**
+To display message with ID <message id>
+```<message id>```
+Where
+**`<message id>`** is the ID of a saved message '''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.saveloc = self.config[SAVE_LOC]

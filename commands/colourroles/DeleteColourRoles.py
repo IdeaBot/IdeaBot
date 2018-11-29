@@ -19,7 +19,7 @@ for i in RAINBOW:
 class Command(command.AdminCommand, command.DirectOnlyCommand):
     '''Removes the colour roles
 
-**Usage:**
+**Usage**
 ```@Idea remove colour role```
 
 The Remove Colour Role command is probably restricted to certain users

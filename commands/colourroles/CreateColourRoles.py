@@ -19,7 +19,7 @@ for i in RAINBOW:
 class Command(command.AdminCommand, command.DirectOnlyCommand):
     '''Generates the colour roles and a message for assigning the roles to yourself
 
-**Usage:**
+**Usage**
 ```@Idea create colour role message```
 
 The Create Colour Role command is probably restricted to certain users

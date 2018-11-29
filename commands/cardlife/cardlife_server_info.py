@@ -5,7 +5,7 @@ class Command(command.DirectOnlyCommand, command.Config):
     '''A command for setting emojis for reaction commands
 This works alongside the `emoji_setter` reaction command
 
-**Usage:**
+**Usage**
 ```@Idea server info <server>```
 Where
 **`<server>`** is an online server displayed in the CardLife server list

@@ -6,10 +6,10 @@ PIN = '📌'
 class Reaction(reactioncommand.AdminReactionAddCommand):
     '''So you don't have to give users permissions to delete messages in order to let them pin messages
 
-    **Usage:**
-    React to a message you want pinned with the `:pushpin:` emoji
+**Usage**
+React to a message you want pinned with the `:pushpin:` emoji
 
-    The Pin command is probably restricted to certain users'''
+The Pin command is probably restricted to certain users'''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.emoji = None

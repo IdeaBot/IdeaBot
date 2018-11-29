@@ -1,6 +1,7 @@
 from libs import plugin, command
 
 class Command(command.Dummy):
+    '''Dummy command, please ignore'''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.public_namespace.newRedditThread = plugin.Queue()
