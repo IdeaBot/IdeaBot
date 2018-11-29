@@ -161,6 +161,10 @@ class Bot(discord.Client):
             self.packages[package][addon_type].append(name)
         packages = self.packages
 
+    def get_package(self, name, addon_type):
+        for key in self.packages:
+            if name in self.packages[key][addon_type]: return key
+
     def load_command(self, filename, name, package=None, reload=False):
         '''(str, str[, str]) -> command.Command
         initilizes a command and then registers it with the bot'''
