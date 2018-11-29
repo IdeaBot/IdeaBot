@@ -2,7 +2,7 @@ from libs import command
 import re
 
 class Command(command.AdminCommand, command.DirectOnlyCommand):
-'''A command for setting which user can use which commands in your server
+    '''A command for setting which user can use which commands in your server
 
 **Usage**
 ```@Idea (reaction OR command) perms -> <reaction/command name> <user mention>```
