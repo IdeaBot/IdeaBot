@@ -78,7 +78,7 @@ class Command(command.AdminCommand, command.DirectOnlyCommand):
             yield from send_func(response_channel, 'Command not found')
 
     def collect_args(self, message):
-        return re.search(r'help(?:\sme)?(?:\swith)?(?:\s([^\-\s]\S*))?', message.content, re.I)
+        return re.search(r'help\b(?:\sme)?(?:\swith)?(?:\s([^\-\s]\S*))?', message.content, re.I)
 
     def make_help(self, name, docstring):
         description = '%s Help\n' % name

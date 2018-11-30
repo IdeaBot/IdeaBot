@@ -8,7 +8,7 @@ CHANNEL = 'channel'
 CHANNELS = 'channels'
 SEEN = 'seen'
 REDDIT_LOGO = r"https://pbs.twimg.com/profile_images/868147475852312577/fjCSPU-a_400x400.jpg" #ignore that this is a Twitter link *whistles innocently*
-SLOWDOWN = 0
+SLOWDOWN = 1 # my hate of Reddit rate limits is indescribable
 
 def redditLogging():
     '''() -> Logger class
@@ -75,22 +75,28 @@ class Plugin(plugin.ThreadedPlugin):
             redditLog.info("Now scraping " + url)
             try:
                 rss = BeautifulSoup(pageRet.pageRet(url).decode(), "html.parser") # rss page
-                items = rss.find_all("entry")[1:]
-                comments = [[x.find("link").get("href"), x.find("title").get_text()] for x in items] # list of [url, thread title]
+                items = rss.find_all("entry")[1:] # first entry is always OP
+                comments = [[x.find("link").get("href"), x.find("title").get_text(), x.find("content", type="html").get_text()] for x in items] # list of [url, thread title]
 
                 if self.is_new_comment(comments[0][0], url):
                     redditLog.debug("New response found: " + comments[0][0])
                     self.data.content[url][self.SEEN].append(comments[0][0])
-                    comment = [url[:-len(".rss?sort=new")], comments[0][0]]
+                    parent_url = url[:-len(".rss?sort=new")]
+                    comment_url = comments[0][0]
+                    title = comments[0][1]
+                    description = comments[0][2].split("<p>")[1].split("</p>")[0]
+                    author={'name':title, 'url':comment_url, 'icon_url':None}
+                    # "A new reply has been made to <" + parent_url + "> (direct link: <"+comment_url+"> )"
+                    em = embed.create_embed(author=author, description=description, footer={"text":"Reddit", "icon_url":REDDIT_LOGO})
                     for discord_channel in self.data.content[url][self.CHANNELS]:
-                        params = {self.SEND_MESSAGE:{plugin.ARGS:[discord.Object(id=discord_channel)], plugin.KWARGS:{'embed':embed.create_embed(description="A new reply has been made to <" + comment[0] + "> (direct link: <"+comment[1]+"> )", footer={"text":"Reddit", "icon_url":REDDIT_LOGO})}}}
+                        params = {self.SEND_MESSAGE:{plugin.ARGS:[discord.Object(id=discord_channel)], plugin.KWARGS:{'embed':em}}}
                         q.put(params)
                         # q.put([url[:-len(".rss?sort=new")], "https://reddit.com"+comments[0][0]])
                 time.sleep(SLOWDOWN)
             except:
                 # Prevent a failed run from crashing the whole thread
                 redditLog.warning("Scraping " + url + " failed. Either the page has changed or the page is unavailable (possibly due to rate limiting)...")
-                # traceback.print_exc()
+                traceback.print_exc()
         self.data.save()
         redditLog.debug("Finished scraping run in "+ str(time.time() - mostrecentrunstart))
 
