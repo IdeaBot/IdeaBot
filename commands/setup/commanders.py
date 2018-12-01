@@ -8,7 +8,7 @@ Commanders are the maintainers of an add-on, including the owner of the plugin
 **Usage**
 ```@Idea generate commanders```
 
-Commanders is probably restricted to certain users'''
+Commanders is restricted to certain users'''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.public_namespace.generate_commanders=self.generate_commanders
@@ -18,7 +18,7 @@ Commanders is probably restricted to certain users'''
         return re.search(r'(?:re)?generate\s+(commanders|command\s+maintainers|import\s+perm(?:ission)?s?)', message.content, re.I) != None
 
     def action(self, message, bot):
-        if self.message.author.id not in bot.ADMINS:
+        if message.author.id not in bot.ADMINS:
             yield from send_func(message.channel, "No can do boss")
             return
         send_func = self.send_message

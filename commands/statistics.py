@@ -13,7 +13,7 @@ class Command(command.DirectOnlyCommand, command.AdminCommand):
         return re.search(r'stats|statistics', message.content, re.I)!=None
 
     def action(self, message, client):
-        if self.message.author.id not in client.ADMINS:
+        if message.author.id not in client.ADMINS:
             yield from send_func(message.channel, "No can do boss")
             return
         discordstats.dumpMessages(client, filename=FILEPATH, info="timestamp.isoformat(timespec='seconds'),author.name,id,channel.name,server.name")
