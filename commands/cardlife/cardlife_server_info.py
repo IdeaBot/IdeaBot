@@ -6,7 +6,7 @@ class Command(command.DirectOnlyCommand, command.Config):
 This works alongside the `emoji_setter` reaction command
 
 **Usage**
-```@Idea server info <server>```
+```@Idea server info "<server>" ```
 Where
 **`<server>`** is an online server displayed in the CardLife server list
 
@@ -14,7 +14,7 @@ Please do not overuse this command - respect the CardLife servers'''
     def matches(self, message):
         return self.collect_args(message)!=None
     def collect_args(self, message):
-        return re.search(r'server\s*info(?:rmation)?(?:\s*for)\s+\"([^\"]+)\"', message.content, re.I)
+        return re.search(r'server\s*info(?:rmation)?(?:\s*for)?\s+\"([^\"]+)\"', message.content, re.I)
 
     def action(self, message):
         try:

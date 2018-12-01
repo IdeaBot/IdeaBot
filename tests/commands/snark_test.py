@@ -1,5 +1,4 @@
 from libs import testlib
-import re
 
 test_messages = [r'{bot-mention} snark me up Scotty']
 
