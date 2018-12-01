@@ -58,19 +58,49 @@ class Command(command.AdminCommand, command.DirectOnlyCommand):
 
         elif is_command and (not is_two or ('-c' in message.content and is_two)):
             help = self.make_help(args.group(1), client.commands[args.group(1)]._help(verbose=is_verbose))
-            foot_text = 'Command maintained by '+(yield from client.get_user_info(self.public_namespace.commanders[self.public_namespace.COMMANDS][args.group(1)][self.public_namespace.OWNER])).name
+            pkg = client.get_package(args.group(1), client.COMMANDS)
+            if pkg!=None:
+                addon_type=self.public_namespace.PACKAGES
+                addon_name=pkg
+            else:
+                addon_type=self.public_namespace.COMMANDS
+                addon_name=args.group(1)
+            if args.group(1) not in self.public_namespace.commanders[addon_type]:
+                commanders = self.public_namespace.generate_commanders(client)
+                self.public_namespace.merge_commanders(commanders)
+            foot_text = 'Command made by '+(yield from client.get_user_info(self.public_namespace.commanders[addon_type][addon_name][self.public_namespace.OWNER])).name
             help.set_footer(text=foot_text)
             yield from send_func(response_channel, embed=help)
 
         elif is_reaction and (not is_two or ('-r' in message.content and is_two)):
             help = self.make_help(args.group(1), client.reactions[args.group(1)]._help(verbose=is_verbose))
-            foot_text = 'Reaction maintained by '+(yield from client.get_user_info(self.public_namespace.commanders[self.public_namespace.REACTIONS][args.group(1)][self.public_namespace.OWNER])).name
+            pkg = client.get_package(args.group(1), client.REACTIOS)
+            if pkg!=None:
+                addon_type=self.public_namespace.PACKAGES
+                addon_name=pkg
+            else:
+                addon_type=self.public_namespace.REACTIONS
+                addon_name=args.group(1)
+            if args.group(1) not in self.public_namespace.commanders[self.public_namespace.REACTIONS]:
+                commanders = self.public_namespace.generate_commanders(client)
+                self.public_namespace.merge_commanders(commanders)
+            foot_text = 'Reaction made by '+(yield from client.get_user_info(self.public_namespace.commanders[addon_type][addon_name][self.public_namespace.OWNER])).name
             help.set_footer(text=foot_text)
             yield from send_func(response_channel, embed=help)
 
         elif is_plugin and (not is_two or ('-l' in message.content and is_two)):
             help = self.make_help(args.group(1), client.plugins[args.group(1)]._help(verbose=is_verbose))
-            foot_text = 'Plugin maintained by '+(yield from client.get_user_info(self.public_namespace.commanders[self.public_namespace.PLUGINS][args.group(1)][self.public_namespace.OWNER])).name
+            pkg = client.get_package(args.group(1), client.PLUGINS)
+            if pkg!=None:
+                addon_type=self.public_namespace.PACKAGES
+                addon_name=pkg
+            else:
+                addon_type=self.public_namespace.PLUGINS
+                addon_name=args.group(1)
+            if args.group(1) not in self.public_namespace.commanders[self.public_namespace.PLUGINS]:
+                commanders = self.public_namespace.generate_commanders(client)
+                self.public_namespace.merge_commanders(commanders)
+            foot_text = 'Plugin made by '+(yield from client.get_user_info(self.public_namespace.commanders[addon_type][addon_name][self.public_namespace.OWNER])).name
             help.set_footer(text=foot_text)
             yield from send_func(response_channel, embed=help)
 

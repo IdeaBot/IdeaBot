@@ -70,9 +70,14 @@ class TestBot(bot.Bot):
     def load_messages(self):
         return
 
+    @asyncio.coroutine
+    def get_user_info(*args):
+        return TestUser()
+
 class TestUser(discord.User):
-    def __init__(self, user_id='0'*18):
+    def __init__(self, user_id='0'*18, name='test'):
         self.id=user_id
+        self.name=name
         #self.mention='<@!'+user_id+'>'
 
 class TestServer(discord.Server):

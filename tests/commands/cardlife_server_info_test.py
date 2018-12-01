@@ -14,3 +14,4 @@ class CardLifeTest(testlib.TestCase):
             self.assertTrue(cl._matches(msg), "Match failed")
             self.assertIsNone(self.loop.run_until_complete(cl._action(msg)), "Action failed")
             self.assertIsNotNone(self.bot.last_embed, "Missing embed")
+            self.bot.last_embed=None
