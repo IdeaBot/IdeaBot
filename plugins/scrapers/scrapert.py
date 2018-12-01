@@ -49,7 +49,7 @@ Currently, this will scrape any valid twitter account given to it '''
 
     def threaded_action(self, q, newTwit=plugin.Queue(), **kwargs):
         '''(ThreadedPlugin, Queue ) -> None
-        Checks continuously for new tweets from the official twitter. A [url (str), tweet (str)] object is reported through q when anything changes
+        Checks continuously for new tweets from the official twitter.
         This should be run in a different thread since it is blocking (it's a while loop ffs)'''
         # handle new items from url_adder
         while not newTwit.empty():
@@ -92,16 +92,23 @@ Currently, this will scrape any valid twitter account given to it '''
                             tweet = {"url":i[0], "content":i[1], "author":tweet_author, "retweet":False}
                             if author.lower() != tweet_author.lower():
                                 tweet["retweet"] = True
+                                em = embed.create_embed(author={"name":author+" retweeted "+tweet["author"], "url":tweet["url"], 'icon_url':None}, description=tweet["content"], footer={"text":"Twitter", "icon_url":TWITTER_LOGO})
+                            else:
+                                good_author=tweet["author"]
+                                em = embed.create_embed(author={"name":good_author, "url":tweet["url"], 'icon_url':None}, description=tweet["content"], footer={"text":"Twitter", "icon_url":TWITTER_LOGO})
                             for discord_channel in self.data.content[twitAccount][self.CHANNELS]:
-                                if not tweet["retweet"]:
-                                    params= {self.SEND_MESSAGE:{plugin.ARGS:[discord.Object(id=discord_channel)], plugin.KWARGS:{'embed':embed.create_embed(author={"name":tweet["author"], "url":tweet["url"], 'icon_url':None}, description=tweet["content"], footer={"text":"Twitter", "icon_url":TWITTER_LOGO})}}}
-                                else:
-                                    params= {self.SEND_MESSAGE:{plugin.ARGS:[discord.Object(id=discord_channel)], plugin.KWARGS:{'embed':embed.create_embed(author={"name":author+" retweeted "+tweet["author"], "url":tweet["url"], 'icon_url':None}, description=tweet["content"], footer={"text":"Twitter", "icon_url":TWITTER_LOGO})}}}
+                                params= {self.SEND_MESSAGE:{plugin.ARGS:[discord.Object(id=discord_channel)], plugin.KWARGS:{'embed':em}}}
                                 q.put(params)
                                 #q.put(q_entry)
                         else:
                             break
                     # self.delete_entry("most recent tweet:")
+                    if good_author!= author: # fix author capitalisation if necessary
+                        good_twitAccount = twitAccount.replace(author, good_author)
+                        self.data.content[good_twitAccount] = self.data.content[twitAccount]
+                        self.data.content[twitAccount] = None
+                        del(self.data.content[twitAccount])
+                        twitAccount = good_twitAccount
                     self.data.content[twitAccount][self.MOST_RECENT]=tweets[0][0]
                     self.data.content[twitAccount][self.MOST_RECENT2]=tweets[1][0]
                     twitLog.debug("Most recent tweet is now: " + tweets[0][0])
