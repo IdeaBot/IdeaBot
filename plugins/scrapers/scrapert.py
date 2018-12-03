@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 from libs import dataloader, plugin, embed
 import time, logging, discord, traceback, sys
 from plugins.scrapers.scraperlibs import pageRet
+import re
 
 CHANNEL = 'channel'
 CHANNELS = 'channels'
@@ -90,12 +91,19 @@ Currently, this will scrape any valid twitter account given to it '''
                             twitLog.debug("New tweet found: " + i[0])
                             tweet_author = self.get_author(i[2])
                             tweet = {"url":i[0], "content":i[1], "author":tweet_author, "retweet":False}
+                            # search for picture in content
+                            img_link = self.get_image(i[2])
+                            img=None
+                            if img_link is not None: # set pic
+                                img = {'url':img_link}
+                                tweet['content']=tweet['content'].replace(img_link, '')
+                                tweet['content']=re.sub(r'pic\.twitter\.com/([\w\d]+)', '', tweet['content'], re.I)
                             if author.lower() != tweet_author.lower():
                                 tweet["retweet"] = True
-                                em = embed.create_embed(author={"name":author+" retweeted "+tweet["author"], "url":tweet["url"], 'icon_url':None}, description=tweet["content"], footer={"text":"Twitter", "icon_url":TWITTER_LOGO})
+                                em = embed.create_embed(image=img, author={"name":author+" retweeted "+tweet["author"], "url":tweet["url"], 'icon_url':None}, description=tweet["content"], footer={"text":"Twitter", "icon_url":TWITTER_LOGO})
                             else:
                                 good_author=tweet["author"]
-                                em = embed.create_embed(author={"name":good_author, "url":tweet["url"], 'icon_url':None}, description=tweet["content"], footer={"text":"Twitter", "icon_url":TWITTER_LOGO})
+                                em = embed.create_embed(image=img, author={"name":good_author, "url":tweet["url"], 'icon_url':None}, description=tweet["content"], footer={"text":"Twitter", "icon_url":TWITTER_LOGO})
                             for discord_channel in self.data.content[twitAccount][self.CHANNELS]:
                                 params= {self.SEND_MESSAGE:{plugin.ARGS:[discord.Object(id=discord_channel)], plugin.KWARGS:{'embed':em}}}
                                 q.put(params)
@@ -117,7 +125,7 @@ Currently, this will scrape any valid twitter account given to it '''
             except:
                 # Prevent a failed run from crashing the whole thread
                 twitLog.warning("Scraping run failed. Either the page has changed or the page is unavailable...")
-                # traceback.print_exc()
+                traceback.print_exc()
         self.data.save()
 
     def get_tweet(self, bso):
@@ -174,3 +182,10 @@ Currently, this will scrape any valid twitter account given to it '''
         '''(str) -> str
         find the twitter handle for a user from their twitter url'''
         return url.strip('/').split('/')[-1]
+
+    def get_image(self, bso):
+        '''(BeautifulSoup object) -> str
+        get the url link to the first image in the tweet (None if no image) '''
+        desc = bso.find('description')
+        img=re.search(r'\<\s*img\s+src\=\"(.+?)\"\s+width\=\"\d+\"\s+\/\>', str(desc), re.I)
+        return img.group(1) if img is not None else None
