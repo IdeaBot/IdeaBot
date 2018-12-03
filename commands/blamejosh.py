@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Why does this exist? blame josh ¯\_(ツ)_/¯
+Why does this exist? blame josh ¯\\_(ツ)_/¯
 Created on Sat Jan 13 13:23:56 2018
 
 @author: 14flash
