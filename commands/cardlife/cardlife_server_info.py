@@ -27,7 +27,7 @@ Please do not overuse this command - respect the CardLife servers'''
             lobby_json = lobby.json()
         except:
             # catch server errors
-            yield from self.send_message(message.channel, 'Unable to CardLife servers' % name_id)
+            yield from self.send_message(message.channel, 'Unable to contact CardLife servers')
             return
 
         args = self.collect_args(message)

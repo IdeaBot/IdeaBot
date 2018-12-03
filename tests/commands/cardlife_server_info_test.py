@@ -13,5 +13,6 @@ class CardLifeTest(testlib.TestCase):
             msg = testlib.TestMessage(content=msg_content)
             self.assertTrue(cl._matches(msg), "Match failed")
             self.assertIsNone(self.loop.run_until_complete(cl._action(msg)), "Action failed")
-            self.assertIsNotNone(self.bot.last_embed, "Missing embed")
-            self.bot.last_embed=None
+            #NOTE: credentials for CardLife API are incorrect so response will not be an embed
+            self.assertIsNotNone(self.bot.last_message, "Missing message")
+            self.bot.last_message=None
