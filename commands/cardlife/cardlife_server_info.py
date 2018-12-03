@@ -2,8 +2,7 @@ from libs import command, embed
 import re, requests, json
 
 class Command(command.DirectOnlyCommand, command.Config):
-    '''A command for setting emojis for reaction commands
-This works alongside the `emoji_setter` reaction command
+    '''Retrieve CardLife server information about a specific server
 
 **Usage**
 ```@Idea server info "<server>" ```
