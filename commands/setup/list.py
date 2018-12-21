@@ -1,8 +1,6 @@
 from libs import command, embed
 import re
 
-FIRST_LETTER_BLACKLIST=['!', '?', '<']
-
 class Command(command.DirectOnlyCommand, command.AdminCommand):
     '''Provides a nice list to summarize Idea's functionality
 
@@ -15,7 +13,8 @@ The list of commands/reactions/plugins is provided in the following form:
 ```@Idea list (commands/reactions/plugins)```
 *(respectively)*
 
-**NOTE:** Most package names do not work with `help` '''
+**NOTE:** Most package names do not work with `help`
+**__WARNING:__** This command has been deprecated. Please use `help (commands/reactions/plugins)` instead '''
     def matches(self, message):
         return self.collect_args(message) != None
 

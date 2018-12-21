@@ -15,7 +15,7 @@ Where
 `@Idea help perms_setter`
 
 To see the list of commands/reaction-commands/plugins, use:
-```@Idea list (commands/reactions/plugins)```
+```@Idea help (commands/reactions/plugins)```
 *(respectively)*
 
 If you're really stuck, ask for help from the devs: https://discord.gg/gwq2vS7
@@ -29,6 +29,8 @@ To specify between reaction-command, command and plugin use `-r`, `-c` and `-l`
 *(respectively)*
 '''
 
+FIRST_LETTER_BLACKLIST=['!', '?', '<']
+
 class Command(command.AdminCommand, command.DirectOnlyCommand):
     def matches(self, message):
         return self.collect_args(message)!=None
@@ -39,8 +41,9 @@ class Command(command.AdminCommand, command.DirectOnlyCommand):
         response_channel = message.author if '-p' not in message.content else message.channel
 
         is_verbose = '-v' in message.content
+        has_flag = '-c' in message.content or '-r' in message.content or '-l' in message.content
 
-        if args == None or not args.group(1):
+        if not args.group(1):
             help = self.make_help('', self._help(verbose=is_verbose))
             foot_text = 'Bot maintained by NGnius'
             help.set_footer(text=foot_text)
@@ -51,7 +54,6 @@ class Command(command.AdminCommand, command.DirectOnlyCommand):
         is_command = args.group(1) in client.commands
         is_plugin = args.group(1) in client.plugins
         is_two = (is_reaction + is_command + is_plugin) > 1
-        has_flag = '-c' in message.content or '-r' in message.content or '-l' in message.content
 
         if is_two and not has_flag:
             yield from send_func(response_channel, MULTIPLE_RESULTS)
@@ -104,8 +106,23 @@ class Command(command.AdminCommand, command.DirectOnlyCommand):
             help.set_footer(text=foot_text)
             yield from send_func(response_channel, embed=help)
 
+        elif args.group(1).lower() in self.ADDON_TYPE_LIST:
+            # list addons of that type
+            addon_type = get_type(args.group(1))
+            addons = eval("client."+addon_type)
+            addons_dict=dict()
+            for i in addons:
+                pkg = client.get_package(i, addon_type)
+                if pkg not in addons_dict:
+                    addons_dict[pkg]=list()
+                addons_dict[pkg].append(i)
+
+            em = make_embed(addons_dict)
+            em.title = 'My '+addon_type
+            yield from self.send_message(response_channel, embed=em)
+
         else:
-            yield from send_func(response_channel, 'Command not found')
+            yield from send_func(response_channel, 'Add-on not found')
 
     def collect_args(self, message):
         return re.search(r'help\b(?:\sme)?(?:\swith)?(?:\s([^\-\s]\S*))?', message.content, re.I)
@@ -119,3 +136,29 @@ class Command(command.AdminCommand, command.DirectOnlyCommand):
         if verbose:
             return VERBOSE_HELPSTRING
         return HELP_HELPSTRING
+
+def process_list(iter, prefix='', suffix=''):
+    result = ''
+    for i in iter:
+        if str(i)[0] not in FIRST_LETTER_BLACKLIST and passes_filter(str(i)):
+            result+=prefix+str(i)+suffix+'\n'
+    return result
+
+def make_embed(addons_dict, colour=0xff00ff):
+    footer={'text':'@Idea help <item> for more info', 'icon_url':None}
+    desc = ''
+    for key in addons_dict:
+        if key is not None: # display package-less add-ons at the bottom
+            desc+='**'+key+'**'+'\n'
+            desc+=process_list(addons_dict[key], prefix='--')
+    desc+='**'+'[NO PACKAGE]'+'**'+'\n'
+    desc+=process_list(addons_dict[None], prefix='--')
+    em = embed.create_embed(description=desc, footer=footer, colour=colour)
+    return em
+
+
+def passes_filter(string):
+    return re.match(r'(.)\1*\_', string) is None
+
+def get_type(string):
+    return string.lower().rstrip('s')+'s'

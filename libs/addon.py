@@ -15,6 +15,14 @@ REACTION = 'reaction'
 
 DEFAULT = 'DEFAULT' # default config file section
 
+# add-on type constants
+COMMAND = 'command'
+COMMANDS = 'commands'
+REACTION = 'reaction'
+REACTIONS = 'reactions'
+PLUGIN = 'plugin'
+PLUGINS = 'plugins'
+
 '''Base class for all add-on systems (Commands, Reactions and Plugins).
 Their interfaces are extended from this interface.
 
@@ -34,6 +42,14 @@ class AddOn:
     REACTION = REACTION
 
     DEFAULT = DEFAULT
+
+    COMMAND = COMMAND
+    COMMANDS = COMMANDS
+    REACTION = REACTION
+    REACTIONS = REACTIONS
+    PLUGIN = PLUGIN
+    PLUGINS = PLUGINS
+    ADDON_TYPE_LIST = [COMMAND, COMMANDS, REACTION, REACTIONS, PLUGIN, PLUGINS] 
 
     DEFAULT_HELPSTRING = '''No help information available.
     Please contact a maintainer to fix this.'''
