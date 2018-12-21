@@ -1,6 +1,7 @@
 from libs import plugin, embed
 import discord, traceback, asyncio
 import logging
+from os import getcwd
 
 def errorLogging():
     '''() -> Logger class
@@ -38,9 +39,11 @@ class Plugin(plugin.AdminPlugin):
             self.public_namespace.merge_commanders(commanders2)
         user_id = self.public_namespace.commanders[type][name][self.public_namespace.OWNER]
         user = discord.utils.find(lambda u: u.id == user_id, self.bot.get_all_members())
+        error = ''.join(traceback.format_exc())
+        error = error.replace(str(os.getcwd()), '') # remove root folder leaks on errors
         if user:
             title = '**%s** (command) raised an exception during execution' %cmd_name
-            desc = '```'+(''.join(traceback.format_exc()))+'```'
+            desc = '```'+error+'```'
             desc+= '**message.content**```%s```' %message.content
             footer = {'text':'You are receiving this because your are the registered owner of this %s' %type[:-1], 'icon_url':None}
             em = embed.create_embed(footer=footer, title=title, description=desc, colour=0xff1111)
