@@ -125,7 +125,7 @@ Currently, this will scrape any valid twitter account given to it '''
             except:
                 # Prevent a failed run from crashing the whole thread
                 twitLog.warning("Scraping run failed. Either the page has changed or the page is unavailable...")
-                traceback.print_exc()
+                # traceback.print_exc()
         self.data.save()
 
     def get_tweet(self, bso):
