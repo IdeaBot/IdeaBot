@@ -1,8 +1,8 @@
 from libs import testlib
 
-test_add_messages = ['{bot-mention} todo add we are number 1 to Test List', '{bot-mention} todo make a stew', '{bot-mention} todo add My life']
+test_add_messages = ['{bot-mention} todo add we are number 1 to Test List', '{bot-mention} todo make a stew', '{bot-mention} todo add My life', '{bot-mention} todo add You Suck to 000000000011223344']
 test_list_messages = ['{bot-mention} todo', '{bot-mention} todo list for Test List']
-test_rm_messages = ['{bot-mention} todo reMove My life', '{bot-mention} todo finish make a stew ', '{bot-mention} todo complete we are number 1 from Test List']
+test_rm_messages = ['{bot-mention} todo reMove My life', '{bot-mention} todo finish make a stew ', '{bot-mention} todo complete we are number 1 from Test List', '{bot-mention} todo remove You Suck to 000000000011223344']
 
 class ToDoTest(testlib.TestCase):
     def setUp(self):
