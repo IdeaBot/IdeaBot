@@ -11,7 +11,10 @@ class Plugin(plugin.OnReadyPlugin):
     '''Displays pretty messages about the bot's status on the Idea Development Server
 
 **Usage**
-```NONE``` '''
+```@Idea add cardlife server status ```
+
+For more information, do
+```@Idea help cardlife_add_server_status``` '''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.CHANNEL_ID = self.config[CHANNEL]

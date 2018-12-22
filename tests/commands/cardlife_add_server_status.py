@@ -4,8 +4,8 @@ test_messages=['add CardLife server status message {bot-mention}', '{bot-mention
 
 class CardLifeTest(testlib.TestCase):
     def test_cardlife_add(self):
-        self.assertIn('add_server_status', self.bot.commands)
-        cl = self.bot.commands['add_server_status']
+        self.assertIn('cardlife_add_server_status', self.bot.commands)
+        cl = self.bot.commands['cardlife_add_server_status']
         for msg_content in test_messages:
             msg_content = msg_content.replace('{bot-mention}', '<@!'+self.bot.user.id+'>')
             msg = testlib.TestMessage(content=msg_content)
