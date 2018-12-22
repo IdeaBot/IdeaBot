@@ -5,7 +5,7 @@ class Command(command.DirectOnlyCommand, command.Config):
     '''Retrieve CardLife server information about a specific server
 
 **Usage**
-```@Idea server info "<server>" ```
+```@Idea cardlife server info "<server>" ```
 Where
 **`<server>`** is an online server displayed in the CardLife server list
 
@@ -13,7 +13,7 @@ Please do not overuse this command - respect the CardLife servers'''
     def matches(self, message):
         return self.collect_args(message)!=None
     def collect_args(self, message):
-        return re.search(r'server\s*info(?:rmation)?(?:\s*for)?\s+\"([^\"]+)\"', message.content, re.I)
+        return re.search(r'(?:cardlife|cl)\s*server\s*info(?:rmation)?(?:\s*for)?\s+\"([^\"]+)\"', message.content, re.I)
 
     def action(self, message):
         try:

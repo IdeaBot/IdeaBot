@@ -5,6 +5,7 @@ import requests
 CHANNEL = 'channel'
 MESSAGE = 'message'
 OFFICIAL_SERVERS = 'official_server_data'
+MESSAGES = 'messagesloc'
 
 class Plugin(plugin.OnReadyPlugin):
     '''Displays pretty messages about the bot's status on the Idea Development Server
@@ -18,6 +19,10 @@ class Plugin(plugin.OnReadyPlugin):
         self.channel = discord.Object(id=self.CHANNEL_ID)
         self.message = discord.Object(id=self.MESSAGE_ID)
         self.message.channel = self.channel
+        self.public_namespace.messages_file = dataloader.loadfile_safe(self.config[MESSAGES], load_as='json')
+        if not isinstance(self.public_namespace.messages_file.content, dict):
+            self.public_namespace.messages_file.content = dict()
+        self.public_namespace.messages = self.public_namespace.messages_file.content
         self.official_servers_data = dataloader.loadfile_safe(self.config[OFFICIAL_SERVERS])
         if not isinstance(self.official_servers_data.content, dict):
             self.official_servers_data.content = dict()
@@ -76,8 +81,11 @@ class Plugin(plugin.OnReadyPlugin):
             footer=dict()
             footer['text'] = '(Unofficial) CardLife API'
             footer['icon_url'] = None
-
-            await self.edit_message(self.message, embed=embed.create_embed(description=description, footer=footer, colour=0xddae60, title=title))
+            em = embed.create_embed(description=description, footer=footer, colour=0xddae60, title=title)
+            for msg in self.public_namespace.messages:
+                message = discord.Object(id=msg)
+                message.channel = discord.Object(id=self.public_namespace.messages[msg])
+                await self.edit_message(message, embed=em)
             self.official_servers_data.content=self.official_servers
             self.official_servers_data.save()
         except:

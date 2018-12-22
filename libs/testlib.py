@@ -37,6 +37,7 @@ class TestBot(bot.Bot):
         self.last_message = content
         self.last_embed = embed
         self.last_destination = destination
+        return TestMessage(channel=destination, content=content, embed=embed)
 
     @asyncio.coroutine
     def edit_message(self, message, new_content=None, *args, embed=None):
@@ -45,6 +46,8 @@ class TestBot(bot.Bot):
         self.last_edit_message = message
         self.last_message = new_content
         self.last_embed = embed
+        message.content = new_content
+        return message
 
     @asyncio.coroutine
     def add_reaction(self, message, emoji):
@@ -97,12 +100,13 @@ class TestChannel(discord.Channel):
         self.server=server
 
 class TestMessage(discord.Message):
-    def __init__(self, content='', message_id='0'*18, channel=TestChannel(), author=TestMember(), server=TestServer()):
+    def __init__(self, content='', message_id='0'*18, channel=TestChannel(), author=TestMember(), server=TestServer(), embed=None):
         self.id=message_id
         self.channel=channel
         self.author=author
         self.content=content
         self.server=server
+        self.embed=embed
 
 class TestEmoji(discord.Emoji):
     def __init__(self, name='test', emoji_id='0'*18, server=TestServer(), url='https://www.google.com/favicon.ico'):
