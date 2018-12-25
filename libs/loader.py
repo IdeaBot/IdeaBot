@@ -1,3 +1,12 @@
+'''
+Collection of functions to easily load the various add-on types from python files.
+This library is mainly used in bot.py and the setup command package.
+
+This heavily relies on Python's importlib in order to allow for new add-ons to be loaded live (no restart required)
+
+@author: NGnius
+'''
+
 from libs import dataloader, plugin, addon
 import importlib, logging
 from os import listdir

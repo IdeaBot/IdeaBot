@@ -1,3 +1,10 @@
+'''
+Simplistic voting which keeps track of voters in a poll and can tally the results
+This is used by the advancedvote command & reaction package
+
+@author: NGnius
+'''
+
 class Poll():
     '''Base class for voting systems that everything below extends
     This class should never be used in a concrete implementation'''

@@ -1,3 +1,14 @@
+'''
+A collection of fake stuff to automate testing without Discord.
+
+This is NOT fully featured, and many testing errors can be caused by this lib.
+The advantage comes in the form of automation and speed, since most
+calls to discord.py functions/methods are emulated by testlib.
+Testlib also doesn't need internet access, which is great for offline testing.
+
+@author: NGnius
+'''
+
 import bot
 import asyncio, logging, discord
 import unittest

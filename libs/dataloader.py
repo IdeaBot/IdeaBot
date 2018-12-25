@@ -1,3 +1,19 @@
+'''
+An attempt at a one-size-fits-all file handler. Depending on the file ending,
+the way the file is loaded is automatically determined.
+
+dataloader currently supports the following file extensions (loaded as):
+.json (JSON)
+.txt (Raw Text)
+.csv (Comma-Seperated Values)
+.config (config; handled by configparser python lib)
+.db (SQLite 3)*
+
+*SQLite support is very primitive atm
+
+@author: NGnius
+'''
+
 import configparser, json, sqlite3
 class datafile: # loads and parses files depending on file ending
     def loadConfig(self, filename):

@@ -1,3 +1,15 @@
+'''
+Security and validation for add-ons
+
+verifyaddon uses the file of an add-on to make sure it follows some
+rules before letting it loose on Idea users.
+During verification, the add-on file is imported into a seperate thread, effectively
+sandboxing it.
+This library is mainly used by !load of the setup command package
+
+@author: NGnius
+'''
+
 from libs import dataloader, plugin, command, reaction
 import re, os, importlib
 from multiprocessing import Process

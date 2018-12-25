@@ -1,3 +1,11 @@
+'''
+A collection of functions to save and load various bot variables to/from file.
+This takes into account discord.py classes and tries to emulate those as closely as possible
+with basic discord.Object objects
+
+@author: NGnius
+'''
+
 from libs import dataloader, voting
 import discord
 

@@ -1,3 +1,13 @@
+'''
+Base class and constants for commands, plugins and reactions.
+
+The AddOn class is a basic interface for all add-ons to extend and implement.
+libs.command.Command, libs.reaction.Reaction and libs.plugin.Plugin all extend this interface.
+Since command, plugin and reaction are all subclasses of addon, addon should be
+unecessary to import.
+
+@author: NGnius
+'''
 # bot api methods accessible to a regular AddOn
 # if more functionality is required, consider using an Admin interfance class
 SEND_MESSAGE = 'send_message'
@@ -23,12 +33,12 @@ REACTIONS = 'reactions'
 PLUGIN = 'plugin'
 PLUGINS = 'plugins'
 
-'''Base class for all add-on systems (Commands, Reactions and Plugins).
-Their interfaces are extended from this interface.
-
-The AddOn interface class should not be used to directly implement a Command/Reaction/Plugin.
-'''
 class AddOn:
+    '''Base class for all add-on systems (Commands, Reactions and Plugins).
+    Their interfaces are extended from this interface.
+
+    The AddOn interface class should not be used to directly implement a Command/Reaction/Plugin.
+    '''
     SEND_MESSAGE = SEND_MESSAGE
     EDIT_MESSAGE = EDIT_MESSAGE
     ADD_REACTION = ADD_REACTION
@@ -49,7 +59,7 @@ class AddOn:
     REACTIONS = REACTIONS
     PLUGIN = PLUGIN
     PLUGINS = PLUGINS
-    ADDON_TYPE_LIST = [COMMAND, COMMANDS, REACTION, REACTIONS, PLUGIN, PLUGINS] 
+    ADDON_TYPE_LIST = [COMMAND, COMMANDS, REACTION, REACTIONS, PLUGIN, PLUGINS]
 
     DEFAULT_HELPSTRING = '''No help information available.
     Please contact a maintainer to fix this.'''

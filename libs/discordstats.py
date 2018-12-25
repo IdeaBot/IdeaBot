@@ -1,3 +1,12 @@
+'''
+Saves discord info to file. This is mainly used in debugging.
+
+This is a collection of tools which take into account the discord.py memory structure
+in order to save relevant and understandable data.
+
+@author: NGnius
+'''
+
 from libs import dataloader
 import datetime
 

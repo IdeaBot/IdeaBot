@@ -1,3 +1,10 @@
+'''
+Simple time and timezone lib for simple conversions between timezones
+This is used by the timezone command
+
+@author: NGnius
+'''
+
 # this badly needs to be changed to OOP, because it's rly hurtful to understand right now
 from libs import dataloader
 
