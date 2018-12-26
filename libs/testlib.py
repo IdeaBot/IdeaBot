@@ -13,6 +13,8 @@ import bot
 import asyncio, logging, discord
 import unittest
 
+import collections
+
 def testLogging():
     '''() -> Logger class
     set ups main log so that it outputs to ./test.log and then returns the log'''
@@ -33,8 +35,8 @@ class TestBot(bot.Bot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, log=testlog, **kwargs)
         self.user=TestUser(user_id='9'*18)
-        #del(self.__setattr__)
-        #del(self.__getattr__)
+        self.message_history=collections.deque(maxlen=64)
+        self.reaction_history=collections.deque(maxlen=64)
         self.last_message = None
         self.last_edit_message = None
         self.last_reaction_message = None
@@ -45,10 +47,12 @@ class TestBot(bot.Bot):
     #TODO: make assert methods that check the inputs to these methods
     @asyncio.coroutine
     def send_message(self, destination, content=None, *args, tts=False, embed=None):
+        message = TestMessage(channel=destination, content=content, embed=embed)
         self.last_message = content
         self.last_embed = embed
         self.last_destination = destination
-        return TestMessage(channel=destination, content=content, embed=embed)
+        self.message_history.append(message)
+        return message
 
     @asyncio.coroutine
     def edit_message(self, message, new_content=None, *args, embed=None):
@@ -62,15 +66,21 @@ class TestBot(bot.Bot):
 
     @asyncio.coroutine
     def add_reaction(self, message, emoji):
+        reaction = TestReaction(emoji=emoji, message=message)
         self.last_reaction_emoji=emoji
         self.last_reaction_message = message
         self.last_reaction_action=ADD
+        self.reaction_history.append(reaction)
+        return reaction
 
     @asyncio.coroutine
     def remove_reaction(self, message, emoji, member):
+        reaction = TestReaction(emoji=emoji, message=message)
         self.last_reaction_emoji=emoji
         self.last_reaction_message = message
         self.last_reaction_action=REMOVE
+        self.reaction_history.append(reaction)
+        return reaction
 
     @asyncio.coroutine
     def send_typing(self,destination):
