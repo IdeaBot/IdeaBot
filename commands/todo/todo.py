@@ -23,10 +23,10 @@ Where
 **`<task>`** is a task or the index of a task
 **`<list>`** is the name of the list
 
-To remove task in position <number> of your todo list
+To remove task from your todo list
 ```@Idea todo remove <task> [from <list>]```
 Where
-**`<task>`** is a task or the index of a task
+**`<task>`** is a task or the number of a task
 **`<list>`** is the name of the list
 
 **NOTE:** [something] means something is optional'''
@@ -83,7 +83,7 @@ Where
         if op_flag=='add':
             # TODO: check for permissions to edit list_name before adding task
             index = self.get_index_for_task(task, todoFiles[list_name])
-            if index!=-1:
+            if index!=-1 and re.match(r'^\d+$', task)!=None:
                 msg_content = "I'm sorry, `%s` already exists" % task
             else:
                 todoFiles[list_name].content.append(task)
@@ -118,16 +118,16 @@ Where
         return result[:-1]
 
     def get_index_for_task(self, task, todoFile):
-        try:
-            return int(task)-1
-        except ValueError:
-            pass
         for i in range(len(todoFile.content)):
             if todoFile.content[i]==task:
                 return i
         for i in range(len(todoFile.content)):
             if task in todoFile.content[i]:
                 return i
+        try:
+            return int(task)-1
+        except ValueError:
+            pass
         return -1
 
     def shutdown(self):
