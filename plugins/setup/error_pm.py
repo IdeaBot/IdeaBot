@@ -40,7 +40,7 @@ class Plugin(plugin.AdminPlugin):
         user_id = self.public_namespace.commanders[type][name][self.public_namespace.OWNER]
         user = discord.utils.find(lambda u: u.id == user_id, self.bot.get_all_members())
         error = ''.join(traceback.format_exc())
-        error = error.replace(str(os.getcwd()), '') # remove root folder leaks on errors
+        error = error.replace(str(getcwd()), '') # remove root folder leaks on errors
         if user:
             title = '**%s** (command) raised an exception during execution' %cmd_name
             desc = '```'+error+'```'
@@ -71,8 +71,10 @@ class Plugin(plugin.AdminPlugin):
         user_id = self.public_namespace.commanders[type][name][self.public_namespace.OWNER]
         user = discord.utils.find(lambda u: u.id == user_id, self.bot.get_all_members())
         if user:
+            error = ''.join(traceback.format_exc())
+            error = error.replace(str(getcwd()), '')
             title = '**%s** (reaction) raised an exception during execution' %cmd_name
-            desc = '```'+(''.join(traceback.format_exc()))+'```'
+            desc = '```'+error+'```'
             footer = {'text':'You are receiving this because you are the registered owner of this %s' %type[:-1], 'icon_url':None}
             em = embed.create_embed(footer=footer, title=title, description=desc, colour=0xff1111)
             try:
