@@ -99,10 +99,11 @@ Where
                 todoFiles[list_name].save()
                 msg_content = "Task deleted"
         # always list tasks after everything
+        list_display_name = list_name if list_name!=message.author.id else 'Todo'
         if re.search(r'\s-p', message.content, re.I) != None or list_name!=message.author.id:
-            yield from self.send_message(message.channel, msg_content, embed=embed.create_embed(title=list_name, description=self.todo2string(todoFiles[list_name]), colour=0xffffff))
+            yield from self.send_message(message.channel, msg_content, embed=embed.create_embed(title=list_display_name, description=self.todo2string(todoFiles[list_name]), colour=0xffffff))
         else:
-            yield from self.send_message(message.author, msg_content, embed=embed.create_embed(title=list_name, description=self.todo2string(todoFiles[list_name]), colour=0xffffff))
+            yield from self.send_message(message.author, msg_content, embed=embed.create_embed(title=list_display_name, description=self.todo2string(todoFiles[list_name]), colour=0xffffff))
         # save file
         todoFiles[list_name].save()
         # remove file from memory if empty, to save some memory
