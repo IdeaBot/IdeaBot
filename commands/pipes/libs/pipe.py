@@ -16,16 +16,16 @@ class Pipe():
     #pipe permissions constants
     PUBLIC = 'public'
     PRIVATE = 'private'
-    
+
     def __init__(self, name, root_channel, channels=list(), mode=ONEWAY, style=DEFAULT, perm=PUBLIC, owner='', maintainers=list()):
         self.name = name
         self.root_channel = root_channel
-        self.channels = channels
+        self.channels = list(channels)
         self.mode = mode
         self.style = style
         self.perm = perm
         self.owner = owner
-        self.maintainers = maintainers
+        self.maintainers = list(maintainers)
 
     def dump(self):
         return {'name':self.name, 'root_channel':self.root_channel, 'channels':self.channels, 'mode':self.mode, 'style':self.style, 'perm':self.perm, 'owner':self.owner, 'maintainers':self.maintainers}

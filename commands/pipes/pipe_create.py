@@ -90,7 +90,7 @@ The Sewer pipe also makes messages look fancy and only you can access the Sewer,
         else:
             perm = pipe.Pipe.PUBLIC
         # create new pipe from args
-        new_pipe = pipe.Pipe(name=name, root_channel=root_channel, mode=mode, style=style, perm=perm, owner=owner)
+        new_pipe = pipe.Pipe(name=name, root_channel=root_channel, mode=mode, style=style, perm=perm, owner=owner, channels=list(), maintainers=list())
         self.public_namespace.pipes.append(new_pipe)
         yield from self.send_message(message.channel, 'Pipe created')
 
