@@ -48,6 +48,7 @@ removes #bot-testing from the Sewer pipe
                 pipe.channels.append(channel_id)
             else:
                 yield from self.send_message(message.channel, 'I\'m sorry, <#%s> is already a channel in %s' %(channel_id, pipe_name) )
+                return
         elif _action == 'remove':
             if channel_id in pipe.channels:
                 pipe.channels.remove(channel_id)

@@ -80,10 +80,10 @@ This uses Google API calls'''
                 '&timeMax='+( datetime.datetime.utcnow()+datetime.timedelta(seconds=self.threaded_period) ).isoformat()+'Z'+
                 '&maxResults=%s' % MAX_RESULTS +
                 '&singleEvents=True&orderBy=startTime')
-                print(url)
+                # print(url)
                 events = requests.get(url)
                 events = json.loads(events.text)
-                print(json.dumps(events, indent=2))
+                # print(json.dumps(events, indent=2))
                 items = events['items']
                 for item in items:
                     if item['id'] not in self.data.content[calendar_id][self.SEEN]:
@@ -100,6 +100,8 @@ This uses Google API calls'''
                         for discord_channel in self.data.content[calendar_id][self.CHANNELS]:
                             q.put({self.SEND_MESSAGE:{plugin.ARGS:[discord.Object(id=discord_channel)], plugin.KWARGS:{'embed':cal_embed}}})
             except:
-                print('Failed on %s' %calendar_id)
-                traceback.print_exc()
+                # TODO: log request failure
+                # print('Failed on %s' %calendar_id)
+                # traceback.print_exc()
+                pass
         self.data.save()
