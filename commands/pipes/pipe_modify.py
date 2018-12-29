@@ -29,7 +29,7 @@ removes #bot-testing from the Sewer pipe
         if pipe is None:
             yield from self.send_message(message.channel, 'I\'m sorry, I couldn\'t find `%s`. ' %pipe_name)
             return
-        if pipe.perm==pipe_class.Pipe.PRIVATE and message.author.id != pipe.owner and message.author.id not in pipe.maintainer:
+        if pipe.perm==pipe_class.Pipe.PRIVATE and message.author.id != pipe.owner and message.author.id not in pipe.maintainers:
             yield from self.send_message(message.channel, 'I\'m sorry, only the owner or maintainers of `%s` can modify this pipe. ' %pipe_name)
             return
         # determine action
@@ -38,7 +38,7 @@ removes #bot-testing from the Sewer pipe
         else:
             _action = 'remove'
         # process channel
-        if not args.group(2) or args.group(2).lower() in ['this']:
+        if args.group(2) is None or args.group(2).lower() in ['this']:
             channel_id = message.channel.id
         else:
             channel_id = args.group(2)[2:-1]
@@ -57,7 +57,7 @@ removes #bot-testing from the Sewer pipe
         yield from self.send_message(message.channel, 'Successfully %sed <#%s> from/to %s' %(_action, channel_id, pipe_name) )
 
     def collect_args(self, message):
-        return re.search(r'(connect|append|add|remove|delete)\s+(this|<#(?:\d{18})>)?\s+(?:to|from)\s+pipe\s+(.+)', message.content, re.I)
+        return re.search(r'(connect|append|add|remove|delete)\s+(?:(this|\<\#(?:\d{18})\>)\s+)?(?:to|from)\s+pipe\s+(.+)', message.content, re.I)
 
     def collect_name_args(self, string):
         option1 = re.match(r'\"(.+?)\"', string)

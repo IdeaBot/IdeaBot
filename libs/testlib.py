@@ -105,7 +105,7 @@ class TestUser(discord.User):
         #self.mention='<@!'+user_id+'>'
 
 class TestServer(discord.Server):
-    def __init__(self, server_id='0'*18, me=TestUser()):
+    def __init__(self, server_id='0'*18, me=TestUser(user_id='9'*18)):
         self.id=server_id
         self.me=me
 

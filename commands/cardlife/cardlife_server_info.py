@@ -25,8 +25,8 @@ Please do not overuse this command - respect the CardLife servers'''
             lobby = requests.post('https://live-lobby.cardlifegame.com/api/client/games', json={"PublicId":auth_json["PublicId"]})
             lobby_json = lobby.json()
         except: # catch server errors
-            # TODO: log failed server requests 
-            # yield from self.send_message(message.channel, 'Unable to contact CardLife servers')
+            # TODO: log failed server requests
+            yield from self.send_message(message.channel, 'Unable to contact CardLife servers')
             return
 
         args = self.collect_args(message)

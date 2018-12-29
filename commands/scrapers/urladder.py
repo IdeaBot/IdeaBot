@@ -13,10 +13,17 @@ class Command(command.DirectOnlyCommand):
     '''UrlAdderCommand adds a url to the appropriate scraper watch list.
 URLs in the watch list will have updates posted in the current channel or the channel with id <channel id>.
 
-Currently supported sites: reddit, twitter, youtube, google calendar and freeforum
+Currently supported sites: reddit, twitter, youtube *channel*, google calendar and freeforum
 
 **Usage**
-```@Idea (add or remove) <url> [<channel id>]``` '''
+```@Idea (add/remove) url <url> [<channel id>]```
+Where
+**`<url>`** is the url to
+
+**Example**
+`@Idea add url https://www.youtube.com/channel/UCYO_jab_esuFRV4b17AJtAw`
+
+**NOTE:** YouTube *channels* are supported, but *users* are not. The urls are different'''
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -51,7 +58,7 @@ Currently supported sites: reddit, twitter, youtube, google calendar and freefor
             yield from self.send_message(message.channel, 'Trying to %s <%s> ' %(action, url))
 
     def collect_args(self, message):
-        return re.search(r'\b(add|remove)\s+(\S+)\s?(\d{18})?', message.content, re.I)
+        return re.search(r'\b(add|remove)\s+url\s+(\S+)(?:\s+?(\d{18}))?', message.content, re.I)
 
     def determine_type(self, url):
         if '.reddit.com/r/' in url:

@@ -33,7 +33,7 @@ The Sewer pipe also makes messages look fancy and only you can access the Sewer,
 
     def collect_args(self, message):
         args = re.search(r'(?:create|make|new|plumb)\s+(?:(.+?)\s+)?pipe\s+(.+)', message.content, re.I)
-        if args and args.group(1):
+        if args is not None and args.group(1) is not None:
             mode_args = self.collect_mode_args(args.group(1))
             style_args = self.collect_style_args(args.group(1))
             perm_args = self.collect_perm_args(args.group(1))
@@ -42,12 +42,18 @@ The Sewer pipe also makes messages look fancy and only you can access the Sewer,
         return args
 
     def collect_mode_args(self, string):
+        if string is None:
+            return
         return re.search(r'(?:(one|two|1|2)\-?way)', string, re.I)
 
     def collect_perm_args(self, string):
+        if string is None:
+            return
         return re.search(r'(private|public)', string, re.I)
 
     def collect_style_args(self, string):
+        if string is None:
+            return
         return re.search(r'(default|embed|embeded|embedded|fancy|simple)', string, re.I)
 
     def collect_name_args(self, string):

@@ -6,13 +6,13 @@ class Command(command.DirectOnlyCommand):
     '''Authorize other people to modify your pipe
 
 **Usage**
-```@Idea authorize <user> for "<name>"```
+```@Idea authorize <user> for pipe "<name>"```
 Where
 **`<user>`** is the user you want to add (user mention/ping)
 **`<name>`** is the name of the pipe you want `<user>` to be able to modify
 
 **Example**
-`@Idea authorize @NGnius#1234 for "Sewer"`
+`@Idea authorize @NGnius#1234 for pipe "Sewer"`
 authorizes NGnius#1234 to add & remove channels from your Sewer pipe
 
 **NOTE:** By `modify` I mean use `pipe_modify`; for more information, do

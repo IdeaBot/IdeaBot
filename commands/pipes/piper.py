@@ -30,8 +30,12 @@ Also check out help information for `pipe_delete` and `pipe_authorize` commands 
 
 **NOTE:** The piper command does not do anything on it's own. It relies on the rest of the pipes command package '''
     def matches(self, message):
+        if message.server is None:
+            return False
+        if message.server.me.id == message.author.id:
+            return False
         for pipe in self.public_namespace.pipes:
-            print(pipe.getAllStartChannels())
+            # print(pipe.getAllStartChannels())
             if message.channel.id in pipe.getAllStartChannels():
                 return True
         return False

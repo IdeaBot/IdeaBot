@@ -12,7 +12,9 @@ class CardLifeTest(testlib.TestCase):
             msg_content = msg_content.replace('{bot-mention}', '<@!'+self.bot.user.id+'>')
             msg = testlib.TestMessage(content=msg_content)
             self.assertTrue(cl._matches(msg), "Match failed for %s" % msg_content)
-            self.assertIsNone(self.loop.run_until_complete(cl._action(msg)), "Action failed for %s" % msg_content)
+            self.loop.run_until_complete(cl._action(msg))
             #NOTE: credentials for CardLife API are incorrect so response will not be an embed
-            self.assertIsNotNone(self.bot.last_message, "Missing message for %s" %msg_content)
+            self.assertGreaterEqual(len(self.bot.message_history), 1, "Missing message for %s" %msg_content)
+            last_msg = self.bot.message_history.pop()
+            self.assertIsNotNone(last_msg.content or last_msg.embed, "Missing message for %s" %msg_content)
             self.bot.last_message=None
