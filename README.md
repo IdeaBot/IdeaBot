@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/NGnius/IdeaBot.svg?style=svg)](https://circleci.com/gh/NGnius/IdeaBot)
+[![CircleCI](https://circleci.com/gh/IdeaBot/IdeaBot.svg?style=svg)](https://circleci.com/gh/IdeaBot/IdeaBot)
 
 # IdeaBot
 Hello! Welcome to IdeaBot's repository.
@@ -14,7 +14,7 @@ To get started,
 ### Important Links ###
 
 * [IdeaBot dev & support server](https://discord.gg/gwq2vS7)
-* [Bugs & feature requests](https://github.com/NGnius/IdeaBot/issues)
+* [Bugs & feature requests](https://github.com/IdeaBot/IdeaBot/issues)
 * [Invite link](https://discordapp.com/oauth2/authorize?client_id=397854238774001673&scope=bot&permissions=268561472)
 
 ### Idea Flavours ###
@@ -23,13 +23,13 @@ To get started,
 This is the easier option for the devs and curious users, since it allows you to maintain and modify Idea without affecting anyone else.
 If you want to help by contributing to the IdeaBot repository, this is the best option for you.
 Unfortunately, this requires a reasonable knowledge of computers and Discord.
-To get started with self-hosted, check out [Idea's wiki](https://github.com/NGnius/IdeaBot/wiki).
+To get started with self-hosted, check out [Idea's wiki](https://github.com/IdeaBot/IdeaBot/wiki).
 
 >***Dev-hosted***
 This is the easier option for users and server owners, since you don't have to worry about maintaining Idea.
 If you want an easy plug-and-play option, this is the option for you!
 Unfortunately, adding your own add-ons to Idea is harder.
-To solve that, Idea comes with a lot of useful add-ons pre-installed ([see basic features](https://github.com/NGnius/IdeaBot/wiki/Basic-Usage)).
+To solve that, Idea comes with a lot of useful add-ons pre-installed ([see basic features](https://github.com/IdeaBot/IdeaBot/wiki/Basic-Usage)).
 To get started with dev-hosted, [invite Idea to your server](https://discordapp.com/oauth2/authorize?client_id=397854238774001673&scope=bot&permissions=268561472).
 
 ## Development Aims and Goals
@@ -76,4 +76,4 @@ Until then: If it works, don't fix it! (Unless you want to, in which case feel f
 ## General Guidelines for Contributing
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for information about helping out!
 
-Check out [projects](https://github.com/NGnius/IdeaBot/projects) for ideas for Idea.
+Check out [projects](https://github.com/IdeaBot/IdeaBot/projects) for ideas for Idea.
