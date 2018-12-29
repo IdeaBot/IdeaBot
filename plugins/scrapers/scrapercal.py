@@ -1,5 +1,5 @@
 from libs import plugin, embed, dataloader
-import requests, datetime, traceback, json, discord
+import requests, datetime, time, traceback, json, discord
 
 URL = 'url'
 TOKEN = 'token'
@@ -60,7 +60,8 @@ This uses Google API calls'''
         # handle new items from url_adder
         while not newGCal.empty():
             item = newGCal.get()
-            item["id"]=item["id"].split('0%40group.calendar.google.com')[0]
+            item["id"]=item["id"].split('%40group.calendar.google.com')[0]
+            item["id"]=item["id"]+"@group.calendar.google.com"
             if item["action"] == "remove" or item["action"] == "delete":
                 try:
                     del(self.data.content[item["id"]][self.CHANNELS][self.data.content[item["id"]][self.CHANNELS].index(item[self.CHANNEL])])
@@ -74,11 +75,15 @@ This uses Google API calls'''
         # do scrape things
         for calendar_id in self.data.content:
             try:
-                events = requests.get(self.config[URL]+calendar_id+r'/events'+'?key='+self.config[TOKEN]+
+                url = (self.config[URL]+calendar_id+r'/events'+'?key='+self.config[TOKEN]+
                 '&timeMin='+datetime.datetime.utcnow().isoformat()+'Z'+
+                '&timeMax='+( datetime.datetime.utcnow()+datetime.timedelta(seconds=self.threaded_period) ).isoformat()+'Z'+
                 '&maxResults=%s' % MAX_RESULTS +
                 '&singleEvents=True&orderBy=startTime')
+                print(url)
+                events = requests.get(url)
                 events = json.loads(events.text)
+                print(json.dumps(events, indent=2))
                 items = events['items']
                 for item in items:
                     if item['id'] not in self.data.content[calendar_id][self.SEEN]:
@@ -90,11 +95,11 @@ This uses Google API calls'''
                             datething = 'date'
                         description+='\n' + self.process_date(item['start'][datething]) + ' to ' + self.process_date(item['end'][datething]) + ' UTC\n'
                         cal_embed = embed.create_embed( description=description,
-                        author={'name':'G-Cal', 'url':item['htmlLink'], 'icon_url':GOOGLE_LOGO},
+                        author={'name':'Google Calendar (Upcoming)', 'url':item['htmlLink'], 'icon_url':GOOGLE_LOGO},
                         footer={'text':item['organizer']['displayName'], 'icon_url':None} )
                         for discord_channel in self.data.content[calendar_id][self.CHANNELS]:
                             q.put({self.SEND_MESSAGE:{plugin.ARGS:[discord.Object(id=discord_channel)], plugin.KWARGS:{'embed':cal_embed}}})
             except:
                 print('Failed on %s' %calendar_id)
-                # traceback.print_exc()
+                traceback.print_exc()
         self.data.save()
