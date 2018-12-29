@@ -46,7 +46,8 @@ For more information, do
                 servers_json = lobby.json()
 
             except: # catch server errors
-                print("Received invalid response from CardLife servers, skipping run...")
+                # TODO: log failed server requests
+                # print("Received invalid response from CardLife servers, skipping run...")
                 return # skip run
 
             # create embed description
