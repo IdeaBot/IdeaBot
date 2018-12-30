@@ -1,0 +1,45 @@
+{
+    "up": {
+        "NGLOF": {
+            "description": "You materialize in a spot with four portals, one in each direction. Your view past the portals is blocked by large amounts of old theme park rides.",
+            "name": "NG's LAND-O-FUN",
+            "item": null
+        }
+    },
+    "down": {
+        "NGLOF": {
+            "description": "You materialize in a spot with four portals, one in each direction. Your view past the portals is blocked by large amounts of old theme park rides.",
+            "name": "NG's LAND-O-FUN",
+            "item": null
+        },
+        "Borg": {
+            "description": "A cyborg is right beside you. It continues along regardless, almost as though it didn't notice you.",
+            "name": "Unimatrix 1f",
+            "item": null
+        }
+    },
+    "left": {
+        "NGLOF": {
+            "description": "You materialize in a spot with four portals, one in each direction. Your view past the portals is blocked by large amounts of old theme park rides.",
+            "name": "NG's LAND-O-FUN",
+            "item": null
+        },
+        "Brooklyn": {
+            "description": "Jake Peralta pops up and yells 'Nine-Nine'",
+            "name": "B99",
+            "item": null
+        }
+    },
+    "right": {
+        "NGLOF": {
+            "description": "You materialize in a spot with four portals, one in each direction. Your view past the portals is blocked by large amounts of old theme park rides.",
+            "name": "NG's LAND-O-FUN",
+            "item": null
+        },
+        "Potato": {
+            "description": "You wake up in a field of potatoes",
+            "name": "Potato Land",
+            "item": null
+        }
+    }
+}
