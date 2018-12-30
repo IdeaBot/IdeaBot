@@ -73,6 +73,7 @@ if __name__ == '__main__': # main
             stop = True
             print("KeyboardInterrupting tf outta here")
         except:
+            stop = True
             print("Something went wrong")
             traceback.print_exc()
         if not stop:

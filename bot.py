@@ -12,8 +12,11 @@ import discord
 import asyncio
 import traceback
 
-from libs import dataloader, embed, command, savetome, plugin, loader
+from libs import dataloader, embed, savetome, command, plugin, reaction, addon, loader
 from libs import reaction as reactioncommand
+import importlib, logging
+# from os import listdir
+from os.path import isfile, join
 from collections import OrderedDict
 
 DEFAULT = 'DEFAULT'
@@ -36,6 +39,13 @@ commands = None
 reactions = None
 plugins = None
 packages = None
+
+#config = dataloader.datafile("./data/config.config")
+#config.content = config.content["DEFAULT"]
+
+EMOJIS_LOCATION = 'emojiloc'
+PERMISSIONS_LOCATION = 'permissionsloc'
+CONFIGEND = 'configend'
 
 class Bot(discord.Client):
     '''A Discord client which has config data and a list of commands to try when
@@ -223,6 +233,64 @@ class Bot(discord.Client):
         self.register_plugin(cmd, name, package=package)
         return self.plugins[name]
 
+    def load_addon(self, filename, name, package=None, reload=False, **kwargs):
+        '''(str, str[, str]) -> plugin.Plugin or reaction.Reaction or command.Command
+        initilizes an addon and then registers it with the bot
+        This determines what sort of add-on the file contains and acts accordingly'''
+        if package:
+            if package not in loader.sub_namespaces:
+                loader.sub_namespaces[package]=loader.CustomNamespace()
+            namespace = loader.sub_namespaces[package]
+        else:
+            namespace = loader.namespace
+        if package==None:
+            package_loader = ""
+        else:
+            package_loader = package
+        # do loading stuff
+        # generate params for addon init
+        bot=self
+        config_end=self.data_config[CONFIGEND]
+        events = {addon.READY:bot.wait_until_ready, addon.LOGIN:bot.wait_until_login, addon.MESSAGE:bot.wait_for_message, addon.REACTION:bot.wait_for_reaction}
+        api_methods = {addon.SEND_MESSAGE:bot.send_message, addon.EDIT_MESSAGE:bot.edit_message, addon.ADD_REACTION:bot.add_reaction, addon.REMOVE_REACTION:bot.remove_reaction, addon.SEND_TYPING:bot.send_typing, addon.SEND_FILE:bot.send_file}
+        # user_func uses lambda to create a closure on bot
+        parameters = {'user':lambda: bot.user, 'namespace':namespace, 'always_watch_messages':bot.always_watch_messages, 'role_messages':bot.role_messages, 'api_methods':api_methods, 'events':events, 'all_emojis_func':bot.get_all_emojis}
+        # find config file
+        if filename[:-len(".py")]+config_end in self.data_config:
+            parameters['config']=self.data_config[filename[:-len(".py")]+config_end]
+        elif isfile(join('addons', package_loader, filename[:-len(".py")]+'.config')):
+            parameters['config']=join('addons', package_loader, filename[:-len(".py")]+'.config')
+        else:
+            parameters['config']=None
+            
+        if package_loader:
+            package_loader = package+'.'
+        temp_lib = importlib.import_module("addons."+package_loader+filename[:-len(".py")]) # import reaction
+        if reload: # dumb way to do it, ik
+            temp_lib = importlib.reload(temp_lib)
+
+        if 'Plugin' in dir(temp_lib):
+            plugin_instance = temp_lib.Plugin(**parameters, **kwargs) # init plugin
+            self.register_plugin(plugin_instance, name, package=package)
+            return self.plugins[name]
+        elif 'Command' in dir(temp_lib):
+            # add command-specific parameters
+            perms_dir=self.data_config[PERMISSIONS_LOCATION]
+            parameters['perms_loc']=perms_dir+'c.'+package_loader+filename[:-len(".py")]+".json"
+            cmd_instance = temp_lib.Command(**parameters, **kwargs) # init command
+            self.register_command(cmd_instance, name, package=package)
+            return self.commands[name]
+        elif 'Reaction' in dir(temp_lib):
+            # add reaction-specific parameters
+            perms_dir=self.data_config[PERMISSIONS_LOCATION]
+            emoji_dir=self.data_config[EMOJIS_LOCATION]
+            parameters['perms_loc']=perms_dir+'r.'+package_loader+filename[:-len(".py")]+".json"
+            parameters['emoji_loc']=emoji_dir+package_loader+filename[:-len(".py")]+".json"
+            reaction_instance = temp_lib.Reaction(**parameters, **kwargs) # init reaction
+            self.register_reaction_command(reaction_instance, name, package=package)
+            return self.reactions[name]
+
+
     def load_addons(self):
         if packages is not None:
             self.packages = packages
@@ -242,6 +310,7 @@ class Bot(discord.Client):
             for name in plugins:
                 plugin_object = plugins[name]
                 self.loop.create_task(plugin_object._action())
+        loader.load_addons('addons', self, register=True)
 
 
     @asyncio.coroutine

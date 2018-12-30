@@ -1,5 +1,5 @@
 from libs import testlib
-from commands.pipes.libs import pipe as pipe_class
+from addons.pipes.libs import pipe as pipe_class
 
 create_messages = ['{bot-mention} plumb private pipe "Yo mama"', '{bot-mention} create private pipe Yo', '{bot-mention} create pipe "42"']
 authorize_messages = ['{bot-mention} authorize {maintainer-mention} for pipe "test pipe"']
