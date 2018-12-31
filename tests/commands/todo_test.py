@@ -17,7 +17,7 @@ class ToDoTest(testlib.TestCase):
             msg = testlib.TestMessage(content=msg_content)
             self.assertTrue(self.todo_cmd._matches(msg), "Match failed for %s " % msg_content)
             self.assertIsNone(self.loop.run_until_complete(self.todo_cmd._action(msg)), "Action failed for %s " % msg_content)
-            self.assertIsNotNone(self.bot.last_embed, "Missing embed")
+            self.assertIsNotNone(self.bot.last_embed, "Missing embed for %s"%msg_content)
             self.bot.last_embed=None
 
         # test listing
@@ -27,7 +27,7 @@ class ToDoTest(testlib.TestCase):
             msg = testlib.TestMessage(content=msg_content)
             self.assertTrue(self.todo_cmd._matches(msg), "Match failed for %s " % msg_content)
             self.assertIsNone(self.loop.run_until_complete(self.todo_cmd._action(msg)), "Action failed for %s " % msg_content)
-            self.assertIsNotNone(self.bot.last_embed, "Missing embed")
+            self.assertIsNotNone(self.bot.last_embed, "Missing embed for %s"%msg_content)
             self.bot.last_embed=None
 
         # test removing
@@ -37,6 +37,6 @@ class ToDoTest(testlib.TestCase):
             msg = testlib.TestMessage(content=msg_content)
             self.assertTrue(self.todo_cmd._matches(msg), "Match failed for %s " % msg_content)
             self.assertIsNone(self.loop.run_until_complete(self.todo_cmd._action(msg)), "Action failed for %s " % msg_content)
-            self.assertIsNotNone(self.bot.last_embed, "Missing embed")
+            self.assertIsNotNone(self.bot.last_embed, "Missing embed for %s"%msg_content)
             # print(self.bot.last_embed)
             self.bot.last_embed=None

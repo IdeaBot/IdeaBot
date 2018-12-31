@@ -63,6 +63,11 @@ class Bot(discord.Client):
 
     ADMINS=ADMINS
 
+    commands = OrderedDict() # maps names to commands
+    reactions = OrderedDict() # maps names to reaction commands
+    plugins = OrderedDict() # maps names to plugins
+    packages = dict()
+
     def __init__(self, config, log):
         '''(str, Logger, fun) -> Bot
         config: a string which is the loaction of the base config file
@@ -80,13 +85,9 @@ class Bot(discord.Client):
         super().__init__(max_messages=max_messages)
         self.log = log
         self.data = dict()
-        self.commands = OrderedDict() # maps names to commands
-        self.reactions = OrderedDict() # maps names to reaction commands
-        self.plugins = OrderedDict() # maps names to plugins
-        self.packages = dict()
         self.always_watch_messages = {LOADING_WARNING}
         self.role_messages= savetome.load_role_messages(self.data_config[ROLE_MSG_LOCATION], self.get_all_emojis)
-        self.load_addons()
+        self.load_addons(reload=True)
 
     def add_data(self, name, content_from=DEFAULT):
         '''(str, str) -> None
@@ -262,7 +263,7 @@ class Bot(discord.Client):
             parameters['config']=join('addons', package_loader, filename[:-len(".py")]+'.config')
         else:
             parameters['config']=None
-            
+
         if package_loader:
             package_loader = package+'.'
         temp_lib = importlib.import_module("addons."+package_loader+filename[:-len(".py")]) # import reaction
@@ -291,25 +292,14 @@ class Bot(discord.Client):
             return self.reactions[name]
 
 
-    def load_addons(self):
-        if packages is not None:
-            self.packages = packages
-        if commands is None:
+    def load_addons(self, reload=False):
+        if len(self.commands)==0 or reload:
             loader.load_commands('commands', self, register=True)
-        else:
-            self.commands = commands
-        if reactions is None:
+        if len(self.reactions)==0 or reload:
             loader.load_reactions('reactions', self, register=True)
-        else:
-            self.reactions = reactions
-        if plugins is None:
-            loader.load_plugins('plugins', self, register=True)
-        else:
-            # this may not play nicely with asyncio
-            self.plugins = plugins
-            for name in plugins:
-                plugin_object = plugins[name]
-                self.loop.create_task(plugin_object._action())
+        if len(self.plugins)!=0:
+            self.plugins.clear()
+        loader.load_plugins('plugins', self, register=True)
         loader.load_addons('addons', self, register=True)
 
 
@@ -537,4 +527,5 @@ class Bot(discord.Client):
             self.plugins[cmd_name]._shutdown()
 
         savetome.save_role_messages(self.data_config[ROLE_MSG_LOCATION], self.role_messages)
+        self.loop.run_until_complete(self.loop.shutdown_asyncgens())
         self.loop.stop()
