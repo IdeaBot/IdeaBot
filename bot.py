@@ -77,7 +77,7 @@ class Bot(discord.Client):
         self.data = dict()
         self.always_watch_messages = {LOADING_WARNING}
         self.role_messages= savetome.load_role_messages(self.data_config[ROLE_MSG_LOCATION], self.get_all_emojis)
-        self.load_addons()
+        self.load_addons(reload=True)
 
     def add_data(self, name, content_from=DEFAULT):
         '''(str, str) -> None
@@ -224,10 +224,10 @@ class Bot(discord.Client):
         self.register_plugin(cmd, name, package=package)
         return self.plugins[name]
 
-    def load_addons(self):
-        if len(self.commands)==0:
+    def load_addons(self, reload=False):
+        if len(self.commands)==0 or reload:
             loader.load_commands('commands', self, register=True)
-        if len(self.reactions)==0:
+        if len(self.reactions)==0 or reload:
             loader.load_reactions('reactions', self, register=True)
         if len(self.plugins)!=0:
             self.plugins.clear()
