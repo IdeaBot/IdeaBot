@@ -1,0 +1,18 @@
+[submodule "addons/tasks"]
+	path = addons/tasks
+	url = https://github.com/IdeaBot/tasks
+[submodule "addons/web_scraper"]
+	path = addons/web_scraper
+	url = https://github.com/IdeaBot/web_scraper
+[submodule "addons/votes"]
+	path = addons/votes
+	url = https://github.com/IdeaBot/votes
+[submodule "addons/pipes"]
+	path = addons/pipes
+	url = https://github.com/IdeaBot/pipes
+[submodule "addons/basics"]
+	path = addons/basics
+	url = https://github.com/IdeaBot/basics
+[submodule "addons/CardLife"]
+	path = addons/CardLife
+	url = https://github.com/IdeaBot/CardLife
