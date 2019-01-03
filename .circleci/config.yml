@@ -33,12 +33,12 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip install -r requirements.txt
-            
+
       - run:
           name: load submodules
           command: |
             git submodule sync
-            git submodule update
+            git submodule update --init
 
       - save_cache:
           paths:
