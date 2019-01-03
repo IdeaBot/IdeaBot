@@ -37,8 +37,9 @@ jobs:
       - run:
           name: load submodules
           command: |
-            git submodule sync
-            git submodule update --init
+            git submodule sync --recursive
+            git submodule update --init --recursive
+            git submodule update --checkout --force
 
       - save_cache:
           paths:
