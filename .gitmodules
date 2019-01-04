@@ -16,3 +16,24 @@
 [submodule "addons/CardLife"]
 	path = addons/CardLife
 	url = https://github.com/IdeaBot/CardLife
+[submodule "addons/roller"]
+	path = addons/roller
+	url = https://github.com/IdeaBot/roller
+[submodule "addons/explorer"]
+	path = addons/explorer
+	url = https://github.com/IdeaBot/explorer
+[submodule "addons/funkin"]
+	path = addons/funkin
+	url = https://github.com/IdeaBot/funkin
+[submodule "addons/bot-tweaks"]
+	path = addons/bot-tweaks
+	url = https://github.com/IdeaBot/bot-tweaks
+[submodule "addons/dev-addons"]
+	path = addons/dev-addons
+	url = https://github.com/IdeaBot/dev-addons
+[submodule "addons/quotes"]
+	path = addons/quotes
+	url = https://github.com/IdeaBot/quotes
+[submodule "addons/karma"]
+	path = addons/karma
+	url = https://github.com/IdeaBot/karma
