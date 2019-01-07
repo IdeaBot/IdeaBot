@@ -37,3 +37,6 @@
 [submodule "addons/karma"]
 	path = addons/karma
 	url = https://github.com/IdeaBot/karma
+[submodule "addons/UIdea"]
+	path = addons/UIdea
+	url = https://github.com/IdeaBot/UIdea
