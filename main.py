@@ -76,6 +76,7 @@ if __name__ == '__main__': # main
             print("Something went wrong")
             traceback.print_exc()
         bot._shutdown()
+        del(bot)
         if not stop:
             print("Something tripped up - reconnecting Discord API")
 
