@@ -40,3 +40,6 @@
 [submodule "addons/UIdea"]
 	path = addons/UIdea
 	url = https://github.com/IdeaBot/UIdea
+[submodule "addons/Robocraft"]
+	path = addons/Robocraft
+	url = https://github.com/IdeaBot/Robocraft
