@@ -527,5 +527,6 @@ class Bot(discord.Client):
             self.plugins[cmd_name]._shutdown()
 
         savetome.save_role_messages(self.data_config[ROLE_MSG_LOCATION], self.role_messages)
+        self.message_stuff()
         self.loop.run_until_complete(self.loop.shutdown_asyncgens())
         self.loop.stop()
