@@ -4,6 +4,8 @@ import bot as botlib
 
 from libs import dataloader, embed, command, reaction, savetome, loader
 
+import time
+
 MSG_BACKUP_LOCATION='msgbackuploc'
 WATCH_MSG_LOCATION='alwayswatchmsgloc'
 ROLE_MSG_LOCATION='rolemessagesloc'
@@ -22,6 +24,8 @@ MANAGE_VOTE_PERM = 'managevoteperm'
 DEV_PERM = 'devperm'
 STATISTICS_PERM = 'statsperm'
 MANAGE_ROLES_PERM = 'manageroleperm'
+
+RESTART_WAIT = 2 # seconds to wait before trying to start the bot again
 
 def configureDiscordLogging():
     '''() -> None
@@ -76,8 +80,10 @@ if __name__ == '__main__': # main
             stop = True
             print("Something went wrong")
             traceback.print_exc()
+        bot._shutdown()
+        del(bot)
         if not stop:
             print("Something tripped up - reconnecting Discord API")
+            time.sleep(RESTART_WAIT)
 
-    bot._shutdown()
     print("Ended")
