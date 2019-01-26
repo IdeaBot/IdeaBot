@@ -6,7 +6,7 @@ Hello! Welcome to IdeaBot's repository.
 Idea is an open-source modular discord bot.
 Originally developed as a side project to meet the needs of the Idea Project community server,
 Idea has grown into a powerful bot for programmers and users alike.
-Idea focuses on allowing users to build their own commands with the easy to learn [Python language](https://www.python.org/).
+IdeaGames removes all the fluff commands and focuses on one thing: games. Currently, IdeaGames includes functionality for CardLife and Robocraft, both cool games from FreeJam that you should check out!
 To get started,
 [add Idea to your server](https://discordapp.com/oauth2/authorize?client_id=397854238774001673&scope=bot&permissions=268561472).
 
@@ -15,7 +15,7 @@ To get started,
 
 * [IdeaBot dev & support server](https://discord.gg/gwq2vS7)
 * [Bugs & feature requests](https://github.com/IdeaBot/IdeaBot/issues)
-* [Invite link](https://discordapp.com/oauth2/authorize?client_id=397854238774001673&scope=bot&permissions=268561472)
+* [Invite link](https://discordapp.com/oauth2/authorize?client_id=538540153824739328&scope=bot&permissions=19456)
 
 ### Idea Flavours ###
 
@@ -30,7 +30,7 @@ This is the easier option for users and server owners, since you don't have to w
 If you want an easy plug-and-play option, this is the option for you!
 Unfortunately, adding your own add-ons to Idea is harder.
 To solve that, Idea comes with a lot of useful add-ons pre-installed ([see basic features](https://github.com/IdeaBot/IdeaBot/wiki/Basic-Usage)).
-To get started with dev-hosted, [invite Idea to your server](https://discordapp.com/oauth2/authorize?client_id=397854238774001673&scope=bot&permissions=268561472).
+To get started with dev-hosted, [invite Idea to your server](https://discordapp.com/oauth2/authorize?client_id=538540153824739328&scope=bot&permissions=19456).
 
 ## Development Aims and Goals
 
