@@ -1,14 +1,16 @@
-import logging, asyncio, traceback
+import logging
+import asyncio
+import traceback
 
 import bot as botlib
 
-from libs import dataloader, embed, command, reaction, savetome, loader
+from libs import dataloader
 
 import time
 
-MSG_BACKUP_LOCATION='msgbackuploc'
-WATCH_MSG_LOCATION='alwayswatchmsgloc'
-ROLE_MSG_LOCATION='rolemessagesloc'
+MSG_BACKUP_LOCATION = 'msgbackuploc'
+WATCH_MSG_LOCATION = 'alwayswatchmsgloc'
+ROLE_MSG_LOCATION = 'rolemessagesloc'
 COMMANDS_DIR = './commands'
 REACTIONS_DIR = './reactions'
 PLUGINS_DIR = './plugins'
@@ -25,7 +27,8 @@ DEV_PERM = 'devperm'
 STATISTICS_PERM = 'statsperm'
 MANAGE_ROLES_PERM = 'manageroleperm'
 
-RESTART_WAIT = 2 # seconds to wait before trying to start the bot again
+RESTART_WAIT = 2  # seconds to wait before trying to start the bot again
+
 
 def configureDiscordLogging():
     '''() -> None
@@ -36,9 +39,10 @@ def configureDiscordLogging():
     handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
     logger.addHandler(handler)
 
+
 def mainLogging():
     '''() -> Logger class
-    set ups main log so that it outputs to ./main.log and then returns the log'''
+    set ups main log outputing to ./main.log and then returns the log'''
     logger = logging.getLogger('main')
     logger.setLevel(logging.INFO)
     handler = logging.FileHandler(filename='main.log', encoding='utf-8', mode='w')
@@ -46,9 +50,10 @@ def mainLogging():
     logger.addHandler(handler)
     return logger
 
+
 configureDiscordLogging()
 
-if __name__ == '__main__': # main
+if __name__ == '__main__':  # main
     # init stuff
     loop = asyncio.get_event_loop()
     config = dataloader.datafile("./data/config.config")
@@ -59,7 +64,7 @@ if __name__ == '__main__': # main
     log = mainLogging()
 
     print("Starting bot...")
-    #run until logged out
+    # run until logged out
     stop = False
     while not stop:
         try:
@@ -76,7 +81,7 @@ if __name__ == '__main__': # main
         except KeyboardInterrupt:
             stop = True
             print("KeyboardInterrupting tf outta here")
-        except:
+        except Exception as e:
             stop = True
             print("Something went wrong")
             traceback.print_exc()
