@@ -56,8 +56,8 @@ class TestBot(bot.Bot):
 
     @asyncio.coroutine
     def edit_message(self, message, new_content=None, *args, embed=None):
-        self.last_message = content
-        self.last_destination = destination
+        self.last_message = new_content
+        self.last_destination = message.channel
         self.last_edit_message = message
         self.last_message = new_content
         self.last_embed = embed
@@ -97,6 +97,10 @@ class TestBot(bot.Bot):
     @asyncio.coroutine
     def get_user_info(*args):
         return TestUser()
+    
+    @asyncio.coroutine
+    def delete_message(*args, **kwargs):
+        return
 
 class TestUser(discord.User):
     def __init__(self, user_id='0'*18, name='test'):
@@ -127,7 +131,10 @@ class TestMessage(discord.Message):
         self.author=author
         self.content=content
         self.server=server
-        self.embed=embed
+        if embed is None:
+            self.embeds = list()
+        else:
+            self.embeds=[embed.to_dict()]
 
 class TestEmoji(discord.Emoji):
     def __init__(self, name='test', emoji_id='0'*18, server=TestServer(), url='https://www.google.com/favicon.ico'):
@@ -144,10 +151,11 @@ class TestReaction(discord.Reaction):
         self.me=False
         self.count=count
 
-import asyncio
 class TestCase(unittest.TestCase):
+    
     def setUp(self):
         self.bot = TestBot('./data/config.config')
         self.loop = asyncio.get_event_loop()
+        
     def tearDown(self):
         self.bot._shutdown()
