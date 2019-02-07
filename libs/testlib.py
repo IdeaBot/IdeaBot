@@ -109,20 +109,23 @@ class TestUser(discord.User):
         #self.mention='<@!'+user_id+'>'
 
 class TestServer(discord.Server):
-    def __init__(self, server_id='0'*18, me=TestUser(user_id='9'*18)):
+    def __init__(self, server_id='0'*18, me=TestUser(user_id='9'*18), name='TestServer'):
         self.id=server_id
         self.me=me
+        self.name=name
 
 class TestMember(discord.Member):
     def __init__(self, user_id='0'*18, server=TestServer()):
         self.id=user_id
         self.server=server
         #self.mention='<@!'+user_id+'>'
+        self.nick = None
 
 class TestChannel(discord.Channel):
-    def __init__(self, channel_id='0'*18, server=TestServer()):
+    def __init__(self, channel_id='0'*18, server=TestServer(), is_private=False):
         self.id=channel_id
         self.server=server
+        self.is_private=is_private
 
 class TestMessage(discord.Message):
     def __init__(self, content='', message_id='0'*18, channel=TestChannel(), author=TestMember(), server=TestServer(), embed=None):
