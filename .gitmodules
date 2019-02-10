@@ -43,3 +43,6 @@
 [submodule "addons/Robocraft"]
 	path = addons/Robocraft
 	url = https://github.com/IdeaBot/Robocraft
+[submodule "addons/toText"]
+	path = addons/toText
+	url = https://github.com/IdeaBot/toText

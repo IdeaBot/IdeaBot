@@ -34,11 +34,19 @@ jobs:
             . venv/bin/activate
             pip install -r requirements.txt
 
+      # addons stuff
       - run:
           name: load submodules
           command: |
             git submodule sync --recursive
             git submodule update --init --recursive
+      
+      - run:
+          name: install submodule dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r addons/**/requirements.txt
 
       - save_cache:
           paths:
