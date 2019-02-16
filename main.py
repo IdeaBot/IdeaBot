@@ -71,22 +71,28 @@ if __name__ == '__main__':  # main
             # init bot
             bot = botlib.Bot("./data/config.config", log)
             bot.add_data(botlib.CHANNEL_LOC)
-            # log in
-            if "token" in credentials.content:
-                loop.run_until_complete(bot.login(credentials.content["token"]))
-            else:
-                loop.run_until_complete(bot.login(credentials.content["username"], credentials.content["password"]))
-            # run bot
-            loop.run_until_complete(bot.connect())
-        except KeyboardInterrupt:
-            stop = True
-            print("KeyboardInterrupting tf outta here")
         except Exception as e:
             stop = True
-            print("Something went wrong")
+            print("Bot failed to start due to an error during initialization")
             traceback.print_exc()
-        bot._shutdown()
-        del(bot)
+            botlib.Bot.cancel_all_tasks(None)
+        if not stop:
+            try:
+                # log in
+                if "token" in credentials.content:
+                    loop.run_until_complete(bot.login(credentials.content["token"]))
+                else:
+                    loop.run_until_complete(bot.login(credentials.content["username"], credentials.content["password"]))
+                # run bot
+                loop.run_until_complete(bot.connect())
+            except KeyboardInterrupt:
+                stop = True
+                print("KeyboardInterrupting outta here")
+            except Exception as e:
+                print("Something went wrong")
+                traceback.print_exc()
+            bot._shutdown()
+            del(bot)
         if not stop:
             print("Something tripped up - reconnecting Discord API")
             time.sleep(RESTART_WAIT)

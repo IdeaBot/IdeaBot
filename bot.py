@@ -272,19 +272,31 @@ class Bot(discord.Client):
 
         if package_loader:
             package_loader = package+'.'
-        temp_lib = importlib.import_module("addons."+package_loader+filename[:-len(".py")])  # import reaction
+        try:
+            temp_lib = importlib.import_module("addons."+package_loader+filename[:-len(".py")])  # import reaction
+        except Exception as e:
+            print('While loading addons, failed to load python file %s' % filename)
+            raise e
         if reload:  # dumb way to do it, ik
             temp_lib = importlib.reload(temp_lib)
 
         if 'Plugin' in dir(temp_lib):
-            plugin_instance = temp_lib.Plugin(**parameters, **kwargs)  # init plugin
+            try:
+                plugin_instance = temp_lib.Plugin(**parameters, **kwargs)  # init plugin
+            except Exception as e:
+                self.log.warning('Failed to initialize plugin %s' % name)
+                raise e
             self.register_plugin(plugin_instance, name, package=package)
             return self.plugins[name]
         elif 'Command' in dir(temp_lib):
             # add command-specific parameters
             perms_dir = self.data_config[PERMISSIONS_LOCATION]
             parameters['perms_loc'] = perms_dir+'c.'+package_loader+filename[:-len(".py")]+".json"
-            cmd_instance = temp_lib.Command(**parameters, **kwargs)  # init command
+            try:
+                cmd_instance = temp_lib.Command(**parameters, **kwargs)  # init command
+            except Exception as e:
+                self.log.warning('Failed to initialize command %s' % name)
+                raise e
             self.register_command(cmd_instance, name, package=package)
             return self.commands[name]
         elif 'Reaction' in dir(temp_lib):
@@ -293,7 +305,11 @@ class Bot(discord.Client):
             emoji_dir = self.data_config[EMOJIS_LOCATION]
             parameters['perms_loc'] = perms_dir+'r.'+package_loader+filename[:-len(".py")]+".json"
             parameters['emoji_loc'] = emoji_dir+package_loader+filename[:-len(".py")]+".json"
-            reaction_instance = temp_lib.Reaction(**parameters, **kwargs)  # init reaction
+            try:
+                reaction_instance = temp_lib.Reaction(**parameters, **kwargs)  # init reaction
+            except Exception as e:
+                self.log.warning('Failed to initialize reaction %s' % name)
+                raise e
             self.register_reaction_command(reaction_instance, name, package=package)
             return self.reactions[name]
 
@@ -534,7 +550,7 @@ class Bot(discord.Client):
         self.cancel_all_tasks()
         # self.loop.run_until_complete(self.loop.shutdown_asyncgens())
         # self.loop.stop()
-    
+
     def cancel_all_tasks(self):
         tasks = asyncio.Task.all_tasks()
         for t in tasks:
