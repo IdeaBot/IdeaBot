@@ -89,7 +89,7 @@ class datafile: # loads and parses files depending on file ending
         self._connection.row_factory = sqlite3.Row
         self.cursor = self._connection.cursor()
         self.execute = self.cursor.execute
-        return connection
+        return self._connection
     def saveDB(self):
         '''() -> None
         commit changes to db'''

@@ -46,3 +46,6 @@
 [submodule "addons/toText"]
 	path = addons/toText
 	url = https://github.com/IdeaBot/toText
+[submodule "addons/filters"]
+	path = addons/filters
+	url = https://github.com/IdeaBot/filters
