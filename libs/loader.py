@@ -178,30 +178,3 @@ def load_plugins(folder, bot, register=False):
                             bot.register_package(bot.PLUGINS, sub_item[:-len(".py")], item)
                             plugins[sub_item[:-len(".py")]]=init_plugin(sub_item, sub_namespaces[item], bot, folder, package=item)
     return plugins
-
-def load_addons(folder, bot, register=False):
-    for item in sorted(listdir(folder)):
-        if isfile(join(folder, item)):
-            if item[-len(".py"):] == ".py" and item[0]!="_":
-                log.info("Loading addon in %s " % item)
-                if register:
-                    try:
-                        addon=bot.load_addon(item, item[:-len(".py")], package=None)
-                        assert addon is not None
-                    except Exception as e:
-                        print('Failed to load addon at %s' % join(folder, item))
-                        log.error(e)
-        elif item[0] != "_": # second level
-            if item not in sub_namespaces:
-                sub_namespaces[item]=CustomNamespace()
-            for sub_item in sorted(listdir(join(folder, item))):
-                if isfile(join(folder, item, sub_item)):
-                    if sub_item[-len(".py"):] == ".py" and sub_item[0]!="_":
-                        log.info("Loading addon in %s " % join(item, sub_item))
-                        if register:
-                            try:
-                                addon=bot.load_addon(sub_item, sub_item[:-len(".py")], package=item)
-                                assert addon is not None
-                            except Exception as e:
-                                print('Failed to load addon at %s' % join(folder, item, sub_item))
-                                log.error(e)

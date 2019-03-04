@@ -17,6 +17,7 @@ from libs import reaction as reactioncommand
 import importlib
 # import traceback
 # from os import listdir
+from os import listdir
 from os.path import isfile, join
 from collections import OrderedDict
 
@@ -86,7 +87,7 @@ class Bot(discord.Client):
         self.data = dict()
         self.always_watch_messages = {LOADING_WARNING}
         self.role_messages = savetome.load_role_messages(self.data_config[ROLE_MSG_LOCATION], self.get_all_emojis)
-        self.load_addons(reload=True)
+        self.load_all_addons(reload=True)
 
     def add_data(self, name, content_from=DEFAULT):
         '''(str, str) -> None
@@ -313,15 +314,43 @@ class Bot(discord.Client):
             self.register_reaction_command(reaction_instance, name, package=package)
             return self.reactions[name]
 
-    def load_addons(self, reload=False):
-        if len(self.commands) == 0 or reload:
-            loader.load_commands('commands', self, register=True)
-        if len(self.reactions) == 0 or reload:
-            loader.load_reactions('reactions', self, register=True)
-        if len(self.plugins) != 0:
-            self.plugins.clear()
-        loader.load_plugins('plugins', self, register=True)
-        loader.load_addons('addons', self, register=True)
+    def load_all_addons(self, reload=False):
+        if self.data_config['loadoldfolders']:
+            if len(self.commands) == 0 or reload:
+                loader.load_commands('commands', self, register=True)
+            if len(self.reactions) == 0 or reload:
+                loader.load_reactions('reactions', self, register=True)
+            # always relaod plugins
+            if len(self.plugins) != 0:
+                self.plugins.clear()
+            loader.load_plugins('plugins', self, register=True)
+        self.load_addons('addons', register=True)
+
+    def load_addons(self, folder, register=False):
+        bot = self
+        for item in sorted(listdir(folder)):
+            if isfile(join(folder, item)):
+                if item[-len(".py"):] == ".py" and item[0]!="_":
+                    self.log.info("Loading addon in %s " % item)
+                    if register:
+                        try:
+                            addon=bot.load_addon(item, item[:-len(".py")], package=None)
+                            assert addon is not None
+                        except Exception as e:
+                            print('Failed to load addon at %s' % join(folder, item))
+                            self.log.error(e)
+            elif item[0] != "_": # second level
+                for sub_item in sorted(listdir(join(folder, item))):
+                    if isfile(join(folder, item, sub_item)):
+                        if sub_item[-len(".py"):] == ".py" and sub_item[0]!="_":
+                            self.log.info("Loading addon in %s " % join(item, sub_item))
+                            if register:
+                                try:
+                                    addon=bot.load_addon(sub_item, sub_item[:-len(".py")], package=item)
+                                    assert addon is not None
+                                except Exception as e:
+                                    print('Failed to load addon at %s' % join(folder, item, sub_item))
+                                    self.log.error(e)
 
     @asyncio.coroutine
     def on_message(self, message):
