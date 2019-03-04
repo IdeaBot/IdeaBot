@@ -361,9 +361,11 @@ class Bot(discord.Client):
                         try:
                             addon=bot.load_addon(item, item[:-len(".py")], package=None)
                             assert addon is not None
+                        except AssertionError:
+                            self.log.info('No addon found in %s' % join(folder, item))
                         except Exception as e:
                             print('Failed to load addon at %s' % join(folder, item))
-                            self.log.error(e)
+                            self.log.error(('Failed to load %s reason: ' % join(folder, item)) + str(e))
             elif item[0] != "_": # second level
                 for sub_item in sorted(listdir(join(folder, item))):
                     if isfile(join(folder, item, sub_item)):
@@ -373,9 +375,11 @@ class Bot(discord.Client):
                                 try:
                                     addon=bot.load_addon(sub_item, sub_item[:-len(".py")], package=item)
                                     assert addon is not None
+                                except AssertionError:
+                                    self.log.info('No addon found in %s' % join(folder, item, sub_item))
                                 except Exception as e:
                                     print('Failed to load addon at %s' % join(folder, item, sub_item))
-                                    self.log.error(e)
+                                    self.log.error(('Failed to load %s reason: ' % join(folder, item, sub_item)) + str(e))
 
     @asyncio.coroutine
     def on_message(self, message):
@@ -447,6 +451,7 @@ class Bot(discord.Client):
         global _messages
         if not int(self.data_config['reloadmessages']):
             print("Skipping message reloading since reloadmessages is 0")
+            self.log.warning("Skipping message reloading; Idea will not react to messages seen before startup")
             return
         # load messages from file
         self.always_watch_messages.add(LOADING_WARNING)
