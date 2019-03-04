@@ -15,6 +15,8 @@ dataloader currently supports the following file extensions (loaded as):
 '''
 
 import configparser, json, sqlite3
+
+
 class datafile: # loads and parses files depending on file ending
     def loadConfig(self, filename):
         '''() -> Config class

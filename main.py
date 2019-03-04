@@ -29,7 +29,6 @@ MANAGE_ROLES_PERM = 'manageroleperm'
 
 RESTART_WAIT = 2  # seconds to wait before trying to start the bot again
 
-
 def configureDiscordLogging():
     '''() -> None
     set ups discord log so that it outputs to ./discord.log'''

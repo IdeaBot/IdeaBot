@@ -17,6 +17,7 @@ EMOJIS_LOCATION = 'emojiloc'
 PERMISSIONS_LOCATION = 'permissionsloc'
 CONFIGEND = 'configend'
 
+
 class CustomNamespace:
     '''For creating custom namespaces wherever necessary'''
     pass
