@@ -36,11 +36,11 @@ PLUGINS = 'plugins'
 # saved stuff
 # in the event of a crash, the data stored here can be used instead of loading
 # from storage and/or internet (slow)
-messages = None
-commands = None
-reactions = None
-plugins = None
-packages = None
+_messages = None
+_commands = None
+_reactions = None
+_plugins = None
+_packages = None
 
 EMOJIS_LOCATION = 'emojiloc'
 PERMISSIONS_LOCATION = 'permissionsloc'
@@ -108,7 +108,7 @@ class Bot(discord.Client):
     def register_command(self, cmd, name, package=None):
         '''(Command, str) -> None
         Registers a Command for execution when a message is received.'''
-        global commands
+        global _commands
         if not isinstance(cmd, command.Command):
             raise ValueError('Only commands may be registered in Bot::register_command')
         if name in self.commands:
@@ -122,12 +122,12 @@ class Bot(discord.Client):
                     self.commands.move_to_end(key)
         if package != '':
             self.register_package(COMMANDS, name, package)
-        commands = self.commands
+        _commands = self.commands
 
     def register_plugin(self, plugin_object, name, package=None):
         '''(Plugin, str) -> None
         Registers a Plugin which executes in a separate process'''
-        global plugins
+        global _plugins
         if not isinstance(plugin_object, plugin.Plugin):
             raise ValueError('Only plugins may be registered in Bot::register_plugin')
         if isinstance(plugin_object, plugin.AdminPlugin):  # give AdminPlugins access to all this class's variables
@@ -144,12 +144,12 @@ class Bot(discord.Client):
         if package != '':
             self.register_package(PLUGINS, name, package)
         self.loop.create_task(plugin_object._action())
-        plugins = self.plugins
+        _plugins = self.plugins
 
     def register_reaction_command(self, cmd, name, package=None):
         '''(reaction.Command, str) -> None
         Registers a reaction command for execution when a message is reacted to'''
-        global reactions
+        global _reactions
         if not (isinstance(cmd, reactioncommand.ReactionAddCommand) or isinstance(cmd, reactioncommand.ReactionRemoveCommand) or isinstance(cmd, reactioncommand.Dummy)):
             raise ValueError("%s is not a reaction command. Only reaction add/remove commands may be registered in Bot::register_reaction_command" % name)
         if name in self.reactions:
@@ -163,18 +163,18 @@ class Bot(discord.Client):
                     self.reactions.move_to_end(key)
         if package != '':
             self.register_package(REACTIONS, name, package)
-        reactions = self.reactions
+        _reactions = self.reactions
 
     def register_package(self, addon_type, name, package):
         '''(str, str) -> None
         Registers an add-on into a package'''
-        global packages
+        global _packages
         if package not in self.packages:
             new_package = {self.COMMANDS: list(), self.REACTIONS: list(), self.PLUGINS: list()}
             self.packages[package] = new_package
         if name not in self.packages[package][addon_type]:
             self.packages[package][addon_type].append(name)
-        packages = self.packages
+        _packages = self.packages
 
     def get_package(self, name, addon_type):
         for key in self.packages:
@@ -409,6 +409,7 @@ class Bot(discord.Client):
     def load_messages(self):
         '''(Bot) -> None
         Convenience function for loading the messages the bot might need from before it's last restart'''
+        global _messages
         # load messages from file
         self.always_watch_messages.add(LOADING_WARNING)
         try:
@@ -418,7 +419,7 @@ class Bot(discord.Client):
             messagefile.content = list()
 
         self.log.info("Loading %a messages" % len(messagefile.content))
-        if messages is None:
+        if _messages is None:
             for msg_str in messagefile.content:
                 channel_id, msg_id = msg_str.strip().split(":")
                 try:
@@ -490,14 +491,14 @@ class Bot(discord.Client):
     def save_messages(self):
         '''(Bot) -> None
         backup self.messages deque'''
-        global messages
+        global _messages
         if LOADING_WARNING not in self.always_watch_messages:  # if not still loading messages (likely from startup)
             messagefile = dataloader.newdatafile(dataloader.datafile("./data/config.config").content["DEFAULT"][MSG_BACKUP_LOCATION])
             for msg in self.messages:
                 messagefile.content.append(msg.channel.id + ":" + msg.id)
             messagefile.save()
             # self.log.info("Saved %a messages" % len(messagefile.content))
-            messages = self.messages
+            _messages = self.messages
         else:
             self.log.info("Messages are still being loaded, skipping save messages")
 
@@ -576,11 +577,11 @@ class Bot(discord.Client):
 
         savetome.save_role_messages(self.data_config[ROLE_MSG_LOCATION], self.role_messages)
         self.loop.run_until_complete(self.logout())
-        self.cancel_all_tasks()
+        self._cancel_all_tasks()
         # self.loop.run_until_complete(self.loop.shutdown_asyncgens())
         # self.loop.stop()
 
-    def cancel_all_tasks(self):
+    def _cancel_all_tasks(self):
         tasks = asyncio.Task.all_tasks()
         for t in tasks:
             t.cancel()

@@ -58,42 +58,42 @@ if __name__ == '__main__':  # main
     loop = asyncio.get_event_loop()
     config = dataloader.datafile("./data/config.config")
     config.content = config.content["DEFAULT"]
-    credentials = dataloader.datafile(config.content["credentialsloc"])
-    credentials.content = credentials.content["DEFAULT"]
+    _credentials = dataloader.datafile(config.content["credentialsloc"])
+    _credentials.content = _credentials.content["DEFAULT"]
 
     log = mainLogging()
 
     print("Starting bot...")
     # run until logged out
-    stop = False
-    while not stop:
+    _stop = False
+    while not _stop:
         try:
             # init bot
             bot = botlib.Bot("./data/config.config", log)
             bot.add_data(botlib.CHANNEL_LOC)
         except Exception as e:
-            stop = True
+            _stop = True
             print("Bot failed to start due to an error during initialization")
             traceback.print_exc()
             botlib.Bot.cancel_all_tasks(None)
-        if not stop:
+        if not _stop:
             try:
                 # log in
-                if "token" in credentials.content:
-                    loop.run_until_complete(bot.login(credentials.content["token"]))
+                if "token" in _credentials.content:
+                    loop.run_until_complete(bot.login(_credentials.content["token"]))
                 else:
-                    loop.run_until_complete(bot.login(credentials.content["username"], credentials.content["password"]))
+                    loop.run_until_complete(bot.login(_credentials.content["username"], _credentials.content["password"]))
                 # run bot
                 loop.run_until_complete(bot.connect())
             except KeyboardInterrupt:
-                stop = True
+                _stop = True
                 print("KeyboardInterrupting outta here")
             except Exception as e:
                 print("Something went wrong")
                 traceback.print_exc()
             bot._shutdown()
             del(bot)
-        if not stop:
+        if not _stop:
             print("Something tripped up - reconnecting Discord API")
             time.sleep(RESTART_WAIT)
 
