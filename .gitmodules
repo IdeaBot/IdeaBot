@@ -43,3 +43,12 @@
 [submodule "addons/Robocraft"]
 	path = addons/Robocraft
 	url = https://github.com/IdeaBot/Robocraft
+[submodule "addons/toText"]
+	path = addons/toText
+	url = https://github.com/IdeaBot/toText
+[submodule "addons/filters"]
+	path = addons/filters
+	url = https://github.com/IdeaBot/filters
+[submodule "addons/management"]
+	path = addons/management
+	url = https://github.com/IdeaBot/management

@@ -71,9 +71,9 @@ class Plugin(addon.AddOn):
             start_time = time.perf_counter()
             try:
                 await self.action()
-            except: # catch any exception that could crash the task
-                traceback.print_exc()
-                pass
+            except Exception as e: # catch any exception that could crash the task
+                # traceback.print_exc()
+                self._on_action_error(e)
             sleep_time = self.period - (time.perf_counter() - start_time)
             if sleep_time<0:
                 sleep_time=0
@@ -98,6 +98,19 @@ class Plugin(addon.AddOn):
         '''(Plugin) -> None
         called during bot shutdown/logout
         Use this to save any information that needs to be kept for the next time the bot starts up'''
+        pass
+
+    def _on_action_error(self, error):
+        '''(Plugin, Exception) -> None
+        Concrete implementations should not override this function.
+
+        the method to call on_action_error() '''
+        self.on_action_error(error)
+
+    def on_action_error(self, error):
+        ''' (Plugin, Exception) -> None
+        Called when action() raises an exception
+        Use this to handle error reporting or exceptional cases'''
         pass
 
 class ThreadedPlugin(Plugin):

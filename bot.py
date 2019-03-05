@@ -17,6 +17,7 @@ from libs import reaction as reactioncommand
 import importlib
 # import traceback
 # from os import listdir
+from os import listdir
 from os.path import isfile, join
 from collections import OrderedDict
 
@@ -35,11 +36,11 @@ PLUGINS = 'plugins'
 # saved stuff
 # in the event of a crash, the data stored here can be used instead of loading
 # from storage and/or internet (slow)
-messages = None
-commands = None
-reactions = None
-plugins = None
-packages = None
+_messages = None
+_commands = None
+_reactions = None
+_plugins = None
+_packages = None
 
 EMOJIS_LOCATION = 'emojiloc'
 PERMISSIONS_LOCATION = 'permissionsloc'
@@ -86,7 +87,7 @@ class Bot(discord.Client):
         self.data = dict()
         self.always_watch_messages = {LOADING_WARNING}
         self.role_messages = savetome.load_role_messages(self.data_config[ROLE_MSG_LOCATION], self.get_all_emojis)
-        self.load_addons(reload=True)
+        self.load_all_addons(reload=True)
 
     def add_data(self, name, content_from=DEFAULT):
         '''(str, str) -> None
@@ -107,7 +108,7 @@ class Bot(discord.Client):
     def register_command(self, cmd, name, package=None):
         '''(Command, str) -> None
         Registers a Command for execution when a message is received.'''
-        global commands
+        global _commands
         if not isinstance(cmd, command.Command):
             raise ValueError('Only commands may be registered in Bot::register_command')
         if name in self.commands:
@@ -121,12 +122,12 @@ class Bot(discord.Client):
                     self.commands.move_to_end(key)
         if package != '':
             self.register_package(COMMANDS, name, package)
-        commands = self.commands
+        _commands = self.commands
 
     def register_plugin(self, plugin_object, name, package=None):
         '''(Plugin, str) -> None
         Registers a Plugin which executes in a separate process'''
-        global plugins
+        global _plugins
         if not isinstance(plugin_object, plugin.Plugin):
             raise ValueError('Only plugins may be registered in Bot::register_plugin')
         if isinstance(plugin_object, plugin.AdminPlugin):  # give AdminPlugins access to all this class's variables
@@ -143,13 +144,15 @@ class Bot(discord.Client):
         if package != '':
             self.register_package(PLUGINS, name, package)
         self.loop.create_task(plugin_object._action())
-        plugins = self.plugins
+        _plugins = self.plugins
 
     def register_reaction_command(self, cmd, name, package=None):
         '''(reaction.Command, str) -> None
         Registers a reaction command for execution when a message is reacted to'''
-        global reactions
-        if not (isinstance(cmd, reactioncommand.ReactionAddCommand) or isinstance(cmd, reactioncommand.ReactionRemoveCommand) or isinstance(cmd, reactioncommand.Dummy)):
+        global _reactions
+        if not (isinstance(cmd, reactioncommand.ReactionAddCommand)\
+            or isinstance(cmd, reactioncommand.ReactionRemoveCommand)\
+            or isinstance(cmd, reactioncommand.Dummy)):
             raise ValueError("%s is not a reaction command. Only reaction add/remove commands may be registered in Bot::register_reaction_command" % name)
         if name in self.reactions:
             self.reactions[name] = cmd
@@ -162,18 +165,22 @@ class Bot(discord.Client):
                     self.reactions.move_to_end(key)
         if package != '':
             self.register_package(REACTIONS, name, package)
-        reactions = self.reactions
+        _reactions = self.reactions
 
     def register_package(self, addon_type, name, package):
         '''(str, str) -> None
         Registers an add-on into a package'''
-        global packages
+        global _packages
         if package not in self.packages:
-            new_package = {self.COMMANDS: list(), self.REACTIONS: list(), self.PLUGINS: list()}
+            new_package = {
+            self.COMMANDS: list(),
+            self.REACTIONS: list(),
+            self.PLUGINS: list()
+            }
             self.packages[package] = new_package
         if name not in self.packages[package][addon_type]:
             self.packages[package][addon_type].append(name)
-        packages = self.packages
+        _packages = self.packages
 
     def get_package(self, name, addon_type):
         for key in self.packages:
@@ -255,13 +262,32 @@ class Bot(discord.Client):
         else:
             package_loader = package
         # do loading stuff
-        # generate params for addon init
+        # params for addon init
         bot = self
         config_end = self.data_config[CONFIGEND]
-        events = {addon.READY: bot.wait_until_ready, addon.LOGIN: bot.wait_until_login, addon.MESSAGE: bot.wait_for_message, addon.REACTION: bot.wait_for_reaction}
-        api_methods = {addon.SEND_MESSAGE: bot.send_message, addon.EDIT_MESSAGE: bot.edit_message, addon.ADD_REACTION: bot.add_reaction, addon.REMOVE_REACTION: bot.remove_reaction, addon.SEND_TYPING: bot.send_typing, addon.SEND_FILE: bot.send_file}
-        # user_func uses lambda to create a closure on bot
-        parameters = {'user': lambda: bot.user, 'namespace': namespace, 'always_watch_messages': bot.always_watch_messages, 'role_messages': bot.role_messages, 'api_methods': api_methods, 'events': events, 'all_emojis_func': bot.get_all_emojis}
+        events = {
+        addon.READY: bot.wait_until_ready,
+        addon.LOGIN: bot.wait_until_login,
+        addon.MESSAGE: bot.wait_for_message,
+        addon.REACTION: bot.wait_for_reaction
+        }
+        api_methods = {
+        addon.SEND_MESSAGE: bot.send_message,
+        addon.EDIT_MESSAGE: bot.edit_message,
+        addon.ADD_REACTION: bot.add_reaction,
+        addon.REMOVE_REACTION: bot.remove_reaction,
+        addon.SEND_TYPING: bot.send_typing,
+        addon.SEND_FILE: bot.send_file
+        }
+        parameters = {
+        'user': lambda: bot.user, # user_func uses lambda to create a closure on bot
+        'namespace': namespace,
+        'always_watch_messages': bot.always_watch_messages,
+        'role_messages': bot.role_messages,
+        'api_methods': api_methods,
+        'events': events,
+        'all_emojis_func': bot.get_all_emojis
+        }
         # find config file
         if filename[:-len(".py")]+config_end in self.data_config:
             parameters['config'] = self.data_config[filename[:-len(".py")]+config_end]
@@ -272,19 +298,31 @@ class Bot(discord.Client):
 
         if package_loader:
             package_loader = package+'.'
-        temp_lib = importlib.import_module("addons."+package_loader+filename[:-len(".py")])  # import reaction
+        try:
+            temp_lib = importlib.import_module("addons."+package_loader+filename[:-len(".py")])  # import reaction
+        except Exception as e:
+            print('While loading addons, failed to load python file %s' % filename)
+            raise e
         if reload:  # dumb way to do it, ik
             temp_lib = importlib.reload(temp_lib)
 
         if 'Plugin' in dir(temp_lib):
-            plugin_instance = temp_lib.Plugin(**parameters, **kwargs)  # init plugin
+            try:
+                plugin_instance = temp_lib.Plugin(**parameters, **kwargs)  # init plugin
+            except Exception as e:
+                self.log.warning('Failed to initialize plugin %s' % name)
+                raise e
             self.register_plugin(plugin_instance, name, package=package)
             return self.plugins[name]
         elif 'Command' in dir(temp_lib):
             # add command-specific parameters
             perms_dir = self.data_config[PERMISSIONS_LOCATION]
             parameters['perms_loc'] = perms_dir+'c.'+package_loader+filename[:-len(".py")]+".json"
-            cmd_instance = temp_lib.Command(**parameters, **kwargs)  # init command
+            try:
+                cmd_instance = temp_lib.Command(**parameters, **kwargs)  # init command
+            except Exception as e:
+                self.log.warning('Failed to initialize command %s' % name)
+                raise e
             self.register_command(cmd_instance, name, package=package)
             return self.commands[name]
         elif 'Reaction' in dir(temp_lib):
@@ -293,24 +331,61 @@ class Bot(discord.Client):
             emoji_dir = self.data_config[EMOJIS_LOCATION]
             parameters['perms_loc'] = perms_dir+'r.'+package_loader+filename[:-len(".py")]+".json"
             parameters['emoji_loc'] = emoji_dir+package_loader+filename[:-len(".py")]+".json"
-            reaction_instance = temp_lib.Reaction(**parameters, **kwargs)  # init reaction
+            try:
+                reaction_instance = temp_lib.Reaction(**parameters, **kwargs)  # init reaction
+            except Exception as e:
+                self.log.warning('Failed to initialize reaction %s' % name)
+                raise e
             self.register_reaction_command(reaction_instance, name, package=package)
             return self.reactions[name]
 
-    def load_addons(self, reload=False):
-        if len(self.commands) == 0 or reload:
-            loader.load_commands('commands', self, register=True)
-        if len(self.reactions) == 0 or reload:
-            loader.load_reactions('reactions', self, register=True)
-        if len(self.plugins) != 0:
-            self.plugins.clear()
-        loader.load_plugins('plugins', self, register=True)
-        loader.load_addons('addons', self, register=True)
+    def load_all_addons(self, reload=False):
+        if int(self.data_config['loadoldfolders']):
+            if len(self.commands) == 0 or reload:
+                loader.load_commands('commands', self, register=True)
+            if len(self.reactions) == 0 or reload:
+                loader.load_reactions('reactions', self, register=True)
+            # always relaod plugins
+            if len(self.plugins) != 0:
+                self.plugins.clear()
+            loader.load_plugins('plugins', self, register=True)
+        self.load_addons('addons', register=True)
+
+    def load_addons(self, folder, register=False):
+        bot = self
+        for item in sorted(listdir(folder)):
+            if isfile(join(folder, item)):
+                if item[-len(".py"):] == ".py" and item[0]!="_":
+                    self.log.info("Loading addon in %s " % item)
+                    if register:
+                        try:
+                            addon=bot.load_addon(item, item[:-len(".py")], package=None)
+                            assert addon is not None
+                        except AssertionError:
+                            self.log.info('No addon found in %s' % join(folder, item))
+                        except Exception as e:
+                            print('Failed to load addon at %s' % join(folder, item))
+                            self.log.error(('Failed to load %s reason: ' % join(folder, item)) + str(e))
+            elif item[0] != "_": # second level
+                for sub_item in sorted(listdir(join(folder, item))):
+                    if isfile(join(folder, item, sub_item)):
+                        if sub_item[-len(".py"):] == ".py" and sub_item[0]!="_":
+                            self.log.info("Loading addon in %s " % join(item, sub_item))
+                            if register:
+                                try:
+                                    addon=bot.load_addon(sub_item, sub_item[:-len(".py")], package=item)
+                                    assert addon is not None
+                                except AssertionError:
+                                    self.log.info('No addon found in %s' % join(folder, item, sub_item))
+                                except Exception as e:
+                                    print('Failed to load addon at %s' % join(folder, item, sub_item))
+                                    self.log.error(('Failed to load %s reason: ' % join(folder, item, sub_item)) + str(e))
 
     @asyncio.coroutine
     def on_message(self, message):
         yield from self.message_stuff()
-        for cmd in list(self.commands.keys()):  # list(self.commands.keys()) prevents RuntimeErrors from mutation when loading new command
+        for cmd in list(self.commands.keys()):
+            # list(self.commands.keys()) prevents RuntimeErrors from mutation when loading new command
             try:
                 if self.commands[cmd]._matches(message):
                     if isinstance(self.commands[cmd], command.AdminCommand):
@@ -327,28 +402,36 @@ class Bot(discord.Client):
 
     @asyncio.coroutine
     def on_reaction_add(self, rxn, user):
-        for cmd in self.reactions:
-            if isinstance(self.reactions[cmd], reactioncommand.ReactionAddCommand) and self.reactions[cmd]._matches(rxn, user):
+        for cmd in list(self.reactions.keys()):
+            if isinstance(self.reactions[cmd], reactioncommand.ReactionAddCommand):
                 try:
-                    if isinstance(self.reactions[cmd], reactioncommand.AdminReactionCommand):
-                        yield from self.reactions[cmd]._action(rxn, user, self)
-                    else:
-                        yield from self.reactions[cmd]._action(rxn, user)
-                    break
+                    if self.reactions[cmd]._matches(rxn, user):
+                        if isinstance(self.reactions[cmd], reactioncommand.AdminReactionCommand):
+                            yield from self.reactions[cmd]._action(rxn, user, self)
+                        else:
+                            yield from self.reactions[cmd]._action(rxn, user)
+                        break
                 except Exception as e:
+                    # Catch and report all errors that happen in matches/action.
+                    # This prevents a bug in one reaction command from
+                    # breaking execution, so other commands can still be run.
                     yield from self._on_reaction_add_error(cmd, e, rxn, user)
 
     @asyncio.coroutine
     def on_reaction_remove(self, rxn, user):
-        for cmd in self.reactions:
-            if isinstance(self.reactions[cmd], reactioncommand.ReactionRemoveCommand) and self.reactions[cmd]._matches(rxn, user):
+        for cmd in list(self.reactions.keys()):
+            if isinstance(self.reactions[cmd], reactioncommand.ReactionRemoveCommand):
                 try:
-                    if isinstance(self.reactions[cmd], reactioncommand.AdminReactionCommand):
-                        yield from self.reactions[cmd]._action(rxn, user, self)
-                    else:
-                        yield from self.reactions[cmd]._action(rxn, user)
-                    break
+                    if self.reactions[cmd]._matches(rxn, user):
+                        if isinstance(self.reactions[cmd], reactioncommand.AdminReactionCommand):
+                            yield from self.reactions[cmd]._action(rxn, user, self)
+                        else:
+                            yield from self.reactions[cmd]._action(rxn, user)
+                        break
                 except Exception as e:
+                    # Catch and report all errors that happen in matches/action.
+                    # This prevents a bug in one reaction command from
+                    # breaking execution, so other commands can still be run.
                     yield from self._on_reaction_remove_error(cmd, e, rxn, user)
 
     @asyncio.coroutine
@@ -361,9 +444,15 @@ class Bot(discord.Client):
         yield from self.load_messages()
         print("All messages loaded. Full functionality enabled")
 
+    @asyncio.coroutine
     def load_messages(self):
         '''(Bot) -> None
         Convenience function for loading the messages the bot might need from before it's last restart'''
+        global _messages
+        if not int(self.data_config['reloadmessages']):
+            print("Skipping message reloading since reloadmessages is 0")
+            self.log.warning("Skipping message reloading; Idea will not react to messages seen before startup")
+            return
         # load messages from file
         self.always_watch_messages.add(LOADING_WARNING)
         try:
@@ -373,7 +462,7 @@ class Bot(discord.Client):
             messagefile.content = list()
 
         self.log.info("Loading %a messages" % len(messagefile.content))
-        if messages is None:
+        if _messages is None:
             for msg_str in messagefile.content:
                 channel_id, msg_id = msg_str.strip().split(":")
                 try:
@@ -445,14 +534,14 @@ class Bot(discord.Client):
     def save_messages(self):
         '''(Bot) -> None
         backup self.messages deque'''
-        global messages
+        global _messages
         if LOADING_WARNING not in self.always_watch_messages:  # if not still loading messages (likely from startup)
             messagefile = dataloader.newdatafile(dataloader.datafile("./data/config.config").content["DEFAULT"][MSG_BACKUP_LOCATION])
             for msg in self.messages:
                 messagefile.content.append(msg.channel.id + ":" + msg.id)
             messagefile.save()
             # self.log.info("Saved %a messages" % len(messagefile.content))
-            messages = self.messages
+            _messages = self.messages
         else:
             self.log.info("Messages are still being loaded, skipping save messages")
 
@@ -531,11 +620,11 @@ class Bot(discord.Client):
 
         savetome.save_role_messages(self.data_config[ROLE_MSG_LOCATION], self.role_messages)
         self.loop.run_until_complete(self.logout())
-        self.cancel_all_tasks()
+        self._cancel_all_tasks()
         # self.loop.run_until_complete(self.loop.shutdown_asyncgens())
         # self.loop.stop()
-    
-    def cancel_all_tasks(self):
+
+    def _cancel_all_tasks(self):
         tasks = asyncio.Task.all_tasks()
         for t in tasks:
             t.cancel()

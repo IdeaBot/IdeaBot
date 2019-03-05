@@ -15,6 +15,8 @@ dataloader currently supports the following file extensions (loaded as):
 '''
 
 import configparser, json, sqlite3
+
+
 class datafile: # loads and parses files depending on file ending
     def loadConfig(self, filename):
         '''() -> Config class
@@ -85,14 +87,15 @@ class datafile: # loads and parses files depending on file ending
     def loadDB(self, filename):
         '''(str) -> SQLite database
         opens an existing SQLite db'''
-        connection = sqlite3.connect(filename)
-        self.cursor = connection.cursor()
+        self._connection = sqlite3.connect(filename)
+        self._connection.row_factory = sqlite3.Row
+        self.cursor = self._connection.cursor()
         self.execute = self.cursor.execute
-        return connection
+        return self._connection
     def saveDB(self):
         '''() -> None
         commit changes to db'''
-        self.content.commit()
+        self._connection.commit()
 
     def __init__(self, filename, load_as=None, default_val=list()):
         if "." in filename:
@@ -134,7 +137,7 @@ class datafile: # loads and parses files depending on file ending
         '''(str) -> bool
         searches for string in the content list strings
         Precondition: self.content must be a list of strings (no sublists or anything)
-        (THIS WILL CRASH IF IT'S A CONFIG FILE!!!)'''
+        (THIS WILL CRASH IF IT'S NOT A RAW TEXT FILE)'''
         for i in self.content:
             if string in i:
                 return True
@@ -143,13 +146,19 @@ class datafile: # loads and parses files depending on file ending
     def index(self, string):
         '''(str) -> (int, int)
         finds string in self.content, returns the location
-        Precondition: self.content must be a list of strings (no sublists or anything)
-        (THIS WILL CRASH IF IT'S A CONFIG FILE!!!)'''
-        for i in range(len(self.content)):
-            for j in range(len(self.content[i]-len(string))):
-                if self.content[i][j:j+len(string)] == string:
-                    return (i,j)
-        return (-1, -1)
+        Precondition: self.content must be a list of strings or list of list of strings
+        (THIS WILL CRASH IF IT'S NOT A CSV or TEXT FILE)'''
+        if self.type == "csv":
+            for i in range(len(self.content)):
+                for j in range(len(self.content[i])):
+                    if self.content[i][j:j+len(string)] == string:
+                        return (i,j)
+            return (-1, -1)
+        elif isinstance(self.content, list):
+            for i in range(len(self.content)):
+                if self.content[i] == string:
+                    return i
+            return -1
 
 class newdatafile (datafile):
     def __init__(self, filename):

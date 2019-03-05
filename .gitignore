@@ -107,12 +107,14 @@ ENV/
 **.csv
 **.txt
 **.json
+**.db
 
 #so you don't commit your token
 data/credentials.config
 
 #temp add-on files
 data/temp*.py
+data/**/*tmp*
 test.*
 plugins/**/test.py
 reactions/**/test.py
