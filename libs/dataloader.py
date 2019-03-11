@@ -99,7 +99,7 @@ class datafile: # loads and parses files depending on file ending
 
     def __init__(self, filename, load_as=None, default_val=list()):
         if "." in filename:
-            fileExt = filename[len(filename)-filename[::-1].index("."):].lower()
+            fileExt = filename[filename.rindex(".")+1:].lower()
             if (fileExt == "config" and load_as==None) or load_as == "config":
                 self.content = self.loadConfig(filename)
             elif (fileExt == "csv" and load_as==None) or load_as == "csv":
@@ -159,6 +159,18 @@ class datafile: # loads and parses files depending on file ending
                 if self.content[i] == string:
                     return i
             return -1
+
+    def patch(self, table, columns, commit=False):
+        '''columns is a dict of {column name : creation arguments (eg type, nullability, etc.)}'''
+        if self.type != 'db':
+            return
+        self.execute('PRAGMA table_info(%s)' % table)
+        column_names = [c[1] for c in self.cursor.fetchall()]
+        for name in columns:
+            if name not in column_names:
+                self.execute('ALTER TABLE %s ADD COLUMN %s %s' % (table, name, columns[name]) )
+        if commit == True:
+            self.save()
 
 class newdatafile (datafile):
     def __init__(self, filename):
