@@ -11,6 +11,7 @@ Created on Thu Jan 11 20:03:56 2018
 import time
 import re
 import types
+import discord
 
 from libs import dataloader, addon
 
@@ -173,3 +174,34 @@ class Config(Command):
                 raise ImportError("No config file found")
         else:
             raise ImportError("Config file cannot be None")
+
+class ErrorlessCommand(Command):
+    '''Extending ErrorlessCommand will stop the command from reporting discord errors to users (default behaviour).
+
+    Pass in the parameter discord_only = False to stop all error reporting '''
+
+    def __init__(self, *args, discord_only = True, **kwargs):
+        self._only_discord_exceptions = discord_only
+        super().__init__(*args, **kwargs)
+
+    def _matches(self, *args, **kwargs):
+        try:
+            return self.matches(*args, **kwargs)
+        except discord.DiscordException as e:
+            return False
+        except Exception as e:
+            if self._only_discord_exceptions:
+                raise e
+            else:
+                return False
+
+    def _action(self, *args, **kwargs):
+        try:
+            yield from self.action(*args, **kwargs)
+        except discord.DiscordException as e:
+            return
+        except Exception as e:
+            if self._only_discord_exceptions:
+                raise e
+            else:
+                return
