@@ -7,6 +7,7 @@ import bot as botlib
 from libs import dataloader
 
 import time
+import warnings
 
 MSG_BACKUP_LOCATION = 'msgbackuploc'
 WATCH_MSG_LOCATION = 'alwayswatchmsgloc'
@@ -42,6 +43,8 @@ def configureDiscordLogging():
 def mainLogging():
     '''() -> Logger class
     set ups main log outputing to ./main.log and then returns the log'''
+    # warnings log
+    # main log
     logger = logging.getLogger('main')
     logger.setLevel(logging.INFO)
     handler = logging.FileHandler(filename='main.log', encoding='utf-8', mode='w')
@@ -54,6 +57,7 @@ configureDiscordLogging()
 
 if __name__ == '__main__':  # main
     # init stuff
+    warnings.filterwarnings('always')
     loop = asyncio.get_event_loop()
     config = dataloader.datafile("./data/config.config")
     config.content = config.content["DEFAULT"]

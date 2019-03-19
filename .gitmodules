@@ -52,3 +52,6 @@
 [submodule "addons/management"]
 	path = addons/management
 	url = https://github.com/IdeaBot/management
+[submodule "addons/Minecraft"]
+	path = addons/Minecraft
+	url = https://github.com/IdeaBot/Minecraft

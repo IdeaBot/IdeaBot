@@ -12,6 +12,7 @@ import time
 import re
 import types
 import discord
+import warnings
 
 from libs import dataloader, addon
 
@@ -97,6 +98,9 @@ class Command(addon.AddOn):
 class BenchmarkableCommand(Command):
     '''Extending BenchmarkableCommand will make the bot respond with the time
     it took to execute a command if "benchmark" appears in the message.'''
+    def __init__(self, *args, **kwargs):
+        warnings.warn('BenchmarkableCommand is no longer supported', DeprecationWarning)
+        super().__init__(*args, **kwargs)
 
     def _action(self, message):
         # start the benchmark
