@@ -1,4 +1,4 @@
-[![Build Status](https://circleci.com/gh/IdeaBot/IdeaBot/tree/develop.svg?style=svg)](https://circleci.com/gh/IdeaBot/IdeaBot/tree/develop)
+[![Build Status](https://circleci.com/gh/IdeaBot/IdeaBot/tree/master.svg?style=svg)](https://circleci.com/gh/IdeaBot/IdeaBot/tree/master)
 [![Discord Bot Status](https://discordbots.org/api/widget/status/397854238774001673.svg?noavatar=true)](https://discordbots.org/bot/397854238774001673)
 
 # IdeaBot #
