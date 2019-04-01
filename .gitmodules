@@ -55,3 +55,6 @@
 [submodule "addons/Minecraft"]
 	path = addons/Minecraft
 	url = https://github.com/IdeaBot/Minecraft
+[submodule "addons/uptime"]
+	path = addons/uptime
+	url = https://github.com/IdeaBot/uptime
