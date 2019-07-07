@@ -1,13 +1,12 @@
 [![Build Status](https://circleci.com/gh/IdeaBot/IdeaBot/tree/master.svg?style=svg)](https://circleci.com/gh/IdeaBot/IdeaBot/tree/master)
-[![Discord Bot Status](https://discordbots.org/api/widget/status/397854238774001673.svg?noavatar=true)](https://discordbots.org/bot/397854238774001673)
 
 # IdeaBot #
 Hello! Welcome to IdeaBot's repository.
 
 Idea is an open-source modular discord bot.
 Originally developed as a side project to meet the needs of the Idea Project community server,
-Idea has grown into a powerful bot for programmers and users alike.
-Idea has lots of [useful features](https://github.com/IdeaBot/IdeaBot/wiki/Feature-Overview) available to everyone.
+Idea has grown into a powerful bot for programmers and users.
+Idea has lots of [useful features](https://github.com/IdeaBot/IdeaBot/wiki/Feature-Overview) available to everyone for free!
 Idea also allows users to build their own commands with the easy to learn [Python language](https://www.python.org/).
 To get started, [add Idea to your server](https://discordapp.com/oauth2/authorize?client_id=397854238774001673&scope=bot&permissions=268561472).
 
@@ -37,7 +36,7 @@ To get started with self-hosted, check out [Idea's wiki](https://github.com/Idea
 **Simple and Modular**
 
 These are requirements Idea development is always striving to achieve and maintain.
-These goals allow Idea to be a powerful Discord bot while constantly growing and improving.
+Development goals aren't just hopes and dreams, but rules to follow when approaching development problems.
 
 ### Modular ###
 **Everything is optional**
@@ -45,16 +44,14 @@ These goals allow Idea to be a powerful Discord bot while constantly growing and
 IdeaBot's structure allows for plugins, commands and reactions to be added and removed easily.
 This makes IdeaBot's functionality easily upgradable and modifiable.
 In order to achieve modularity, IdeaBot's core is simple but powerful.
-It also makes patching easy.
-With modularity comes versatility, which allows Idea to offer a solution to almost any problem.
+With modularity comes versatility; if Idea can't do something, anyone can write code to fix that.
 
 ### Simple ###
-**IdeaBot aims to be easy to use and easy to improve.**
+**IdeaBot aims to be easy to use and improve.**
 
 Development and usage of Idea should be simple.
-Unnecessary complexity is unnecessary; Complexity in a simple task detracts from the user experience.
-Similarly, complexity in development detracts from and slows down the development process.
-Lack of simplicity detracts from the user and developer experience, which is bad for everyone.
+Unnecessary complexity is unnecessary; complexity detracts from the user experience.
+This also extends to the development process.
 
 ## General Guidelines for Contributing ##
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for information about helping out!
