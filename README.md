@@ -1,4 +1,4 @@
-[![Build Status](https://circleci.com/gh/IdeaBot/IdeaBot/tree/unstable.svg?style=svg)](https://circleci.com/gh/IdeaBot/IdeaBot/tree/unstable)
+[![Build Status](https://circleci.com/gh/IdeaBot/IdeaBot/tree/develop.svg?style=svg)](https://circleci.com/gh/IdeaBot/IdeaBot/tree/develop)
 
 # IdeaBot #
 Hello! Welcome to IdeaBot's repository.
